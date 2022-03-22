@@ -1,4 +1,6 @@
 const std = @import("std");
+const Builder = std.build.Builder;
+const raylib = @import("libs/raylib-zig/lib.zig"); //call .Pkg() with the folder raylib-zig is in relative to project build.zig
 
 pub fn build(b: *std.build.Builder) void {
     // Standard target options allows the person running `zig build` to choose
@@ -11,9 +13,17 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
+    const system_lib = b.option(bool, "system-raylib", "link to preinstalled raylib libraries") orelse false;
+
     const exe = b.addExecutable("hello-wold", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
+
+    // Link raylib
+    raylib.link(exe, system_lib);
+    raylib.addAsPackage("raylib", exe);    
+    raylib.math.addAsPackage("raylib-math", exe);
+
     exe.install();
 
     const run_cmd = exe.run();
