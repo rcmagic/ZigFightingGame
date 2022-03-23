@@ -26,8 +26,12 @@ Game Loop:
         CharacterPushCollision()
         WallUpdate()
         WallCollisionHandling()
+        CharacterAttackCollision()  // Processing collisions between attack and vulnerable hitboxes
+        ReactionSystemUpdate()      // Transitions characters into reaction states.
         
     }
     StoreGameState()
+
+    VisualCameraUpdate()
     Rendering()
 
