@@ -1,0 +1,143 @@
+
+* Zig components to learn about *
+- vars/consts
+- type casting
+- functions
+- structs
+- arrays
+- enums
+- libraries/packages
+- building/compiling 
+- references/pointers
+- memory management
+- file i/o
+- data pipeline
+- reflection/introspection
+- generics / code generation
+
+
+
+** VARIABLES**
+
+var x: i32 = 1; // Delcare a mutable variable with the type int 32 assigned the value 1.
+const y: f32 = 2.0; // Declare a constant with the name y, with the value 2.0.
+** FUNCTIONS **
+// Functions are declared like this
+fn add(a: i8, b: i8) i8 {
+    if (a == 0) {
+        return b;
+    }
+
+    return a + b;
+}
+
+
+** FUNCTIONS**
+
+// **Does it let us call it from C?**
+// The export specifier makes a function externally visible in the generated
+// object file, and makes it use the C ABI.
+export fn sub(a: i8, b: i8) i8 { return a - b; }
+
+// The pub specifier allows the function to be visible when importing.
+// Another file can use @import and call sub2
+pub fn sub2(a: i8, b: i8) i8 { return a - b; }
+
+
+
+
+// Functions can be used as values and are equivalent to pointers.
+const call2_op = fn (a: i8, b: i8) i8; 
+fn do_op(fn_call: call2_op, op1: i8, op2: i8) i8 { // A function that takes another function as an argument.
+    return fn_call(op1, op2);
+}
+
+** STRUCTS ** 
+// Declare a struct.
+// Zig gives no guarantees about the order of fields and the size of
+// the struct but the fields are guaranteed to be ABI-aligned.
+const Point = struct {
+    x: f32, // variable with the type float 32
+    y: f32,
+};
+
+// Instance a struct
+const p = Point {
+    .x = 0.12,  // Be specific about which field is assigned this value, in this case Point.x
+    .y = 0.34,
+};
+
+
+// Structs can have methods
+// Struct methods are not special, they are only namespaced
+// functions that you can call with dot syntax.
+const Vec3 = struct {
+    x: f32,
+    y: f32,
+    z: f32,
+
+    pub fn init(x: f32, y: f32, z: f32) Vec3 {
+        return Vec3 {
+            .x = x,
+            .y = y,
+            .z = z,
+        };
+    }
+
+    pub fn dot(self: Vec3, other: Vec3) f32 {
+        return self.x * other.x + self.y * other.y + self.z * other.z;
+    }
+};
+
+// Example calling struct member function.
+const v1 = Vec3.init(1.0, 0.0, 0.0);
+const v2 = Vec3.init(0.0, 1.0, 0.0);
+try expect(v1.dot(v2) == 0.0);
+
+
+** ARRAYS **
+
+// array literal
+const message = [_]u8{ 'h', 'e', 'l', 'l', 'o' };
+
+// get the size of an array
+comptime {
+    assert(message.len == 5);
+}
+
+// A string literal is a single-item pointer to an array literal.
+const same_message = "hello";
+
+
+// Iterate over an array
+var sum: usize = 0;
+for (message) |byte| {
+    sum += byte;
+}
+
+// concat arrays
+const part_one = [_]i32{ 1, 2, 3, 4 };
+const part_two = [_]i32{ 5, 6, 7, 8 };
+const all_of_it = part_one ++ part_two;
+
+// string concat
+const hello = "hello";
+const world = "world";
+const hello_world = hello ++ " " ++ world;
+
+//  array initialization 
+// initialize an array to zero, with 10 elements in the array
+const all_zero = [_]u16{0} ** 10;
+
+
+*** Can we modify array elements directly with syntax such as myArray[4] = 5?
+
+
+
+** Building/Running
+// initialize a zig project
+zig init-exe 
+
+
+// run and build a zig project
+zig build run

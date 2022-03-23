@@ -1,0 +1,30 @@
+* Agenda *
+** 2022/3/19 **
+- Hello World program
+- Automated Build from Visual Studio Code
+- Setup Debugging
+
+** 2022/3/22 **
+- Setup a git repo [x]
+- Build and link raylib libraries [x]
+- Show a Window [x]
+- Add raylib to git repo [x]
+
+
+** 2022/3/23
+- Code Design Principles [x]
+- Draw a circle on screen. [x]
+- Add physics state for an object. [x]
+- Move object each frame. [x]
+- Reflect object position in the window. [x]
+- Discussed game code architecture [x]
+
+
+** TBD **
+- Discuss some fighting game design 
+- data structures / layout
+- projectiles discussion
+- character action state machine discussion
+- animation discussion
+
+
