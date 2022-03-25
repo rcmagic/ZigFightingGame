@@ -20,11 +20,19 @@
 - Discussed game code architecture [x]
 
 
+** 2022/3/25
+- Break out game simulation into its own module/source [x]
+- Create a physics component [x]
+- Create physics system [x]
+- Create 2D Vector struct. [x]
+- Support velocity and acceleration [x]
+
 ** TBD **
 - Discuss some fighting game design 
 - data structures / layout
 - projectiles discussion
 - character action state machine discussion
 - animation discussion
+- Create function translate game world space to screen space.
 
 

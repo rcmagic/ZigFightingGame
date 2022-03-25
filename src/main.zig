@@ -1,5 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
+const math = @import("utils/math.zig");
+const GameSimulation = @import("GameSimulation.zig");
+
 
 
 const GameObject = struct {
@@ -19,12 +22,11 @@ pub fn main() anyerror!void {
     rl.SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-
-    // Initial state of our object
-    var TestObject = GameObject {
-        .x = 400, 
-        .y = 400,
-    };
+    // Our game state
+    var gameState = GameSimulation.GameState{};
+    
+    // Initialize our game object
+    gameState.physicsComponents[0].position = .{.x = 400, .y = 200 };
 
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
@@ -60,15 +62,26 @@ pub fn main() anyerror!void {
             
         // Game Simulation
         {
-            // Update position of object base on player input
-            if(PressingLeft)
+            
+            //  Update position of object base on player input
             {
-                TestObject.x -= 1;
+                const entity = &gameState.physicsComponents[0];
+                if(PressingLeft)
+                {
+                     entity.velocity.x = -1;
+                }
+                else if(PressingRight)
+                {
+                     entity.velocity.x = 1;
+                }
+                else
+                {
+                    entity.velocity.x = 0; 
+                }
             }
-            else if(PressingRight)
-            {
-                TestObject.x += 1;
-            }
+
+            GameSimulation.UpdateGame(&gameState);
+
 
         }
 
@@ -78,7 +91,7 @@ pub fn main() anyerror!void {
         rl.ClearBackground(rl.WHITE);
 
         // Reflect the position of our game object on screen.
-        rl.DrawCircle(TestObject.x, TestObject.y, 50, rl.MAROON);
+        rl.DrawCircle(gameState.physicsComponents[0].position.x, gameState.physicsComponents[0].position.y, 50, rl.MAROON);
 
         rl.EndDrawing();
         //----------------------------------------------------------------------------------
