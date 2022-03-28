@@ -35,3 +35,15 @@ Game Loop:
     VisualCameraUpdate()
     Rendering()
 
+
+** Action State Machine Data **
+
+- Unique Identifier (Integer/Enum)
+- Associated properties for each state (Animation, Hitbox, sounds, hit properties, VFX)
+- Custom Transitions (Condition, Target States)
+
+** Action State Machine Processor **
+- Handle the state transitions.
+- Checks transition conditions of the current state and sets the next state.
+- Must handle state intialization when transitioning and state tear down.
+

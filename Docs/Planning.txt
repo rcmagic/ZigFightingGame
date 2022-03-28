@@ -27,11 +27,14 @@
 - Create 2D Vector struct. [x]
 - Support velocity and acceleration [x]
 
+** 2022/3/28
+- Diagram Character State machine [x]
+
 ** TBD **
+- Implement state machine processor 
 - Discuss some fighting game design 
 - data structures / layout
 - projectiles discussion
-- character action state machine discussion
 - animation discussion
 - Create function translate game world space to screen space.
 
