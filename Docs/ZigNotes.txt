@@ -129,9 +129,38 @@ const hello_world = hello ++ " " ++ world;
 // initialize an array to zero, with 10 elements in the array
 const all_zero = [_]u16{0} ** 10;
 
-
 *** Can we modify array elements directly with syntax such as myArray[4] = 5?
 
+
+
+** ENUMS **
+const std = @import("std");
+
+const CombatState = enum(u32) {
+    Stand,
+    Walk,
+    Backup,
+    Jump,
+    _   // covers values that are greater than CombatState.Jump
+};
+
+const state = CombatState.Stand;
+
+pub fn main() anyerror!void {
+    
+    std.debug.print("Value: {}\n", .{ @enumToInt( CombatState.Backup) });
+
+    const result = switch(@intToEnum(CombatState, 200))
+    {
+        .Stand => 3,
+        .Walk => 4,
+        .Backup => 5,
+        .Jump => 6,
+        _ => 7          // covers values that are greater than CombatState.Jump
+    };
+
+    std.debug.print("State: {}\n", .{ result }); // should print 200
+}
 
 
 ** Building/Running
