@@ -1,4 +1,6 @@
 const math = @import("utils/math.zig");
+const StateMachine = @import("ActionStates/StateMachine.zig");
+const StandState = @import("ActionStates/CommonStates.zig");
 
 const PhysicsComponent = struct {
     position: math.IntVector2D = .{},

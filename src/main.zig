@@ -4,12 +4,6 @@ const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
 
 
-
-const GameObject = struct {
-    x: i32, // variable with the type float 32
-    y: i32,
-};
-
 pub fn main() anyerror!void {
 
     // Initialization
@@ -101,9 +95,5 @@ pub fn main() anyerror!void {
     //--------------------------------------------------------------------------------------
     rl.CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
-}
-
-test "basic test" {
-    try std.testing.expectEqual(10, 3 + 7);
 }
 

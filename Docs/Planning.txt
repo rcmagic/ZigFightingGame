@@ -30,6 +30,14 @@
 ** 2022/3/28
 - Diagram Character State machine [x]
 
+** 2022/3/30
+- Start first pass implemenation of character state machine [x]
+- Start using Zig test to verify functionality of the state machine [x]
+
+** 2022/3/31
+- Implement state transitions and test them
+- Implement basic character states
+
 ** TBD **
 - Implement state machine processor 
 - Discuss some fighting game design 
