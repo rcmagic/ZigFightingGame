@@ -35,8 +35,11 @@
 - Start using Zig test to verify functionality of the state machine [x]
 
 ** 2022/3/31
-- Implement state transitions and test them
-- Implement basic character states
+- Implement state transitions and test them [p]
+
+
+** 2022/4/1
+- Support state transitions in the state machine processor [x]
 
 ** TBD **
 - Implement state machine processor 

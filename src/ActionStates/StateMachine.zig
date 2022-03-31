@@ -14,7 +14,8 @@ const CombatStateID = enum(u32)
 // A context is passed into the combat state callbacks.
 const CombatStateContext = struct 
 { 
-    dummy: i32 = 0 // Zig can sometimes have trouble with empty structs.
+    bTransition: bool = false,                           // indicates that a state transition has been triggered
+    NextState: CombatStateID = CombatStateID.Standing    // indicates the next state to transition to.
 };
 
 // Provides an interface for combat states to respond to various events
@@ -50,16 +51,36 @@ const CombatStateMachineProcessor = struct
 
     pub fn UpdateStateMachine(self: *CombatStateMachineProcessor) void
     { 
-        if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
+        if(self.Context) | context |
         {
-            if(State.OnUpdate) | OnUpdate |
+            if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
             {
-                if(self.Context) | context |
+                if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
+
+                // Perform a state transition when requested
+                if(context.bTransition) 
                 {
-                    OnUpdate(context);
-                }
-            }
-        }        
+                    // Call the OnEnd function of the previous state to do any cleanup required.
+                    if(State.OnEnd) | OnEnd | { OnEnd(context); }
+
+                    // Call the OnStart function on the next state to do any setup required
+                    if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
+                    {
+                        if(NextState.OnStart) | OnStart | { OnStart(context); }                              
+                    }
+
+                    // Make sure the transition isn't performed more than once.
+                    context.bTransition = false;
+
+                    // Make the next state current.
+                    self.CurrentState = context.NextState;  
+
+
+                } 
+            }      
+     
+        }  
+
     }
 
 };
@@ -82,6 +103,7 @@ const TestContext = struct
 {
     base: CombatStateContext = .{},    
     TestVar: bool = false,
+    TestVar2: bool = false,
 };
 
 fn TestOnUpdate(context: *CombatStateContext) void 
@@ -101,4 +123,52 @@ test "Test running a state update on a state machine processor."
     Processor.UpdateStateMachine();
 
     try std.testing.expect(context.TestVar == true);
+}
+
+test "Test transitioning the state machine from one state to another." 
+{    
+    const Dummy = struct
+    {
+        // Test transitioning from one common state to another
+        fn StandingOnUpdate(context: *CombatStateContext) void
+        {
+            context.bTransition = true;
+            context.NextState = CombatStateID.Jump;
+        }
+
+        fn StandingOnEnd(context: *CombatStateContext) void
+        {
+            const context_sub = @fieldParentPtr(TestContext, "base", context);
+            context_sub.TestVar = true;
+        }
+
+        fn JumpOnStart(context: *CombatStateContext) void
+        {
+            const context_sub = @fieldParentPtr(TestContext, "base", context);
+            context_sub.TestVar2 = true;
+        }
+    };
+
+    var context = TestContext{};
+    var Processor = CombatStateMachineProcessor{.Context = &context.base};
+
+    var StandingCallbacks = CombatStateCallbacks { .OnUpdate = Dummy.StandingOnUpdate, .OnEnd = Dummy.StandingOnEnd };
+    var JumpCallbacks = CombatStateCallbacks { .OnStart = Dummy.JumpOnStart };
+    
+    Processor.Registery.RegisterCommonState(CombatStateID.Standing, &StandingCallbacks);
+    Processor.Registery.RegisterCommonState(CombatStateID.Jump, &JumpCallbacks);
+    
+    Processor.UpdateStateMachine();
+
+    // Test that the transition is finished
+    try std.testing.expect(context.base.bTransition == false);
+
+    // Test that the state machine correctly transitioned to the jump state
+    try std.testing.expectEqual(Processor.CurrentState, CombatStateID.Jump);
+
+    // Test to see if OnEnd was called on the previous state.
+    try std.testing.expect(context.TestVar == true);
+
+    // Test to see if OnStart was called on the next state.
+    try std.testing.expect(context.TestVar2 == true);
 }
