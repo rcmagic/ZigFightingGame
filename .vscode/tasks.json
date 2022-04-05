@@ -4,11 +4,14 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "zig build",
+            "command": "zig build  --prominent-compile-errors",
             "problemMatcher": [ "$gcc"],
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "presentation": {
+                "clear": true
             }
         }
     ]
