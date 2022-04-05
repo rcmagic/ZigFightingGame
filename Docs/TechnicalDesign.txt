@@ -8,3 +8,15 @@
 - Most actions will return to the "idle" state.
 - The idle states (standing, crouching, jump, etc) transition into attacks and other actions "commanded" by the player.
 
+
+*** Input Handling ***
+- Player input is polled at the start of our game tick. 
+- The change in input state needs to be stored somewhere which can be read by the game simulation.
+- We going to store input once per game update (frame). This will let us replay inputs to produce
+    exactly the same result for testing/replays/network syncronization.
+- These stored input "commands" will drive character behavior.
+
+** Character Controller **
+- The character will be controlled by a state machine with unique states for each action.
+- State transitions will represent changes from one action to another.
+- Player control (player input) will trigger state transitions to the desired action.

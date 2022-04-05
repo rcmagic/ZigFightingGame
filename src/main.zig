@@ -18,6 +18,8 @@ pub fn main() anyerror!void {
 
     // Our game state
     var gameState = GameSimulation.GameState{};
+
+    gameState.Init();
     
     // Initialize our game object
     gameState.physicsComponents[0].position = .{.x = 400, .y = 200 };
@@ -25,58 +27,38 @@ pub fn main() anyerror!void {
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
 
-            var PressingRight : bool = false;
-            var PressingLeft : bool = false;
+
+            // Reset input to not held down before polling
+            gameState.inputComponents[0].inputCommand.Reset();
 
             if(rl.IsWindowFocused() and rl.IsGamepadAvailable(0))
             {
                 if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
                 {
-                    // PolledInput |= static_cast<unsigned int>(InputCommand::Up);
+                    gameState.inputComponents[0].inputCommand.Up = true;
                 }
 
                 if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
                 {
-                    // PolledInput |= static_cast<unsigned int>(InputCommand::Down);
+                    gameState.inputComponents[0].inputCommand.Down = true;
                 }
 
                 if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
                 {
-                    // PolledInput |= static_cast<unsigned int>(InputCommand::Left);
-                    PressingLeft = true;
+
+                    gameState.inputComponents[0].inputCommand.Left = true;
                 }
 
                 if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
                 {
-                    // PolledInput |= static_cast<unsigned int>(InputCommand::Right);
-                    PressingRight = true;
+                    gameState.inputComponents[0].inputCommand.Right = true;
                 }
             }
 
             
         // Game Simulation
         {
-            
-            //  Update position of object base on player input
-            {
-                const entity = &gameState.physicsComponents[0];
-                if(PressingLeft)
-                {
-                     entity.velocity.x = -1;
-                }
-                else if(PressingRight)
-                {
-                     entity.velocity.x = 1;
-                }
-                else
-                {
-                    entity.velocity.x = 0; 
-                }
-            }
-
             GameSimulation.UpdateGame(&gameState);
-
-
         }
 
         // Draw

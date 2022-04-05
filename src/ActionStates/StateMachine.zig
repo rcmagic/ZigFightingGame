@@ -1,7 +1,8 @@
 const std = @import("std");
-
+const Component = @import("../Component.zig");
+const Input = @import("../Input.zig");
 // Identifies common character states.
-const CombatStateID = enum(u32) 
+pub const CombatStateID = enum(u32) 
 {
     Standing,
     Crouching,
@@ -12,14 +13,16 @@ const CombatStateID = enum(u32)
 };
 
 // A context is passed into the combat state callbacks.
-const CombatStateContext = struct 
+pub const CombatStateContext = struct 
 { 
     bTransition: bool = false,                           // indicates that a state transition has been triggered
-    NextState: CombatStateID = CombatStateID.Standing    // indicates the next state to transition to.
+    NextState: CombatStateID = CombatStateID.Standing,    // indicates the next state to transition to.
+    InputCommand: Input.InputCommand = .{},
+    PhysicsComponent: ?*Component.PhysicsComponent = null
 };
 
 // Provides an interface for combat states to respond to various events
-const CombatStateCallbacks = struct
+pub const CombatStateCallbacks = struct
 {
     OnStart: ?fn(context: *CombatStateContext) void = null,         // Called when starting an action
     OnUpdate: ?fn(context: *CombatStateContext) void = null,        // Called every frame
@@ -28,7 +31,7 @@ const CombatStateCallbacks = struct
 
 
 // Stores the combat states used for a character.
-const CombatStateRegistery = struct 
+pub const CombatStateRegistery = struct 
 {
     const MAX_STATES = 256;
     CombatStates: [MAX_STATES]?*CombatStateCallbacks = [_]?*CombatStateCallbacks{null} ** MAX_STATES,
@@ -42,12 +45,12 @@ const CombatStateRegistery = struct
 };
 
 // Runs and keeps track of a state machine
-const CombatStateMachineProcessor = struct
+pub const CombatStateMachineProcessor = struct
 {
     Registery: CombatStateRegistery = .{},
     CurrentState: CombatStateID = CombatStateID.Standing,
 
-    Context: ?*CombatStateContext,
+    Context: ?*CombatStateContext = null,
 
     pub fn UpdateStateMachine(self: *CombatStateMachineProcessor) void
     { 

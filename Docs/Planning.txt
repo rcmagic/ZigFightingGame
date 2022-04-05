@@ -41,12 +41,19 @@
 ** 2022/4/1
 - Support state transitions in the state machine processor [x]
 
+** 2002/4/5
+- Add support for input commands. [x]
+- Implement first pass at character controller states [x]
+
+** Next Time **
+- Implement more character states
+- Implement a store of persistent const data for a character (action states, hitboxes, etc).
+
 ** TBD **
-- Implement state machine processor 
 - Discuss some fighting game design 
 - data structures / layout
 - projectiles discussion
 - animation discussion
-- Create function translate game world space to screen space.
+- Create function to translate game world space to screen space.
 
 

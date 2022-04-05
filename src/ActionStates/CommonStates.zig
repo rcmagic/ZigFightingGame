@@ -1,38 +1,88 @@
 const std = @import("std");
+const StateMachine = @import("StateMachine.zig");
 
 // Standing state
-const Standing = struct 
+pub const Standing = struct 
 {
-    pub fn OnStart() void
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Standing.OnStart()\n");
+        _ = context;
+        std.debug.print("Standing.OnStart()\n", .{});
     }
 
-    pub fn OnUpdate() void
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Standing.OnUpdate()\n");
+        _ = context;
+
+        //  Stop character movement on standing.
+        if(context.PhysicsComponent) | physicsComponent |
+        {
+            physicsComponent.velocity.x = 0;
+        }
+
+        if(context.InputCommand.Right)
+        {
+            context.bTransition = true;
+            context.NextState = StateMachine.CombatStateID.WalkingForward;
+        }
     }
 
-    pub fn OnEnd() void
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Standing.OnEnd()\n");
+        _ = context;
+        std.debug.print("Standing.OnEnd()\n", .{});
+    }
+};
+
+pub const WalkingForward = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("WalkingForward.OnStart()\n", .{});
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+
+        //  Move the character right when the player presses right on the controller.
+        if(context.PhysicsComponent) | physicsComponent |
+        {
+            physicsComponent.velocity.x = 2;
+        }
+
+        if(!context.InputCommand.Right)
+        {
+            context.bTransition = true;
+            context.NextState = StateMachine.CombatStateID.Standing;
+        }
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("WalkingForward.OnEnd()\n", .{});
     }
 };
 
 const Crouching = struct 
 {
-    pub fn OnStart() void
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Crouching.OnStart()\n");
+        _ = context;
+        std.debug.print("Crouching.OnStart()\n", .{});
     }
 
-    pub fn OnUpdate() void
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Crouching.OnUpdate()\n");
+        _ = context;
+        std.debug.print("Crouching.OnUpdate()\n", .{});
     }
 
-    pub fn OnEnd() void
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
     {
-        std.debug.print("Crouching.OnEnd()\n");
+        _ = context;
+        std.debug.print("Crouching.OnEnd()\n", .{});
     }
 };
