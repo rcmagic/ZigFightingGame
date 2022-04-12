@@ -16,7 +16,33 @@
     exactly the same result for testing/replays/network syncronization.
 - These stored input "commands" will drive character behavior.
 
-** Character Controller **
+*** Character Controller ***
 - The character will be controlled by a state machine with unique states for each action.
 - State transitions will represent changes from one action to another.
 - Player control (player input) will trigger state transitions to the desired action.
+
+
+*** Character Data ***
+- Max health
+- Walk speed
+- Backup speed
+- Jump Velocity
+- Jump Gravity
+
+*** Action Properties **
+- hitboxes
+- duration of an action
+- looping/not looping
+- looping sections / animation sections
+- hit properties
+- sound fx
+- animation
+- transitions 
+
+
+*** Hitboxes ***
+- Group hitboxes together. 
+- These "groups" exists for a set amount of time during an action.
+- Editable assets that can be referenced by an action and a time within that action. 
+- At edit time, think about hitbox as (top, left, width and height). Might supports more transformations in editor.
+- Runtime data structure. For each hitbox 4 integers (top, left, bottom, right)
