@@ -132,6 +132,36 @@ const all_zero = [_]u16{0} ** 10;
 *** Can we modify array elements directly with syntax such as myArray[4] = 5?
 
 
+** Array Lists (Resizable Arrays) **
+
+
+test "Testing resizable array." 
+{   
+    {
+        var list = std.ArrayList(i32).init(std.testing.allocator);
+        defer list.deinit();
+
+        try std.testing.expect(list.items.len == 0);
+        try std.testing.expect(list.capacity == 0);
+    }
+
+    {
+        var list = try std.ArrayList(i8).initCapacity(std.testing.allocator, 200);        
+        defer list.deinit();
+        try std.testing.expect(list.items.len == 0);
+        try std.testing.expect(list.capacity >= 200);
+
+        try list.append(10);
+        
+        try std.testing.expect(list.items[0] == 10);
+
+        list.items[0] = 25;
+
+        try std.testing.expect(list.items[0] == 25);
+    }
+
+
+}
 
 ** ENUMS **
 const std = @import("std");
