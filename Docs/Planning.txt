@@ -57,7 +57,7 @@
 - Implement a data store for character properties (attack properties, hitboxes, etc). [p]
 
 2022/4/12/
-- Begin work on collision system 
+- Begin work on collision system [x]
 
 
 ** Next Time **
