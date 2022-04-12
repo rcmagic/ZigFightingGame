@@ -16,13 +16,14 @@ pub fn main() anyerror!void {
     rl.SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
+    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     // Our game state
-    var gameState = GameSimulation.GameState{};
+    var gameState = GameSimulation.GameState{.allocator = ArenaAllocator.allocator() };
 
     gameState.Init();
     
     // Initialize our game object
-    gameState.physicsComponents[0].position = .{.x = 400, .y = 200 };
+    gameState.physicsComponents[0].position = .{.x = 400000, .y = 200000 };
 
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
@@ -60,14 +61,23 @@ pub fn main() anyerror!void {
         {
             GameSimulation.UpdateGame(&gameState);
         }
-
+        
         // Draw
         rl.BeginDrawing();
 
         rl.ClearBackground(rl.WHITE);
 
+        const ScreenX = math.WorldToScreen(gameState.physicsComponents[0].position.x);
+        const ScreenY = math.WorldToScreen(gameState.physicsComponents[0].position.y);
+
         // Reflect the position of our game object on screen.
-        rl.DrawCircle(gameState.physicsComponents[0].position.x, gameState.physicsComponents[0].position.y, 50, rl.MAROON);
+        rl.DrawCircle(ScreenX, ScreenY, 50, rl.MAROON);
+
+        if(gameState.gameData) | gameData |
+        {
+            const hitbox = gameData.HitboxGroup.Hitboxes.items[0]; 
+           rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);    
+        }
 
         rl.EndDrawing();
         //----------------------------------------------------------------------------------
@@ -77,5 +87,6 @@ pub fn main() anyerror!void {
     //--------------------------------------------------------------------------------------
     rl.CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
+
 }
 
