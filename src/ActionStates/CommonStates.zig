@@ -49,7 +49,7 @@ pub const WalkingForward = struct
         //  Move the character right when the player presses right on the controller.
         if(context.PhysicsComponent) | physicsComponent |
         {
-            physicsComponent.velocity.x = 2;
+            physicsComponent.velocity.x = 2000;
         }
 
         if(!context.InputCommand.Right)
