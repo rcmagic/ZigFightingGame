@@ -41,19 +41,36 @@
 ** 2022/4/1
 - Support state transitions in the state machine processor [x]
 
-** 2002/4/5
+** 2022/4/5
 - Add support for input commands. [x]
 - Implement first pass at character controller states [x]
 
+
+** 2022/4/8
+- World to Screen space coordinate conversion [x]
+- Implement a data store for character properties (attack properties, hitboxes, etc). [p]
+- Hitbox debug display
+- Hitbox collision
+- Add second character to test hits
+
+** 2022/4/11
+- Implement a data store for character properties (attack properties, hitboxes, etc). [p]
+
+2022/4/12/
+- Begin work on collision system 
+
+
 ** Next Time **
-- Implement more character states
-- Implement a store of persistent const data for a character (action states, hitboxes, etc).
+- Implement a timeline data structure
 
 ** TBD **
+- Make new run-time structure for storing hitboxes for the collision system.
+- Implement more character states (Attack, Reaction, Jump)
+- Support action state variables (action time, hit stop)
 - Discuss some fighting game design 
 - data structures / layout
 - projectiles discussion
 - animation discussion
-- Create function to translate game world space to screen space.
+
 
 
