@@ -61,16 +61,31 @@
 
 
 ** Next Time **
+- Free persistent memory store at the end of a game [x]
+- Implement a independent game loop function outside of main() [x]
+
+
+- Run the hitbox data through the collision system
+- Create a collision event structure
+- Generated hit events when hitboxes overlap
+
+- Create test hitbox data to test collision system. 
+- Test hitbox collision event generation
+
+- Create a bunch of hitbox data for our character
+- Create a second character to test hit interactions
+- Create an attack action
+- Create a reaction action 
 - Implement a timeline data structure
 
 ** TBD **
-- Make new run-time structure for storing hitboxes for the collision system.
+- Create hit properties struct
+- Implement reaction system
 - Implement more character states (Attack, Reaction, Jump)
 - Support action state variables (action time, hit stop)
-- Discuss some fighting game design 
-- data structures / layout
 - projectiles discussion
 - animation discussion
+- Make new run-time structure for storing hitboxes for the collision system.
 
 
 

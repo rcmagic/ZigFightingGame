@@ -22,6 +22,18 @@
 - Player control (player input) will trigger state transitions to the desired action.
 
 
+*** Persistent Data Store ***
+- Unmutable data
+- Initialized at the start of a match
+- Will not be stored for rollbacks. 
+- Will not be updated by the game simulation.
+- Can be modified by the editor
+
+
+*** Allocators ***
+- Potentially use the following allocators if we know the max memory used at compile time.
+ std.heap.FixedBufferAllocator or std.heap.ThreadSafeFixedBufferAllocator
+
 *** Character Data ***
 - Max health
 - Walk speed
