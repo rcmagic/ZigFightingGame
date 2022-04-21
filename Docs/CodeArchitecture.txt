@@ -37,7 +37,6 @@ Game Loop:
 
 
 ** Action State Machine Data **
-
 - Unique Identifier (Integer/Enum)
 - Associated properties for each state (Animation, Hitbox, sounds, hit properties, VFX)
 - Custom Transitions (Condition, Target States)

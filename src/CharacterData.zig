@@ -1,9 +1,5 @@
 const std = @import("std");
 
-pub const CharacterProperties = struct 
-{
-    MaxHealth : i32
-};
 
 pub const Hitbox = struct
 {
@@ -21,10 +17,20 @@ pub const HitboxGroup = struct
     Hitboxes: std.ArrayList(Hitbox)
 };
 
+
 pub const ActionProperties = struct
 {
-    Duration: i32
+    Duration: i32,
+    HitboxGroups: std.ArrayList(HitboxGroup)
 };
+
+pub const CharacterProperties = struct 
+{
+    MaxHealth : i32,
+    Actions: std.ArrayList(ActionProperties)
+};
+
+
 
 test "Testing resizable array." 
 {   
