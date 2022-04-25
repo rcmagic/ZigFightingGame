@@ -58,3 +58,11 @@
 - Editable assets that can be referenced by an action and a time within that action. 
 - At edit time, think about hitbox as (top, left, width and height). Might supports more transformations in editor.
 - Runtime data structure. For each hitbox 4 integers (top, left, bottom, right)
+
+
+
+*** Collision System ***
+
+Stages:
+    1. Translate data in our character data structures to easy to process/cache friendly flat arrays of hitboxes.
+    2. Process hitbox collisions and generate overlap events.
