@@ -1,3 +1,4 @@
+const std = @import("std");
 const GameSimulation = @import("GameSimulation.zig");
 const CharacterData = @import("CharacterData.zig");
 const Component = @import("Component.zig");
@@ -39,52 +40,75 @@ fn GetActiveAttackHiboxes(gameState: *const GameSimulation.GameState, entity: us
     return null;
 }
 
-fn CollisionSystem(gameState: *GameSimulation.GameState) void
+const CollisionSystem = struct 
 {
-    // TODO: Remove when the parameter is used.
-    _ = gameState;
+    // Working memory to pass between the collision system stages
+    AttackerEntityBoxes: std.ArrayList(CharacterData.HitboxGroup),
+    DefenderEntityBoxes: std.ArrayList(CharacterData.HitboxGroup),
 
-    // Preprocessing step. Generated hitboxes used to actually check collision.
-    // var entity: usize = 0;
-    // while (entity < gameState.entityCount) 
-    // {
-    //     const entityOffset = gameState.physicsComponent[entity].position;
-    //     // Get active attack hitboxes and offset them.
-    //     // GetActiveAttackHitboxes(entity);
-
-    //     TranslateHitbox(hitbox, entityOffset);
-
-    //     entity += 1;
-    // }
-
-    const AttackBoxes: [10]CharacterData.HitboxGroup = .{} ** 10;
-    const VulnerableBoxes: [10]CharacterData.HitboxGroup = .{} ** 10;
-
-    var attackEntity: usize = 0;
-    while (attackEntity < gameState.entityCount) 
-    {        
-        const attackBox = AttackBoxes[attackEntity]        ;
-
-        var defendEntity: usize = 0;
-        while(defendEntity < gameState.entityCount)
-        {
-            // Don't check an attacker against itself.
-            if(attackEntity == defendEntity) 
-            {
-                continue;
-            }
-
-            const vulnerableBox = VulnerableBoxes[defendEntity];
-            if(DoHitboxesOverlap(attackBox, vulnerableBox))
-            {
-                // Generate Hit event.
-            }
-
-            defendEntity += 1;
-        }
-
-        attackEntity += 1;
+    fn Init(allocator: std.mem.Allocator) !CollisionSystem
+    {
+        var Attacker = try std.ArrayList(CharacterData.HitboxGroup).initCapacity(allocator, 10);
+        var Defender = try std.ArrayList(CharacterData.HitboxGroup).initCapacity(allocator, 10);
+        return CollisionSystem {
+                    .AttackerEntityBoxes = Attacker,
+                    .DefenderEntityBoxes = Defender
+                };
     }
-    _ = AttackBoxes;
-    _ = VulnerableBoxes;
+
+    fn Execute(self: CollisionSystem, gameState: *GameSimulation.GameState) void
+    {
+        // TODO: Remove when the parameter is used.
+        _ = gameState;
+
+        // Preprocessing step. Generated hitboxes used to actually check collision.
+        // var entity: usize = 0;
+        // while (entity < gameState.entityCount) 
+        // {
+        //     const entityOffset = gameState.physicsComponent[entity].position;
+        //     // Get active attack hitboxes and offset them.
+        //     // GetActiveAttackHitboxes(entity);
+
+        //     TranslateHitbox(hitbox, entityOffset);
+
+        //     entity += 1;
+        // }
+
+        for(self.AttackerEntityBoxes) | AttackBoxes, attackerIndex |
+        {
+            for(AttackBoxes) | attackBox |
+            {                
+                for(self.DefenderEntityBoxes) | VulnerableBoxes, defenderIndex |
+                {
+                    // Don't check an attacker against itself.
+                    if(attackerIndex == defenderIndex) 
+                    {
+                        continue;
+                    }
+
+                    for(VulnerableBoxes) | vulnerableBox |
+                    {
+                        if(DoHitboxesOverlap(attackBox, vulnerableBox))
+                        {
+                            // Generate Hit event.
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+test "Initializing the collision system"
+{
+    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var collisionSystem : CollisionSystem = try CollisionSystem.Init(ArenaAllocator.allocator());
+
+    // The collision system currently supports processing 10 attack boxes at a time.
+    try std.testing.expect(collisionSystem.AttackerEntityBoxes.capacity == 10);
+    try std.testing.expect(collisionSystem.AttackerEntityBoxes.items.len == 0);
+
+    // The collision system currently supports processing 10 vulnerable boxes at a time.
+    try std.testing.expect(collisionSystem.DefenderEntityBoxes.capacity == 10);
+    try std.testing.expect(collisionSystem.DefenderEntityBoxes.items.len == 0);
 }
