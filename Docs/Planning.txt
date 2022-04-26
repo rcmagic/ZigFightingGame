@@ -56,15 +56,25 @@
 ** 2022/4/11
 - Implement a data store for character properties (attack properties, hitboxes, etc). [p]
 
-2022/4/12/
+2022/4/12
 - Begin work on collision system [x]
 
-
-** Next Time **
+** 2022/4/21
 - Free persistent memory store at the end of a game [x]
 - Implement a independent game loop function outside of main() [x]
 
+2022/4/25
+- Test that scratch hitbox data used in the collision system is cleared out each frame. []
+- Generate collision events and write tests to verify the required functionality. []
+- Prepare character properties to be stored in the game's persistent store. [p]
 
+2022/4/26
+- Create a path for setting up character properties in code (actions, hitbox, etc) for testing the collision system.
+- Create utility function for getting current active hitboxes from a character
+
+
+** TODO **
+- Setup character data that will be used in the collision system.
 - Run the hitbox data through the collision system
 - Create a collision event structure
 - Generated hit events when hitboxes overlap

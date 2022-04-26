@@ -20,16 +20,19 @@ var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .OnUpdate = Com
 
 
 pub const GameData = struct {
-    HitboxGroup: CharacterData.HitboxGroup,
+    HitboxGroup: CharacterData.HitboxGroup, // TODO: Temp data, remove.
+    Characters: std.ArrayList(CharacterData.CharacterProperties),
     
     //CharacterProperties: [10]CharacterData.CharacterProperties
 };
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) GameData
 {
-    var gameData = GameData{ .HitboxGroup = .{ .Hitboxes = std.ArrayList(CharacterData.Hitbox).init(allocator) } };
+    var gameData = GameData{ .HitboxGroup = .{ .Hitboxes = std.ArrayList(CharacterData.Hitbox).init(allocator) },
+                             .Characters = std.ArrayList(CharacterData.CharacterProperties).init(allocator) 
+                            };
 
-    gameData.HitboxGroup.Hitboxes.append(CharacterData.Hitbox{ .top = 200, .left = 300, .bottom = 0, .right = 600 }) catch unreachable;
+    //gameData.HitboxGroup.Hitboxes.append(CharacterData.Hitbox{ .top = 200, .left = 300, .bottom = 0, .right = 600 }) catch unreachable;
 
     return gameData;
 }
@@ -101,7 +104,9 @@ test "Testing setting up game data"
 {
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     var Allocator = ArenaAllocator.allocator();
-    var gameData = GameData{ .HitboxGroup = .{ .Hitboxes = std.ArrayList(CharacterData.Hitbox).init(Allocator) } };
+    var gameData = GameData{ .HitboxGroup = .{ .Hitboxes = std.ArrayList(CharacterData.Hitbox).init(Allocator) },
+                            .Characters = std.ArrayList(CharacterData.CharacterProperties).init(Allocator) 
+    };
 
     try gameData.HitboxGroup.Hitboxes.append(CharacterData.Hitbox{ .top = 200, .left = -300, .bottom = 0, .right = 300 });
     try std.testing.expect(gameData.HitboxGroup.Hitboxes.items[0].right == 300);

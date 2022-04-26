@@ -66,3 +66,12 @@
 Stages:
     1. Translate data in our character data structures to easy to process/cache friendly flat arrays of hitboxes.
     2. Process hitbox collisions and generate overlap events.
+
+
+
+*** Utility Function for getting current hitboxes ***
+- Requirements: 
+    1. Get active hitboxes (attack, vulnerable box, etc)
+    2. Seperate functions for getting each type of box (GetAttackBoxes(), GetVulnerableBoxes(), ...)
+    3. Returned boxes are translated by the character position.
+    4. Doesn't allocate memory for hitboxes storage.
