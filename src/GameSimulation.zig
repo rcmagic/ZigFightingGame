@@ -20,10 +20,7 @@ var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .OnUpdate = Com
 
 
 pub const GameData = struct {
-    HitboxGroup: CharacterData.HitboxGroup, // TODO: Temp data, remove.
-    Characters: std.ArrayList(CharacterData.CharacterProperties),
-    
-    //CharacterProperties: [10]CharacterData.CharacterProperties
+    Characters: std.ArrayList(CharacterData.CharacterProperties), 
 };
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) GameData
@@ -104,12 +101,11 @@ test "Testing setting up game data"
 {
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     var Allocator = ArenaAllocator.allocator();
-    var gameData = GameData{ .HitboxGroup = .{ .Hitboxes = std.ArrayList(CharacterData.Hitbox).init(Allocator) },
-                            .Characters = std.ArrayList(CharacterData.CharacterProperties).init(Allocator) 
+    var gameData = GameData{
+        .Characters = std.ArrayList(CharacterData.CharacterProperties).init(Allocator) 
     };
 
-    try gameData.HitboxGroup.Hitboxes.append(CharacterData.Hitbox{ .top = 200, .left = -300, .bottom = 0, .right = 300 });
-    try std.testing.expect(gameData.HitboxGroup.Hitboxes.items[0].right == 300);
+    _ = gameData;
 }
 
 pub fn UpdateGame(gameState: *GameState) void {
