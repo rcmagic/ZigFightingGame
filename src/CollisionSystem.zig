@@ -73,7 +73,7 @@ const CollisionSystem = struct
         // TODO: Remove when the parameter is used.
         _ = gameState;
 
-        // Preprocessing step. Generated hitboxes used to actually check collision.
+        // Preprocessing step. Generate hitboxes used to check collision.
         // var entity: usize = 0;
         // while (entity < gameState.entityCount) 
         // {

@@ -18,7 +18,6 @@ pub const HitboxGroup = struct
     
     pub fn init(allocator: std.mem.Allocator) !HitboxGroup {
         return HitboxGroup {
-
             .Hitboxes = std.ArrayList(Hitbox).init(allocator),
         };
     }

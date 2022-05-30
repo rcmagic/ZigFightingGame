@@ -9,7 +9,8 @@ fn GetVulnerableBoxes(
     action: CharacterData.ActionProperties,
     frame: i32,
     position: math.IntVector2D,
-) usize {
+) usize 
+{
     var poolIndex: usize = 0;
 
     // Find all active hitboxes
@@ -65,7 +66,7 @@ test "Test getting translated hitboxes from an action" {
     const hitbox = hitboxPool[0];
 
     try std.testing.expect(count == 1);
-    try std.testing.expect(action.VulnerableHitboxGroups.items[0].IsActiveOnFrame(5));
+    try std.testing.expect(action.VulnerableHitboxGroups.items[0].IsActiveOnFrame(frame));
     try std.testing.expect(hitbox.top == (position.y + testingBox.top));
     try std.testing.expect(hitbox.left == (position.x + testingBox.left));
     try std.testing.expect(hitbox.bottom == (position.y + testingBox.bottom));

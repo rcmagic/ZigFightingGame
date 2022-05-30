@@ -72,6 +72,11 @@
 - Create a path for setting up character properties in code (actions, hitbox, etc) for testing the collision system.
 - Create utility function for getting current active hitboxes from a character
 
+2022/5/16
+- Catch up on previous work.
+- Plan for future streams.
+- Test allocating character data with action and hitbox data [x]
+- Remove test hitbox data from the GameData struct. [x]
 
 ** TODO **
 - Setup character data that will be used in the collision system.
@@ -88,6 +93,11 @@
 - Create a reaction action 
 - Implement a timeline data structure
 
+
+- Move the TranslateHitbox function to common.zig
+- Implement function for getting active attack boxes offset by the character position.
+- Verify what we're doing with the character data in the test "Test clearing out scratch hitbox data each frame"
+
 ** TBD **
 - Create hit properties struct
 - Implement reaction system
@@ -96,6 +106,7 @@
 - projectiles discussion
 - animation discussion
 - Make new run-time structure for storing hitboxes for the collision system.
+
 
 
 

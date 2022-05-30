@@ -192,6 +192,26 @@ pub fn main() anyerror!void {
     std.debug.print("State: {}\n", .{ result }); // should print 200
 }
 
+** Hashmaps **
+Ref: https://devlog.hexops.com/2022/zig-hashmaps-explained/
+
+// Hashmap with string keys and values of type 'V'.
+var my_hash_map = std.StringHashMap(V).init(allocator);
+
+// Hashmap with a key type 'K' and value type 'V'.
+var my_hash_map = std.AutoHashMap(K, V).init(allocator); 
+
+// A hashmap that doesn't store its own allocator 
+var my_hash_map = std.StringHashMapUnmanaged(V){};
+
+// Zig has two implementations of hash maps
+'std.HashMap' is optimized for random element lookups
+'std.ArrayHashMap' is optimized
+- inserts
+- iterating
+- Insertion order is preserved. 
+- You can index the underlying data like an array
+- You can remove data with a swap or shifting all elements forward to maintain order. 
 
 ** Building/Running
 // initialize a zig project
