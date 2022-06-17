@@ -96,6 +96,94 @@ pub const CharacterProperties = struct
     }
 };
 
+fn IsArrayList(comptime T: type) bool
+{
+    switch(@typeInfo(T))
+    {
+        .Struct => { return @hasField(T, "items"); },
+        else => {}
+    }
+
+    return false;
+}
+
+fn ItemType(comptime T: type)? type
+{
+    switch(@typeInfo(T)) 
+    {
+        .Pointer => |info| return info.child,
+        else => null
+    }
+}
+
+
+fn ParseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T
+{
+    switch(@typeInfo(T))
+    {
+        .Int =>
+        {
+            return @intCast(T, tree.Integer);
+        },
+        .Struct => |structInfo|
+        {
+            comptime var isArrayList = IsArrayList(T);
+            
+            // ArrayLists are handled as a special case. We serialize ArrayList as JSON arrays
+            // rather than objects.
+            if(isArrayList)
+            {           
+                var instanceOfArrayList = T.init(allocator);
+                const itemType = ItemType(@TypeOf(instanceOfArrayList.items));
+
+
+                // Array lists are stored as JSON arrays.
+                for(tree.Array.items) | itemValue |
+                {                        
+                    if(itemType) | itemTypeValidated |
+                    {                                                 
+                        if(try ParseJsonValue(itemTypeValidated, itemValue, allocator)) | item |
+                        {
+                            try instanceOfArrayList.append(item);
+                        }
+                    }
+                }
+
+                return instanceOfArrayList;
+            }
+            else
+            {                
+                var instanceOfStruct: T = undefined;
+
+                if(@hasDecl(T, "init"))
+                {
+                    instanceOfStruct = try T.init(allocator);
+                }
+                else 
+                {
+                    instanceOfStruct = .{};
+                }
+                
+                inline for(structInfo.fields) | field |
+                {
+                    const value = tree.Object.get(field.name).?;
+                    const thing = ParseJsonValue(field.field_type, value, allocator) catch unreachable;
+                    if(thing) | item |
+                    {
+                        @field(instanceOfStruct, field.name) = item;
+                    }
+                }
+
+                return instanceOfStruct;
+            }
+        },
+        else => {}
+    }
+
+    return null;
+}
+
+
 
 
 test "Test HitboxGroup.IsActiveOnFrame()"
@@ -170,28 +258,31 @@ test "Test writing character data to a json file"
     try file.writeAll(buffer[0..string.items.len]);
 }
 
-// test "Test parsing a json file!"
-// {
-//     const file = try std.fs.cwd().openFile("prototyping/testinput.json", .{.read = true});
-//     defer(file.close());
+
+test "Test reading a json asset file."
+{
+    var p = std.json.Parser.init(std.testing.allocator, false);
+    defer p.deinit();
+
+    const file = try std.fs.cwd().openFile("character_data_test.json", .{.read = true});
+    defer(file.close());
+    var buffer: [1024]u8 = undefined;
+    const bytesRead = try file.readAll(&buffer);
+    const message = buffer[0..bytesRead];
 
 
-//     var buffer: [1024]u8 = undefined;
+    var tree = try p.parse(message);
+    defer tree.deinit();
 
-//     var bytesRead = try file.readAll(&buffer);
-
-//     var message = buffer[0..bytesRead];
-
-//     var stream = std.json.TokenStream.init(message);
-
-//     // Requires an allocator to parse JSON string values.
-//     var allocBuffer: [1024]u8 = undefined;
-//     var fba = std.heap.FixedBufferAllocator.init(&allocBuffer);
-
-//     const data = try std.json.parse(TestJsonStruct, &stream, .{ .allocator = fba.allocator()});
+    const LoadedCharacter = try ParseJsonValue(CharacterProperties, tree.root, std.testing.allocator);
     
-//     try std.testing.expect(data.a == 42);
-//     try std.testing.expectEqualStrings(data.b, "The World!");
+    {
+        var bufferOut: [1024]u8 = undefined;
+        var fba = std.heap.FixedBufferAllocator.init(&bufferOut);
+        var string = std.ArrayList(u8).init(fba.allocator());
 
-// }
+        try std.json.stringify(LoadedCharacter, .{.whitespace = .{}}, string.writer());
 
+        std.debug.print("\n{s}", .{string.items});
+    }
+}

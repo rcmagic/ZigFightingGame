@@ -78,7 +78,25 @@
 - Test allocating character data with action and hitbox data [x]
 - Remove test hitbox data from the GameData struct. [x]
 
+2022/5/31
+- Reading/Writing text files from storage in Zig [x].
+- Research and test seraliazing data to JSON [x]
+
+2022/6/2
+- Attempt to read/write the game's Character Data from and to a JSON file [p].
+- Move test code into game code [x].
+
+2022/6/13
+- Write deserializer that decodes the JSON object [x]
+- Setup test character data and write it to a file [x]
+
+2022/6/*
+- Create a character asset. Load it when starting the game.
+- Support in-game reloading of character data to support rapid iteration.
+- Pipeline the hitboxes from the character data to the collision system.
+
 ** TODO **
+
 - Setup character data that will be used in the collision system.
 - Run the hitbox data through the collision system
 - Create a collision event structure
@@ -107,6 +125,9 @@
 - animation discussion
 - Make new run-time structure for storing hitboxes for the collision system.
 
+** The Back Burner **
+- Look into how to deal with parsing large files with JSON.
+- Look into memory allocation tradeoffs for dealing with loading data.
 
 
 
