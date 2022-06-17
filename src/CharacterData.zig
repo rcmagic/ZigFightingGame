@@ -294,7 +294,6 @@ test "Deserialize an empty struct"
 
 test "Deserialize a struct with a single integer field"
 {
-    // Test that we can read a struct with no fields.
     const oneFieldStruct = struct { value: i32 = 0 };
     const oneFieldAssetJson = "{\"value\": 25}";
 
@@ -315,16 +314,21 @@ test "Deserialize a struct with a single integer field"
 
 test "Deserialize a struct with a single character string field"
 {
-    // Test that we can read a struct with no fields.
+
     const oneFieldStruct = struct { message: []u8 = "" };
     const oneFieldAssetJson = "{\"message\": \"hello zig!\"}";
 
-    var p = std.json.Parser.init(std.testing.allocator, false);
+
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    var p = std.json.Parser.init(allocator, false);
     defer p.deinit();
     var tree = try p.parse(oneFieldAssetJson);
     defer tree.deinit();
 
-    const loadedAsset = try ParseJsonValue(oneFieldStruct, tree.root, std.testing.allocator);
+    const loadedAsset = try ParseJsonValue(oneFieldStruct, tree.root, allocator);
 
     try std.testing.expect(loadedAsset != null);
     if(loadedAsset) | asset |
@@ -336,7 +340,6 @@ test "Deserialize a struct with a single character string field"
 
 test "Deserialize a struct with a child struct field"
 {
-    // Test that we can read a child struct with no fields.
     const oneChildStructFieldStruct = struct { 
         child: struct { value: i32 = 0} = .{}
     };
@@ -356,7 +359,37 @@ test "Deserialize a struct with a child struct field"
     }
 }
 
-// test "Deserialize a struct with an single ArrayList field"
-// {
-//     try std.testing.expect(false);
-// }
+test "Deserialize a struct with an ArrayList"
+{    
+
+    const oneFieldStructArrayList = struct { 
+        numbers: std.ArrayList(i32),
+        const Self = @This();
+        fn init(allocator: std.mem.Allocator) !Self
+        {
+          return Self{ .numbers = std.ArrayList(i32).init(allocator) };
+        }
+    };
+
+    const oneFieldStructArrayListJson = "{\"numbers\": [5, 9, 20, 52]}";
+
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+
+    var p = std.json.Parser.init(allocator, false);
+    defer p.deinit();
+    var tree = try p.parse(oneFieldStructArrayListJson);
+    defer tree.deinit();
+
+    const loadedAsset = try ParseJsonValue(oneFieldStructArrayList, tree.root, allocator);
+
+    try std.testing.expect(loadedAsset != null);
+    if(loadedAsset) | asset | 
+    {
+        try std.testing.expect(asset.numbers.items.len == 4);
+        try std.testing.expect(asset.numbers.items[2] == 20);
+    }
+
+}
