@@ -125,6 +125,22 @@ fn ParseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
         {
             return @intCast(T, tree.Integer);
         },
+        // Currenly only support slices
+        .Pointer => |ptrInfo|
+        {
+            switch(ptrInfo.size)
+            {
+                .Slice => 
+                {
+                    const output = try allocator.alloc(u8, tree.String.len);
+                    errdefer allocator.free(output);
+                    std.mem.copy(u8, output, tree.String);
+                    
+                    return output;
+                },
+                else => unreachable
+            }
+        },
         .Struct => |structInfo|
         {
             comptime var isArrayList = IsArrayList(T);
@@ -259,30 +275,88 @@ test "Test writing character data to a json file"
 }
 
 
-test "Test reading a json asset file."
+test "Deserialize an empty struct"
 {
+    // Test that we can read a struct with no fields.
+
+    const noFieldStruct = struct {};
+    const noFieldAssetJson = "{}";
+
     var p = std.json.Parser.init(std.testing.allocator, false);
     defer p.deinit();
-
-    const file = try std.fs.cwd().openFile("character_data_test.json", .{.read = true});
-    defer(file.close());
-    var buffer: [1024]u8 = undefined;
-    const bytesRead = try file.readAll(&buffer);
-    const message = buffer[0..bytesRead];
-
-
-    var tree = try p.parse(message);
+    var tree = try p.parse(noFieldAssetJson);
     defer tree.deinit();
 
-    const LoadedCharacter = try ParseJsonValue(CharacterProperties, tree.root, std.testing.allocator);
-    
+    const loadedAsset = try ParseJsonValue(noFieldStruct, tree.root, std.testing.allocator);
+    try std.testing.expect(loadedAsset != null);
+   
+}
+
+test "Deserialize a struct with a single integer field"
+{
+    // Test that we can read a struct with no fields.
+    const oneFieldStruct = struct { value: i32 = 0 };
+    const oneFieldAssetJson = "{\"value\": 25}";
+
+    var p = std.json.Parser.init(std.testing.allocator, false);
+    defer p.deinit();
+    var tree = try p.parse(oneFieldAssetJson);
+    defer tree.deinit();
+
+    const loadedAsset = try ParseJsonValue(oneFieldStruct, tree.root, std.testing.allocator);
+
+    try std.testing.expect(loadedAsset != null);
+    if(loadedAsset) | asset |
     {
-        var bufferOut: [1024]u8 = undefined;
-        var fba = std.heap.FixedBufferAllocator.init(&bufferOut);
-        var string = std.ArrayList(u8).init(fba.allocator());
+        try std.testing.expect( asset.value == 25);
+    }
+   
+}
 
-        try std.json.stringify(LoadedCharacter, .{.whitespace = .{}}, string.writer());
+test "Deserialize a struct with a single character string field"
+{
+    // Test that we can read a struct with no fields.
+    const oneFieldStruct = struct { message: []u8 = "" };
+    const oneFieldAssetJson = "{\"message\": \"hello zig!\"}";
 
-        std.debug.print("\n{s}", .{string.items});
+    var p = std.json.Parser.init(std.testing.allocator, false);
+    defer p.deinit();
+    var tree = try p.parse(oneFieldAssetJson);
+    defer tree.deinit();
+
+    const loadedAsset = try ParseJsonValue(oneFieldStruct, tree.root, std.testing.allocator);
+
+    try std.testing.expect(loadedAsset != null);
+    if(loadedAsset) | asset |
+    {        
+        try std.testing.expectEqualStrings(asset.message, "hello zig!");
+    }
+   
+}
+
+test "Deserialize a struct with a child struct field"
+{
+    // Test that we can read a child struct with no fields.
+    const oneChildStructFieldStruct = struct { 
+        child: struct { value: i32 = 0} = .{}
+    };
+    const oneChildStructFieldStructJson = "{\"child\": {\"value\" : 35}}";
+
+    var p = std.json.Parser.init(std.testing.allocator, false);
+    defer p.deinit();
+    var tree = try p.parse(oneChildStructFieldStructJson);
+    defer tree.deinit();
+
+    const loadedAsset = try ParseJsonValue(oneChildStructFieldStruct, tree.root, std.testing.allocator);
+
+    try std.testing.expect(loadedAsset != null);
+    if(loadedAsset) | asset | 
+    {
+        try std.testing.expect(asset.child.value == 35);
     }
 }
+
+// test "Deserialize a struct with an single ArrayList field"
+// {
+//     try std.testing.expect(false);
+// }
