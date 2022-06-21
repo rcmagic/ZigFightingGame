@@ -90,10 +90,54 @@
 - Write deserializer that decodes the JSON object [x]
 - Setup test character data and write it to a file [x]
 
+2022/6/17
+- Write a test that validates loading a json asset to a struct[x]
+
+2022/6/21
+- Create a action name map for looking up actions in the character data [x]
+- Wrote tests validating use of the action name map [x]
+- Used loaded character data when executing actions in the state machine [p].
+- Pipeline the hitboxes from the character data to the collision system [p]
+
 2022/6/*
 - Create a character asset. Load it when starting the game.
+- Copy translated hitbox data into the scratch hitbox memory for the collison system.
 - Support in-game reloading of character data to support rapid iteration.
-- Pipeline the hitboxes from the character data to the collision system.
+- Prototype 2 characters on the screen, each with at atleast one hitbox. Fire off
+    a debug message when the two collide, and only when they initially overlap.
+
+2022/7/*
+- Implement first attack.
+- Save/Load attack data from/to individual files
+- In game hitbox editing.
+- Movement states and transitions (Walk, Jump, Run, Air Dash, etc)
+- Reaction system
+- Hit Stun / Block Stun / Hit Stop / Hit Shake
+- Hit trades
+- Knockback/Launch physics
+- Knockdown state transitions
+- Clashing?
+
+2022/8/*
+- Training Mode / Debug tools
+- Input history buffer
+- Special attack input motion detection.
+- Implement special attacks
+- Camera tracking
+
+
+
+2022/9/*
+- Match state (Round Start, During Match, Round End, Rematch, etc)
+- Combo damage and hit stun scaling.
+- Throws and the a locking mechanism.
+- Super Freeze.
+- Cinematics
+
+2022/10/*
+- Network session support.
+- Lock-step synchronization 
+- Rollbacks
 
 ** TODO **
 
@@ -128,6 +172,7 @@
 ** The Back Burner **
 - Look into how to deal with parsing large files with JSON.
 - Look into memory allocation tradeoffs for dealing with loading data.
+- What do we do about allocated memory inside of deep struct hierarchies such as strings and ArrayLists?
 
 
 
