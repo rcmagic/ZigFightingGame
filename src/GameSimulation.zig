@@ -5,7 +5,7 @@ const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const Input = @import("Input.zig");
 const CharacterData = @import("CharacterData.zig");
-const CollisionSystem = @import("CollisionSystem.zig");
+const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 const GameState = @import("GameState.zig").GameState;
 
 
@@ -108,5 +108,6 @@ pub fn UpdateGame(gameState: *GameState) void {
     InputCommandSystem(gameState);
     ActionSystem(gameState);
     PhysicsSystem(gameState);
+    try gameState.collisionSystem.Execute(gameState);
     gameState.frameCount += 1;
 }

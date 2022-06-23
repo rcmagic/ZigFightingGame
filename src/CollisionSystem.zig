@@ -98,15 +98,6 @@ pub const CollisionSystem = struct
     pub fn Execute(self: *CollisionSystem, gameState: *GameState) !void
     {
         
-        // Before building the scratch hitbox data, we clear it out each frame.        
-        const dummy = [0][0]CharacterData.Hitbox {};
-
-        self.AttackSlices = dummy[0..0];
-        self.VulnerableSlices = dummy[0..0];
-
-        // Assure that we start with no hitboxes to process
-        std.debug.assert(self.AttackSlices.len == 0 and self.VulnerableSlices.len == 0);
-
         var VulnerableScratchCount : usize = 0;
         var AttackScratchCount : usize = 0;
 
@@ -114,9 +105,11 @@ pub const CollisionSystem = struct
         var entity: usize = 0;
         while (entity < gameState.entityCount) : (entity += 1)
         {
-            // Insert new set of hitboxes for each entity that will be used in the next stage.
-            try self.AttackerEntityBoxes.append(.{});
-            try self.DefenderEntityBoxes.append(.{});
+
+            // Before building the scratch hitbox data, we clear it out each frame.                 
+            var dummy = [0]CharacterData.Hitbox{};   
+            self.AttackSlices[entity] = &dummy;
+            self.AttackSlices[entity] = &dummy;
             
             const entityOffset = gameState.physicsComponents[entity].position;
 

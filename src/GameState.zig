@@ -4,6 +4,7 @@ const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const Input = @import("Input.zig");
 const CharacterData = @import("CharacterData.zig");
+const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 
 pub const GameData = struct {
     Characters: std.ArrayList(CharacterData.CharacterProperties), 
@@ -49,7 +50,7 @@ pub const GameState = struct {
     inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
 
     // Systems
-    //collisionSystem: CollisionSystem,
+    collisionSystem: CollisionSystem,
 
     allocator: std.mem.Allocator,
     gameData: ?GameData = null,
@@ -63,7 +64,7 @@ pub const GameState = struct {
             .gameData = InitializeGameData(allocator),
 
             // Initialize Systems
-            //.collisionSystem = CollisionSystem.init(allocator)
+            .collisionSystem = try CollisionSystem.init(allocator)
         };
 
         state.stateMachineComponents[0].context.PhysicsComponent = &state.physicsComponents[0];
