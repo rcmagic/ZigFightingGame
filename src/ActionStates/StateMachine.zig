@@ -24,6 +24,7 @@ pub const CombatStateContext = struct
 // Provides an interface for combat states to respond to various events
 pub const CombatStateCallbacks = struct
 {
+    Name: []const u8 = "",
     OnStart: ?fn(context: *CombatStateContext) void = null,         // Called when starting an action
     OnUpdate: ?fn(context: *CombatStateContext) void = null,        // Called every frame
     OnEnd: ?fn(context: *CombatStateContext) void = null            // Called when finishing an action

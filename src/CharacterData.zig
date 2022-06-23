@@ -1,7 +1,6 @@
 const std = @import("std");
 
 
-
 pub const Hitbox = struct
 {
     top: i32 = 0,
@@ -49,6 +48,8 @@ pub const ActionProperties = struct
     VulnerableHitboxGroups: std.ArrayList(HitboxGroup),
     AttackHitboxGroups: std.ArrayList(HitboxGroup),
 
+    Name: []const u8 = "",
+
     const Self = @This();
     pub fn jsonStringify(
             value: Self,
@@ -75,11 +76,31 @@ pub const CharacterProperties = struct
     MaxHealth : i32 = 10000,
     Actions: std.ArrayList(ActionProperties),
 
+    ActionNameMap: std.StringHashMap(usize),
+
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
         return CharacterProperties {
             .Actions = std.ArrayList(ActionProperties).init(allocator),
+            .ActionNameMap = std.StringHashMap(usize).init(allocator)
         };
+    }
+
+    pub fn FindAction(self: *CharacterProperties, ActionName: []const u8) ?*ActionProperties
+    {
+        if(self.ActionNameMap.get(ActionName)) | index |
+        {            
+            return &self.Actions.items[index];
+        }
+        return null;
+    }
+
+    pub fn InitializeActionNameMap(self: *CharacterProperties) !void
+    {
+        for(self.Actions.items) | action, index |
+        {
+            try self.ActionNameMap.putNoClobber(action.Name, index);
+        }
     }
 
     // Serialization Support
@@ -312,7 +333,7 @@ test "Deserialize a struct with a single integer field"
    
 }
 
-test "Deserialize a struct with a single character string field"
+test "Deserialize a struct with a single string field"
 {
 
     const oneFieldStruct = struct { message: []u8 = "" };
@@ -391,5 +412,29 @@ test "Deserialize a struct with an ArrayList"
         try std.testing.expect(asset.numbers.items.len == 4);
         try std.testing.expect(asset.numbers.items[2] == 20);
     }
+
+}
+
+
+test "Test CharacterProperties action name map lookup"
+{
+    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    var Allocator = ArenaAllocator.allocator();
+
+    var Character = try CharacterProperties.init(Allocator);
+
+    var Action = try ActionProperties.init(Allocator);
+
+    Action.Name =  "Jump";
+    try Character.Actions.append(Action);    
+
+    Action.Name =  "Run";
+    try Character.Actions.append(Action);
+
+    try Character.InitializeActionNameMap();
+
+    try std.testing.expect(Character.FindAction("Jump") != null);
+    try std.testing.expect(Character.FindAction("Run") != null);
+    try std.testing.expect(Character.FindAction("FlyToTheMoon") == null);
 
 }
