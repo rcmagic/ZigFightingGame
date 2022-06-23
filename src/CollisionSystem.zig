@@ -65,15 +65,18 @@ pub const CollisionSystem = struct
         return CollisionSystem{};
     }
 
-    pub fn CollisionPhase(self: *CollisionSystem) void
+    pub fn CollisionPhase(self: *CollisionSystem, gameState: *GameState) void
     {
+        var activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
+        var activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
+
         // Loop through all the active attacking entities's vulnerable boxes.
-        for(self.AttackSlices) | OneEntityAttackBoxes, attackerIndex |
+        for(activeAttackSlices) | OneEntityAttackBoxes, attackerIndex |
         {                        
             for(OneEntityAttackBoxes) | attackBox |
             {                 
                 // Loop through all the active defending entities's vulnerable boxes.
-                for(self.VulnerableSlices) | OneEntityVulnerableBoxes, defenderIndex |
+                for(activeVulnerableSlices) | OneEntityVulnerableBoxes, defenderIndex |
                 {
                     // Don't check an attacker against itself.
                     if(attackerIndex == defenderIndex) 
@@ -125,6 +128,11 @@ pub const CollisionSystem = struct
 
             if(gameState.gameData) | gameData |
             {
+                if(entity >= gameData.Characters.items.len)
+                {
+                    continue; 
+                }
+
                 // Get all the hitboxes for the current action.
                 if(gameData.Characters.items[entity].FindAction(actionName)) | actionData |
                 {
@@ -156,7 +164,7 @@ pub const CollisionSystem = struct
             }
         }
 
-        self.CollisionPhase();
+        self.CollisionPhase(gameState);
     }
 };
 

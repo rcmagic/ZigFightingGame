@@ -43,7 +43,7 @@ var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Walkin
 
 pub const GameState = struct {
     frameCount: i32 = 0,
-    entityCount: i32 = 1,
+    entityCount: usize = 1,
     physicsComponents: [10]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** 10,
     stateMachineComponents: [10]StateMachineComponent = [_]StateMachineComponent{.{}} ** 10,
 
