@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
+const GameState = @import("GameState.zig").GameState;
 
 pub fn GameLoop() void
 {
@@ -12,9 +13,8 @@ pub fn GameLoop() void
     defer ArenaAllocator.deinit();
 
     // Our game state
-    var gameState = GameSimulation.GameState{.allocator = ArenaAllocator.allocator() };
 
-    gameState.Init();
+    var gameState = try GameState.init( ArenaAllocator.allocator());
     
     // Initialize our game object
     gameState.physicsComponents[0].position = .{.x = 400000, .y = 200000 };
@@ -67,11 +67,11 @@ pub fn GameLoop() void
         // Reflect the position of our game object on screen.
         rl.DrawCircle(ScreenX, ScreenY, 50, rl.MAROON);
 
-        if(gameState.gameData) | gameData |
-        {
-            const hitbox = gameData.HitboxGroup.Hitboxes.items[0]; 
-           rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);    
-        }
+        // if(gameState.gameData) | gameData |
+        // {
+        //     const hitbox = gameData.HitboxGroup.Hitboxes.items[0]; 
+        //    rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);    
+        // }
 
         rl.EndDrawing();
         //----------------------------------------------------------------------------------

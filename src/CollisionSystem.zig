@@ -1,8 +1,8 @@
 const std = @import("std");
-const GameSimulation = @import("GameSimulation.zig");
+const math = @import("utils/math.zig");
 const CharacterData = @import("CharacterData.zig");
 const Component = @import("Component.zig");
-const math = @import("utils/math.zig");
+const GameState = @import("GameState.zig").GameState;
 
 
 // Create a new hitbox translated by the offset provided.
@@ -25,129 +25,188 @@ fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
     return !IsNotOverlapping;                      
 }
 
-fn GetActiveAttackHiboxes(gameState: *const GameSimulation.GameState, entity: usize) ?*CharacterData.HitboxGroup
+fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, hitboxes: []CharacterData.Hitbox) usize
 {
-    // Unused for now
-    _ = gameState;
-    _ = entity;
+    var count: usize = 0;
+    for(hitboxGroups) | hitboxGroup |
+    {                
+        for(hitboxGroup.Hitboxes.items) | hitbox |
+        {
+            const translateBox = TranslateHitbox(hitbox, offset);                            
 
-    // if(gameState.gameData) | gameData |
-    // {
-    //     gameData.CharacterProperties[entity].
-    // }
+            hitboxes[count] = translateBox;
+            count += 1;
+        }
+    }
 
-
-    return null;
+    return count;
 }
 
 const ScratchHitboxSet = struct
 {
-    hitboxStore: [10]CharacterData.Hitbox,
-    hitboxes: []CharacterData.Hitbox
+    hitboxStore: [10]CharacterData.Hitbox =  [_]CharacterData.Hitbox{.{}} ** 10,
+    hitboxCount: usize = 0,
 };
 
-const CollisionSystem = struct 
+
+
+pub const CollisionSystem = struct 
 {
     // Working memory to pass between the collision system stages
-    AttackerEntityBoxes: std.ArrayList(ScratchHitboxSet),
-    DefenderEntityBoxes: std.ArrayList(ScratchHitboxSet),
+    VulnerableHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
+    AttackHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
 
-    fn Init(allocator: std.mem.Allocator) !CollisionSystem
-    {
-        
-        var Attacker = try std.ArrayList(ScratchHitboxSet).initCapacity(allocator, 10);
-        var Defender = try std.ArrayList(ScratchHitboxSet).initCapacity(allocator, 10);
-        return CollisionSystem {
-                    .AttackerEntityBoxes = Attacker,
-                    .DefenderEntityBoxes = Defender
-                };
+    VulnerableSlices : [10][]CharacterData.Hitbox = undefined, 
+    AttackSlices : [10][]CharacterData.Hitbox = undefined,
+
+
+    pub fn init(allocator: std.mem.Allocator) !CollisionSystem
+    {   _ = allocator;
+        return CollisionSystem{};
     }
 
-    // fn PrepareHitbox(self: CollisionSystem,  gameState: *GameSimulation.GameState) void
-    // {
-
-    // }
-
-    fn Execute(self: CollisionSystem, gameState: *GameSimulation.GameState) void
+    pub fn CollisionPhase(self: *CollisionSystem) void
     {
-        // TODO: Remove when the parameter is used.
-        _ = gameState;
-
-        // Preprocessing step. Generate hitboxes used to check collision.
-        // var entity: usize = 0;
-        // while (entity < gameState.entityCount) 
-        // {
-        //     const entityOffset = gameState.physicsComponent[entity].position;
-        //     // Get active attack hitboxes and offset them.
-        //     // GetActiveAttackHitboxes(entity);
-
-        //     TranslateHitbox(hitbox, entityOffset);
-
-        //     entity += 1;
-        // }
-
-        for(self.AttackerEntityBoxes.items) | AttackBoxes, attackerIndex |
-        {
-            for(AttackBoxes.hitboxes) | attackBox |
-            {                
-                for(self.DefenderEntityBoxes.items) | VulnerableBoxes, defenderIndex |
+        // Loop through all the active attacking entities's vulnerable boxes.
+        for(self.AttackSlices) | OneEntityAttackBoxes, attackerIndex |
+        {                        
+            for(OneEntityAttackBoxes) | attackBox |
+            {                 
+                // Loop through all the active defending entities's vulnerable boxes.
+                for(self.VulnerableSlices) | OneEntityVulnerableBoxes, defenderIndex |
                 {
                     // Don't check an attacker against itself.
                     if(attackerIndex == defenderIndex) 
                     {
                         continue;
                     }
-
-                    for(VulnerableBoxes.hitboxes) | vulnerableBox |
+                    
+                    for(OneEntityVulnerableBoxes) | vulnerableBox |
                     {
                         if(DoHitboxesOverlap(attackBox, vulnerableBox))
                         {
                             // Generate Hit event.
+
+                            std.debug.print("Hitboxes overlap!!", .{});
                         }
                     }
                 }
             }
         }
     }
+
+    pub fn Execute(self: *CollisionSystem, gameState: *GameState) !void
+    {
+        // Before building the scratch hitbox data, we clear it out each frame.        
+        var VulnerableScratchCount : usize = 0;
+        var AttackScratchCount : usize = 0;
+
+        // Preprocessing step. Generate hitboxes used to check collision.
+        var entity: usize = 0;
+        while (entity < gameState.entityCount) : (entity += 1)
+        {
+            // Insert new set of hitboxes for each entity that will be used in the next stage.
+            try self.AttackerEntityBoxes.append(.{});
+            try self.DefenderEntityBoxes.append(.{});
+            
+            const entityOffset = gameState.physicsComponents[entity].position;
+
+            const component = &gameState.stateMachineComponents[entity];
+            
+            const CurrentState = component.stateMachine.CurrentState;
+
+            var actionName : []const u8 = "";
+            if(component.stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
+            {
+                actionName = state.Name;
+            }
+
+            if(gameState.gameData) | gameData |
+            {
+                // Get all the hitboxes for the current action.
+                if(gameData.Characters.items[entity].FindAction(actionName)) | actionData |
+                {
+                                    
+                    // Gather attack boxes    
+                    {
+                        // Here we insert the translated hitboxes for the action into AttackHitboxScratch
+                        const atkCount = GetTranslatedActiveHitboxes(actionData.AttackHitboxGroups.items, entityOffset, 
+                        self.AttackHitboxScratch[AttackScratchCount..]);
+
+                        // Store the slice for this entity that points to a range on the hitbox scratch array
+                        self.AttackSlices[entity] = self.AttackHitboxScratch[ AttackScratchCount .. atkCount ];
+
+                        AttackScratchCount += atkCount;
+                    }
+
+                    // Gather vulnerable boxes
+                    {
+                        // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
+                        const vulCount = GetTranslatedActiveHitboxes(actionData.VulnerableHitboxGroups.items, entityOffset, 
+                        self.VulnerableHitboxScratch[VulnerableScratchCount..]);
+
+                        // Store the slice for this entity that points to a range on the hitbox scratch array
+                        self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[ VulnerableScratchCount .. vulCount ];
+
+                        VulnerableScratchCount += vulCount;
+                    }
+                }
+            }
+        }
+
+        self.CollisionPhase();
+    }
 };
 
 test "Initializing the collision system"
 {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    var collisionSystem : CollisionSystem = try CollisionSystem.Init(ArenaAllocator.allocator());
-
-    // The collision system currently supports processing 10 attack boxes at a time.
-    try std.testing.expect(collisionSystem.AttackerEntityBoxes.capacity == 10);
-    try std.testing.expect(collisionSystem.AttackerEntityBoxes.items.len == 0);
-
-    // The collision system currently supports processing 10 vulnerable boxes at a time.
-    try std.testing.expect(collisionSystem.DefenderEntityBoxes.capacity == 10);
-    try std.testing.expect(collisionSystem.DefenderEntityBoxes.items.len == 0);
+    var ArenaAllocator = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer ArenaAllocator.deinit();
+    var collisionSystem : CollisionSystem = try CollisionSystem.init(ArenaAllocator.allocator());
+    _ = collisionSystem;
 }
 
-test "Test clearing out scratch hitbox data each frame"
+test "Testing getting translated hitboxes"
 {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    var collisionSystem : CollisionSystem = try CollisionSystem.Init(ArenaAllocator.allocator());
+    var Allocator = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer Allocator.deinit();
 
-    var Allocator = ArenaAllocator.allocator();
+    var HitboxGroupList = std.ArrayList(CharacterData.HitboxGroup).init(Allocator.allocator());
 
-    // Our game state
-    var gameState = GameSimulation.GameState{.allocator = ArenaAllocator.allocator() };
-    gameState.Init();
+    var HitboxGroupData = try CharacterData.HitboxGroup.init(Allocator.allocator());
+    try HitboxGroupList.append(HitboxGroupData);
+    try HitboxGroupList.append(HitboxGroupData);
 
-    if(gameState.gameData) | *gameData |
-    {
-        var Character = try CharacterData.CharacterProperties.init(Allocator);
-        // Add a test character
-        try gameData.Characters.append(Character);
-    }
-
-    // Check to see if hitboxes are staged
-    // collisionSytstem.PrepareHitbox(&gameState);
+    try HitboxGroupList.items[0].Hitboxes.append(.{});
+    try HitboxGroupList.items[0].Hitboxes.append(.{});
     
-    try std.testing.expect(collisionSystem.AttackerEntityBoxes.items.len == 2);
-    try std.testing.expect(collisionSystem.DefenderEntityBoxes.items.len == 4);
+    var hitboxScratch: [10]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 10;
 
-    collisionSystem.Execute(&gameState);
+    const count = GetTranslatedActiveHitboxes(HitboxGroupList.items, math.IntVector2D{}, hitboxScratch[0..]);
+
+    try std.testing.expect(count == 2);
 }
+
+// test "Test clearing out scratch hitbox data each frame"
+// {
+//     var ArenaAllocator = std.heap.ArenaAllocator.init(std.testing.allocator);
+//     var collisionSystem : CollisionSystem = try CollisionSystem.init(ArenaAllocator.allocator());
+
+//     _ = collisionSystem;
+//     //var Allocator = ArenaAllocator.allocator();
+
+//     // Our game state
+//     var gameState = try GameState.GameState.init(ArenaAllocator.allocator());
+
+//     if(gameState.gameData) | *gameData |
+//     {
+//         var Character = try CharacterData.CharacterProperties.init(ArenaAllocator.allocator());
+//         // Add a test character
+//         try gameData.Characters.append(Character);
+//     }
+    
+//     // try std.testing.expect(collisionSystem.AttackerEntityBoxes.items.len == 2);
+//     // try std.testing.expect(collisionSystem.DefenderEntityBoxes.items.len == 2);
+
+//     try collisionSystem.Execute(&gameState);
+// }
