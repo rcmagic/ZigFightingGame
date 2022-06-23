@@ -97,7 +97,16 @@ pub const CollisionSystem = struct
 
     pub fn Execute(self: *CollisionSystem, gameState: *GameState) !void
     {
+        
         // Before building the scratch hitbox data, we clear it out each frame.        
+        const dummy = [0][0]CharacterData.Hitbox {};
+
+        self.AttackSlices = dummy[0..0];
+        self.VulnerableSlices = dummy[0..0];
+
+        // Assure that we start with no hitboxes to process
+        std.debug.assert(self.AttackSlices.len == 0 and self.VulnerableSlices.len == 0);
+
         var VulnerableScratchCount : usize = 0;
         var AttackScratchCount : usize = 0;
 
