@@ -455,11 +455,9 @@ test "Test CharacterProperties action name map lookup"
     Action.Name =  "Run";
     try Character.Actions.append(Action);
 
-    try Character.InitializeActionNameMap();
-
     const map = try GenerateActionNameMap(Character, Allocator);
-    try std.testing.expect(FindAction(map, Character, "Jump") != null);
-    try std.testing.expect(FindAction(map, Character, "Run") != null);
-    try std.testing.expect(FindAction(map, Character, "FlyToTheMoon") == null);
+    try std.testing.expect(FindAction(Character, map, "Jump") != null);
+    try std.testing.expect(FindAction(Character, map, "Run") != null);
+    try std.testing.expect(FindAction(Character, map, "FlyToTheMoon") == null);
 
 }
