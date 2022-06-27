@@ -8,6 +8,8 @@ const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 
 pub const GameData = struct {
     Characters: std.ArrayList(CharacterData.CharacterProperties), 
+    ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
+
 };
 
 
@@ -22,11 +24,19 @@ const InputComponent = struct
     inputCommand: Input.InputCommand = .{} 
 };
 
-pub fn InitializeGameData(allocator: std.mem.Allocator) GameData
+pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 {
     var gameData = GameData { 
-        .Characters = std.ArrayList(CharacterData.CharacterProperties).init(allocator) 
+        .Characters = std.ArrayList(CharacterData.CharacterProperties).init(allocator),
+        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator)
     };
+
+    var data = try CharacterData.LoadAsset("assets/test_chara_1.json", allocator);
+    if(data) | loadedData |
+    {
+        try gameData.Characters.append(loadedData);
+        try gameData.ActionMaps.append(try CharacterData.GenerateActionNameMap(loadedData, allocator));
+    }
 
     //gameData.HitboxGroup.Hitboxes.append(CharacterData.Hitbox{ .top = 200, .left = 300, .bottom = 0, .right = 600 }) catch unreachable;
 
@@ -61,7 +71,7 @@ pub const GameState = struct {
             .allocator = allocator,
             
             // Game data initialization
-            .gameData = InitializeGameData(allocator),
+            .gameData = try InitializeGameData(allocator),
 
             // Initialize Systems
             .collisionSystem = try CollisionSystem.init(allocator)

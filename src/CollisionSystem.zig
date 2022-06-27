@@ -56,8 +56,8 @@ pub const CollisionSystem = struct
     VulnerableHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
     AttackHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
 
-    VulnerableSlices : [10][]CharacterData.Hitbox = undefined, 
-    AttackSlices : [10][]CharacterData.Hitbox = undefined,
+    VulnerableSlices : [10][]const CharacterData.Hitbox = undefined, 
+    AttackSlices : [10][]const CharacterData.Hitbox = undefined,
 
 
     pub fn init(allocator: std.mem.Allocator) !CollisionSystem
@@ -67,11 +67,11 @@ pub const CollisionSystem = struct
 
     pub fn CollisionPhase(self: *CollisionSystem, gameState: *GameState) void
     {
-        var activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
-        var activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
+        const activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
+        const activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
 
         // Loop through all the active attacking entities's vulnerable boxes.
-        for(activeAttackSlices) | OneEntityAttackBoxes, attackerIndex |
+        for( activeAttackSlices ) | OneEntityAttackBoxes, attackerIndex |
         {                        
             for(OneEntityAttackBoxes) | attackBox |
             {                 
@@ -134,7 +134,7 @@ pub const CollisionSystem = struct
                 }
 
                 // Get all the hitboxes for the current action.
-                if(gameData.Characters.items[entity].FindAction(actionName)) | actionData |
+                if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
                 {
                                     
                     // Gather attack boxes    

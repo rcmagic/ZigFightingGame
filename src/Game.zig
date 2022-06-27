@@ -4,7 +4,7 @@ const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
 const GameState = @import("GameState.zig").GameState;
 
-pub fn GameLoop() void
+pub fn GameLoop() !void
 {
     // The ArenaAllocator lets use free all the persistent store memory at once.
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);

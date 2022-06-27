@@ -71,37 +71,40 @@ pub const ActionProperties = struct
     }
 };
 
+pub fn FindAction(character: CharacterProperties, map: std.StringHashMap(usize), ActionName: []const u8) ?*ActionProperties
+{
+    if(map.get(ActionName)) | index |
+    {            
+        return &character.Actions.items[index];
+    }
+    return null;
+}
+
+pub fn GenerateActionNameMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize)
+{
+
+    var ActionNameMap = std.StringHashMap(usize).init(allocator);
+    for(character.Actions.items) | action, index |
+    {
+        try ActionNameMap.putNoClobber(action.Name, index);
+    }
+
+    return ActionNameMap;
+}
+
 pub const CharacterProperties = struct 
 {
     MaxHealth : i32 = 10000,
     Actions: std.ArrayList(ActionProperties),
 
-    ActionNameMap: std.StringHashMap(usize),
-
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
         return CharacterProperties {
-            .Actions = std.ArrayList(ActionProperties).init(allocator),
-            .ActionNameMap = std.StringHashMap(usize).init(allocator)
+            .Actions = std.ArrayList(ActionProperties).init(allocator)
         };
     }
 
-    pub fn FindAction(self: *CharacterProperties, ActionName: []const u8) ?*ActionProperties
-    {
-        if(self.ActionNameMap.get(ActionName)) | index |
-        {            
-            return &self.Actions.items[index];
-        }
-        return null;
-    }
 
-    pub fn InitializeActionNameMap(self: *CharacterProperties) !void
-    {
-        for(self.Actions.items) | action, index |
-        {
-            try self.ActionNameMap.putNoClobber(action.Name, index);
-        }
-    }
 
     // Serialization Support
     const Self = @This();
@@ -116,6 +119,24 @@ pub const CharacterProperties = struct
             } , options, out_stream);
     }
 };
+
+pub fn LoadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties
+{
+    const file = try std.fs.cwd().openFile(path, .{.read = true});    
+    defer(file.close());
+
+    var buffer: [1024]u8 = undefined;
+    const bytesRead = try file.readAll(&buffer);
+    const message = buffer[0..bytesRead];
+
+    var p = std.json.Parser.init(allocator, false);
+    defer p.deinit();
+    var tree = try p.parse(message);
+    defer tree.deinit();
+
+    var thing = try ParseJsonValue(CharacterProperties, tree.root, allocator);
+    return thing;
+}
 
 fn IsArrayList(comptime T: type) bool
 {
@@ -203,11 +224,14 @@ fn ParseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 
                 inline for(structInfo.fields) | field |
                 {
-                    const value = tree.Object.get(field.name).?;
-                    const thing = ParseJsonValue(field.field_type, value, allocator) catch unreachable;
-                    if(thing) | item |
+                    const valueOptional = tree.Object.get(field.name);
+                    if(valueOptional) | value |
                     {
-                        @field(instanceOfStruct, field.name) = item;
+                        const thing = ParseJsonValue(field.field_type, value, allocator) catch unreachable;
+                        if(thing) | item |
+                        {
+                            @field(instanceOfStruct, field.name) = item;
+                        }
                     }
                 }
 
@@ -433,8 +457,9 @@ test "Test CharacterProperties action name map lookup"
 
     try Character.InitializeActionNameMap();
 
-    try std.testing.expect(Character.FindAction("Jump") != null);
-    try std.testing.expect(Character.FindAction("Run") != null);
-    try std.testing.expect(Character.FindAction("FlyToTheMoon") == null);
+    const map = try GenerateActionNameMap(Character, Allocator);
+    try std.testing.expect(FindAction(map, Character, "Jump") != null);
+    try std.testing.expect(FindAction(map, Character, "Run") != null);
+    try std.testing.expect(FindAction(map, Character, "FlyToTheMoon") == null);
 
 }
