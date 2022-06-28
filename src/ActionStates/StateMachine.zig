@@ -51,39 +51,33 @@ pub const CombatStateMachineProcessor = struct
     Registery: CombatStateRegistery = .{},
     CurrentState: CombatStateID = CombatStateID.Standing,
 
-    Context: ?*CombatStateContext = null,
 
-    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor) void
+    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext) void
     { 
-        if(self.Context) | context |
+        if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
         {
-            if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
+            if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
+
+            // Perform a state transition when requested
+            if(context.bTransition) 
             {
-                if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
+                // Call the OnEnd function of the previous state to do any cleanup required.
+                if(State.OnEnd) | OnEnd | { OnEnd(context); }
 
-                // Perform a state transition when requested
-                if(context.bTransition) 
+                // Call the OnStart function on the next state to do any setup required
+                if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
                 {
-                    // Call the OnEnd function of the previous state to do any cleanup required.
-                    if(State.OnEnd) | OnEnd | { OnEnd(context); }
+                    if(NextState.OnStart) | OnStart | { OnStart(context); }                              
+                }
 
-                    // Call the OnStart function on the next state to do any setup required
-                    if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
-                    {
-                        if(NextState.OnStart) | OnStart | { OnStart(context); }                              
-                    }
+                // Make sure the transition isn't performed more than once.
+                context.bTransition = false;
 
-                    // Make sure the transition isn't performed more than once.
-                    context.bTransition = false;
-
-                    // Make the next state current.
-                    self.CurrentState = context.NextState;  
-
-
-                } 
-            }      
-     
-        }  
+                // Make the next state current.
+                self.CurrentState = context.NextState;  
+            } 
+        }      
+    
 
     }
 

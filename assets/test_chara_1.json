@@ -10,10 +10,10 @@
                     "Duration": 1,
                     "Hitboxes": [
                         {
-                            "top": 0,
-                            "left": 0,
+                            "top": 100000,
+                            "left": -100000,
                             "bottom": 0,
-                            "right": 0
+                            "right": 100000
                         }
                     ]
                 }
@@ -21,9 +21,24 @@
             "AttackHitboxGroups": []
         },
         {
+            "Name": "WalkingForward",
             "Duration": 0,
-            "VulnerableHitboxGroups": [],
-            "AttackHitboxGroups": []
+            "VulnerableHitboxGroups": [
+            ],
+            "AttackHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 1,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

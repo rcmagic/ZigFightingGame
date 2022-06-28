@@ -109,10 +109,9 @@ pub const CollisionSystem = struct
         while (entity < gameState.entityCount) : (entity += 1)
         {
 
-            // Before building the scratch hitbox data, we clear it out each frame.                 
-            var dummy = [0]CharacterData.Hitbox{};   
-            self.AttackSlices[entity] = &dummy;
-            self.AttackSlices[entity] = &dummy;
+            // Before building the scratch hitbox data, we clear it out each frame.                   
+            self.AttackSlices[entity] = self.AttackHitboxScratch[0..0];
+            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
             
             const entityOffset = gameState.physicsComponents[entity].position;
 
@@ -144,7 +143,14 @@ pub const CollisionSystem = struct
                         self.AttackHitboxScratch[AttackScratchCount..]);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
-                        self.AttackSlices[entity] = self.AttackHitboxScratch[ AttackScratchCount .. atkCount ];
+                        if(atkCount > 0)
+                        {
+                            self.AttackSlices[entity] = self.AttackHitboxScratch[ AttackScratchCount .. atkCount ];
+                        }
+                        else
+                        {
+                             self.AttackSlices[entity] = self.AttackHitboxScratch[0 .. 0 ];
+                        }
 
                         AttackScratchCount += atkCount;
                     }

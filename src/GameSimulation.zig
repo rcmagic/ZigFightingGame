@@ -21,7 +21,6 @@ fn PhysicsSystem(gameState: *GameState) void
         // move position based on the current velocity.
         component.position = component.position.Add(component.velocity);
         component.velocity = component.velocity.Add(component.acceleration);
-
         entityIndex += 1;
     }
 }
@@ -32,7 +31,7 @@ fn ActionSystem(gameState: *GameState) void
     while (entityIndex < gameState.entityCount) {
         const component = &gameState.stateMachineComponents[entityIndex];
 
-        component.stateMachine.UpdateStateMachine();
+        component.stateMachine.UpdateStateMachine(&component.context);
 
         entityIndex += 1;
     }
