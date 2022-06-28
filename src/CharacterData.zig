@@ -125,7 +125,7 @@ pub fn LoadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProp
     const file = try std.fs.cwd().openFile(path, .{.read = true});    
     defer(file.close());
 
-    var buffer: [1024]u8 = undefined;
+    var buffer: [2048]u8 = undefined;
     const bytesRead = try file.readAll(&buffer);
     const message = buffer[0..bytesRead];
 
