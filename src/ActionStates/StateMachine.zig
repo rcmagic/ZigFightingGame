@@ -64,19 +64,22 @@ pub const CombatStateMachineProcessor = struct
             // Run the update function on the current action
             if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
 
-            // Updated the timeline              
+            // Advance the timeline              
             context.TimelineComponent.framesElapsed += 1; 
-            // Updated state timeline
+            
+            // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
             {
                 if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
                 {   
                     if(context.TimelineComponent.framesElapsed >= actionData.Duration)
                     {
+                        // Reset the timeline for actions that loop
                         if(actionData.IsLooping)
                         {
                             context.TimelineComponent.framesElapsed = 0;                        
                         }
+                        // Otherwise return to idle
                         else 
                         {
                             // TODO: Support going back to idle
