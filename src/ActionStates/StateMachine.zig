@@ -20,8 +20,8 @@ pub const CombatStateContext = struct
     bTransition: bool = false,                           // indicates that a state transition has been triggered
     NextState: CombatStateID = CombatStateID.Standing,    // indicates the next state to transition to.
     InputCommand: Input.InputCommand = .{},
-    PhysicsComponent: ?*Component.PhysicsComponent = null,
-    TimelineComponent: ?*Component.TimelineComponent = null,
+    PhysicsComponent: *Component.PhysicsComponent = undefined,
+    TimelineComponent: *Component.TimelineComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
 };
 
@@ -61,31 +61,30 @@ pub const CombatStateMachineProcessor = struct
     { 
         if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
         {
+            // Run the update function on the current action
             if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
 
-            // Updated the timeline
-            if(context.TimelineComponent) | timeline |
-            {                
-                timeline.framesElapsed += 1; 
-                 // Updated state timeline
-                if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
-                {
-                    if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
-                    {   
-                        if(timeline.framesElapsed >= actionData.Duration)
+            // Updated the timeline              
+            context.TimelineComponent.framesElapsed += 1; 
+            // Updated state timeline
+            if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
+            {
+                if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
+                {   
+                    if(context.TimelineComponent.framesElapsed >= actionData.Duration)
+                    {
+                        if(actionData.IsLooping)
                         {
-                            if(actionData.IsLooping)
-                            {
-                                timeline.framesElapsed = 0;                        
-                            }
-                            else 
-                            {
-                                // TODO: Support going back to idle
-                            }
+                            context.TimelineComponent.framesElapsed = 0;                        
+                        }
+                        else 
+                        {
+                            // TODO: Support going back to idle
                         }
                     }
-                }         
-            }  
+                }
+            }         
+
 
             // Perform a state transition when requested
             if(context.bTransition) 
@@ -111,10 +110,8 @@ pub const CombatStateMachineProcessor = struct
                 }
 
                 // Reset the timeline when a transition has occurred. 
-                if(context.TimelineComponent) | timeline |
-                {
-                    timeline.framesElapsed = 0;
-                }
+                context.TimelineComponent.framesElapsed = 0;
+
             } 
         }      
     

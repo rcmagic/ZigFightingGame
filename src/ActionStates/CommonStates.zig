@@ -15,10 +15,8 @@ pub const Standing = struct
         _ = context;
 
         //  Stop character movement on standing.
-        if(context.PhysicsComponent) | physicsComponent |
-        {
-            physicsComponent.velocity.x = 0;
-        }
+        context.PhysicsComponent.velocity.x = 0;
+
 
         if(context.InputCommand.Right)
         {
@@ -52,10 +50,7 @@ pub const WalkingForward = struct
         _ = context;
 
         //  Move the character right when the player presses right on the controller.
-        if(context.PhysicsComponent) | physicsComponent |
-        {
-            physicsComponent.velocity.x = 2000;
-        }
+        context.PhysicsComponent.velocity.x = 2000;        
 
         if(!context.InputCommand.Right)
         {
@@ -82,19 +77,16 @@ pub const Attack = struct
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
     {
-        _ = context;
 
-        if(context.TimelineComponent) | timeline |
+        if(context.ActionData) | actionData |
         {
-            if(context.ActionData) | actionData |
+            if(context.TimelineComponent.framesElapsed >= actionData.Duration)
             {
-                if(timeline.framesElapsed >= actionData.Duration)
-                {
-                    context.bTransition = true;
-                    context.NextState = StateMachine.CombatStateID.Standing;
-                }
+                context.bTransition = true;
+                context.NextState = StateMachine.CombatStateID.Standing;
             }
         }
+
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
