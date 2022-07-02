@@ -1,6 +1,7 @@
 const std = @import("std");
 const Component = @import("../Component.zig");
 const Input = @import("../Input.zig");
+const CharacterData = @import("../CharacterData.zig");
 // Identifies common character states.
 pub const CombatStateID = enum(u32) 
 {
@@ -9,6 +10,7 @@ pub const CombatStateID = enum(u32)
     WalkingForward,
     WalkingBackwards,
     Jump,
+    Attack,
     _
 };
 
@@ -18,7 +20,9 @@ pub const CombatStateContext = struct
     bTransition: bool = false,                           // indicates that a state transition has been triggered
     NextState: CombatStateID = CombatStateID.Standing,    // indicates the next state to transition to.
     InputCommand: Input.InputCommand = .{},
-    PhysicsComponent: ?*Component.PhysicsComponent = null
+    PhysicsComponent: ?*Component.PhysicsComponent = null,
+    TimelineComponent: ?*Component.TimelineComponent = null,
+    ActionData: ?*CharacterData.ActionProperties = null,
 };
 
 // Provides an interface for combat states to respond to various events
@@ -52,11 +56,36 @@ pub const CombatStateMachineProcessor = struct
     CurrentState: CombatStateID = CombatStateID.Standing,
 
 
-    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext) void
+    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: CharacterData.CharacterProperties,
+                                actionmap: std.StringHashMap(usize)) void
     { 
         if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
         {
             if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
+
+            // Updated the timeline
+            if(context.TimelineComponent) | timeline |
+            {                
+                timeline.framesElapsed += 1; 
+                 // Updated state timeline
+                if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
+                {
+                    if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
+                    {   
+                        if(timeline.framesElapsed >= actionData.Duration)
+                        {
+                            if(actionData.IsLooping)
+                            {
+                                timeline.framesElapsed = 0;                        
+                            }
+                            else 
+                            {
+                                // TODO: Support going back to idle
+                            }
+                        }
+                    }
+                }         
+            }  
 
             // Perform a state transition when requested
             if(context.bTransition) 
@@ -74,7 +103,18 @@ pub const CombatStateMachineProcessor = struct
                 context.bTransition = false;
 
                 // Make the next state current.
-                self.CurrentState = context.NextState;  
+                self.CurrentState = context.NextState;
+
+                if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
+                {
+                    context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.Name);
+                }
+
+                // Reset the timeline when a transition has occurred. 
+                if(context.TimelineComponent) | timeline |
+                {
+                    timeline.framesElapsed = 0;
+                }
             } 
         }      
     

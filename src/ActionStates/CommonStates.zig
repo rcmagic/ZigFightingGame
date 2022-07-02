@@ -25,6 +25,11 @@ pub const Standing = struct
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.WalkingForward;
         }
+        else  if(context.InputCommand.Attack)
+        {
+            context.bTransition = true;
+            context.NextState = StateMachine.CombatStateID.Attack;
+        }
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -65,6 +70,40 @@ pub const WalkingForward = struct
         std.debug.print("WalkingForward.OnEnd()\n", .{});
     }
 };
+
+
+pub const Attack = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("Attack.OnStart()\n", .{});
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+
+        if(context.TimelineComponent) | timeline |
+        {
+            if(context.ActionData) | actionData |
+            {
+                if(timeline.framesElapsed >= actionData.Duration)
+                {
+                    context.bTransition = true;
+                    context.NextState = StateMachine.CombatStateID.Standing;
+                }
+            }
+        }
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("WalkingForward.OnEnd()\n", .{});
+    }
+};
+
 
 const Crouching = struct 
 {

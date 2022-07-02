@@ -30,8 +30,11 @@ fn ActionSystem(gameState: *GameState) void
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
         const component = &gameState.stateMachineComponents[entityIndex];
-
-        component.stateMachine.UpdateStateMachine(&component.context);
+        
+        if( gameState.gameData) | gameData |
+        {
+            component.stateMachine.UpdateStateMachine(&component.context, gameData.Characters.items[entityIndex], gameData.ActionMaps.items[entityIndex]);
+        }
 
         entityIndex += 1;
     }

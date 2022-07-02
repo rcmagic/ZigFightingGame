@@ -5,6 +5,11 @@ pub const PhysicsComponent = struct {
     acceleration: math.IntVector2D = .{}
 };
 
+pub const TimelineComponent = struct {
+    framesElapsed: i32 = 0
+};
+
+
 
 pub const HitEvent = struct
 {

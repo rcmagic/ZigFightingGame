@@ -25,17 +25,20 @@ fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
     return !IsNotOverlapping;                      
 }
 
-fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, hitboxes: []CharacterData.Hitbox) usize
+fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
 {
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
     {                
-        for(hitboxGroup.Hitboxes.items) | hitbox |
+        if(hitboxGroup.IsActiveOnFrame(framesElapsed))
         {
-            const translateBox = TranslateHitbox(hitbox, offset);                            
+            for(hitboxGroup.Hitboxes.items) | hitbox |
+            {
+                const translateBox = TranslateHitbox(hitbox, offset);                            
 
-            hitboxes[count] = translateBox;
-            count += 1;
+                hitboxes[count] = translateBox;
+                count += 1;
+            }
         }
     }
 
@@ -90,7 +93,7 @@ pub const CollisionSystem = struct
                         {
                             // Generate Hit event.
 
-                            std.debug.print("Hitboxes overlap!!", .{});
+                            std.debug.print("Hitboxes overlap!!\n", .{});
                         }
                     }
                 }
@@ -116,6 +119,7 @@ pub const CollisionSystem = struct
             const entityOffset = gameState.physicsComponents[entity].position;
 
             const component = &gameState.stateMachineComponents[entity];
+            const timeline = &gameState.timelineComponents[entity];
             
             const CurrentState = component.stateMachine.CurrentState;
 
@@ -140,7 +144,7 @@ pub const CollisionSystem = struct
                     {
                         // Here we insert the translated hitboxes for the action into AttackHitboxScratch
                         const atkCount = GetTranslatedActiveHitboxes(actionData.AttackHitboxGroups.items, entityOffset, 
-                        self.AttackHitboxScratch[AttackScratchCount..]);
+                                            self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
                         if(atkCount > 0)
@@ -159,10 +163,18 @@ pub const CollisionSystem = struct
                     {
                         // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
                         const vulCount = GetTranslatedActiveHitboxes(actionData.VulnerableHitboxGroups.items, entityOffset, 
-                        self.VulnerableHitboxScratch[VulnerableScratchCount..]);
+                                 self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
 
-                        // Store the slice for this entity that points to a range on the hitbox scratch array
-                        self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[ VulnerableScratchCount .. vulCount ];
+
+                        if(vulCount > 0)
+                        {
+                            // Store the slice for this entity that points to a range on the hitbox scratch array
+                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[ VulnerableScratchCount .. vulCount ];
+                        }
+                        else
+                        {
+                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0 .. 0];
+                        }
 
                         VulnerableScratchCount += vulCount;
                     }
@@ -198,7 +210,7 @@ test "Testing getting translated hitboxes"
     
     var hitboxScratch: [10]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 10;
 
-    const count = GetTranslatedActiveHitboxes(HitboxGroupList.items, math.IntVector2D{}, hitboxScratch[0..]);
+    const count = GetTranslatedActiveHitboxes(HitboxGroupList.items, math.IntVector2D{}, hitboxScratch[0..], 0);
 
     try std.testing.expect(count == 2);
 }

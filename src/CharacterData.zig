@@ -45,6 +45,7 @@ pub const HitboxGroup = struct
 pub const ActionProperties = struct
 {
     Duration: i32 = 0,
+    IsLooping: bool = false,
     VulnerableHitboxGroups: std.ArrayList(HitboxGroup),
     AttackHitboxGroups: std.ArrayList(HitboxGroup),
 
@@ -166,6 +167,10 @@ fn ParseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
         .Int =>
         {
             return @intCast(T, tree.Integer);
+        },
+        .Bool =>
+        {
+            return tree.Bool;
         },
         // Currenly only support slices
         .Pointer => |ptrInfo|

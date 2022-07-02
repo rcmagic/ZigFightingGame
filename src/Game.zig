@@ -59,6 +59,11 @@ pub fn GameLoop() !void
                 {
                     gameState.inputComponents[0].inputCommand.Right = true;
                 }
+
+                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+                {
+                    gameState.inputComponents[0].inputCommand.Attack = true;
+                }
             }
 
             

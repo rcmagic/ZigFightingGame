@@ -16,7 +16,7 @@ pub const GameData = struct {
 const StateMachineComponent = struct 
 { 
     context: StateMachine.CombatStateContext = .{},
-    stateMachine: StateMachine.CombatStateMachineProcessor = .{}
+    stateMachine: StateMachine.CombatStateMachineProcessor = .{}    
 };
 
 const InputComponent = struct 
@@ -54,6 +54,7 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 // specific data is stored.
 var StandingCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Standing",  .OnUpdate = CommonStates.Standing.OnUpdate, .OnStart = CommonStates.Standing.OnStart, .OnEnd = CommonStates.Standing.OnEnd };
 var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .Name = "WalkingForward", .OnUpdate = CommonStates.WalkingForward.OnUpdate, .OnStart = CommonStates.WalkingForward.OnStart, .OnEnd = CommonStates.WalkingForward.OnEnd };
+var AttackCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart };
 
 
 
@@ -62,7 +63,7 @@ pub const GameState = struct {
     entityCount: usize = 2,
     physicsComponents: [10]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** 10,
     stateMachineComponents: [10]StateMachineComponent = [_]StateMachineComponent{.{}} ** 10,
-
+    timelineComponents: [10]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** 10,
     inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
 
     // Systems
@@ -87,13 +88,17 @@ pub const GameState = struct {
          
         // testing initializing a single entity
         self.stateMachineComponents[0].context.PhysicsComponent = &self.physicsComponents[0];
+        self.stateMachineComponents[0].context.TimelineComponent = &self.timelineComponents[0];
         self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
         self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
+        self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
 
 
         // testing initializing a second entity
         self.stateMachineComponents[1].context.PhysicsComponent = &self.physicsComponents[1];
+        self.stateMachineComponents[1].context.TimelineComponent = &self.timelineComponents[1];
         self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
         self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
+        self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
     }
 };

@@ -3,11 +3,12 @@
     "Actions": [
         {
             "Name": "Standing",
-            "Duration": 0,
+            "Duration": 10,
+            "IsLooping": true,
             "VulnerableHitboxGroups": [
                 {
                     "StartFrame": 0,
-                    "Duration": 1,
+                    "Duration": 100,
                     "Hitboxes": [
                         {
                             "top": 100000,
@@ -26,9 +27,17 @@
             "VulnerableHitboxGroups": [
             ],
             "AttackHitboxGroups": [
+            ]
+        },
+        {
+            "Name": "Attack",
+            "Duration": 20,
+            "VulnerableHitboxGroups": [
+            ],
+            "AttackHitboxGroups": [
                 {
-                    "StartFrame": 0,
-                    "Duration": 1,
+                    "StartFrame": 8,
+                    "Duration": 4,
                     "Hitboxes": [
                         {
                             "top": 100000,
