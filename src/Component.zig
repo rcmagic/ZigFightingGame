@@ -9,17 +9,7 @@ pub const TimelineComponent = struct {
     framesElapsed: i32 = 0
 };
 
-
-
-pub const HitEvent = struct
-{
-    attacker: usize,
-    defender: usize
-};
-
-const MAX_HIT_EVENTS_PER_ENTITY = 10;
-pub const HitEventComponent = struct
-{
-    events: [MAX_HIT_EVENTS_PER_ENTITY] HitEvent = [MAX_HIT_EVENTS_PER_ENTITY]**.{.attacker = 0, .defender = 0 },
-    eventCount: usize = 0
+pub const ReactionComponent = struct {
+    hitStun: i32 = 0,
+    attackHasHit: bool = false
 };

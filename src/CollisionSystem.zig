@@ -5,6 +5,7 @@ const Component = @import("Component.zig");
 const GameState = @import("GameState.zig").GameState;
 
 
+
 // Create a new hitbox translated by the offset provided.
 fn TranslateHitbox(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
 {
@@ -68,14 +69,26 @@ pub const CollisionSystem = struct
         return CollisionSystem{};
     }
 
-    pub fn CollisionPhase(self: *CollisionSystem, gameState: *GameState) void
+    pub fn CollisionPhase(self: *CollisionSystem, gameState: *GameState) !void
     {
+
+        // Clear all hit events
+        gameState.hitEvents.shrinkRetainingCapacity(0);
+
         const activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
         const activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
 
         // Loop through all the active attacking entities's vulnerable boxes.
         for( activeAttackSlices ) | OneEntityAttackBoxes, attackerIndex |
         {                        
+
+            
+            // Don't let an action hit more than once
+            if(gameState.reactionComponents[attackerIndex].attackHasHit)
+            {
+                continue;
+            }
+
             for(OneEntityAttackBoxes) | attackBox |
             {                 
                 // Loop through all the active defending entities's vulnerable boxes.
@@ -87,13 +100,17 @@ pub const CollisionSystem = struct
                         continue;
                     }
                     
+                    
                     for(OneEntityVulnerableBoxes) | vulnerableBox |
                     {
                         if(DoHitboxesOverlap(attackBox, vulnerableBox))
                         {
-                            // Generate Hit event.
+                            // Make sure the attack won't hit more than once.
+                            gameState.reactionComponents[attackerIndex].attackHasHit = true;
 
+                            // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
+                            try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 25 });
                         }
                     }
                 }
@@ -182,7 +199,7 @@ pub const CollisionSystem = struct
             }
         }
 
-        self.CollisionPhase(gameState);
+        try self.CollisionPhase(gameState);
     }
 };
 

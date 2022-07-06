@@ -92,7 +92,7 @@ pub const Attack = struct
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
     {
         _ = context;
-        std.debug.print("WalkingForward.OnEnd()\n", .{});
+        std.debug.print("Attack.OnEnd()\n", .{});
     }
 };
 
@@ -115,5 +115,34 @@ const Crouching = struct
     {
         _ = context;
         std.debug.print("Crouching.OnEnd()\n", .{});
+    }
+};
+
+
+pub const Reaction = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("Reaction.OnStart()\n", .{});
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        // if(context.ActionData) | actionData |
+        // {
+        //     //if(context.ReactionComponent.hitStun <= 0)
+        //     {
+        //         context.bTransition = true;
+        //         context.NextState = StateMachine.CombatStateID.Standing;
+        //     }
+        // }
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("Reaction.OnEnd()\n", .{});
     }
 };

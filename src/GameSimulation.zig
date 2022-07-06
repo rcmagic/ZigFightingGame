@@ -6,6 +6,7 @@ const CommonStates = @import("ActionStates/CommonStates.zig");
 const Input = @import("Input.zig");
 const CharacterData = @import("CharacterData.zig");
 const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
+const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
 const GameState = @import("GameState.zig").GameState;
 
 
@@ -106,10 +107,11 @@ test "Test adding an action with hitboxes to a character"
 
 
 
-pub fn UpdateGame(gameState: *GameState) void {
+pub fn UpdateGame(gameState: *GameState) !void {
     InputCommandSystem(gameState);
     ActionSystem(gameState);
     PhysicsSystem(gameState);
     try gameState.collisionSystem.Execute(gameState);
+    try gameState.reactionSystem.Execute(gameState);
     gameState.frameCount += 1;
 }

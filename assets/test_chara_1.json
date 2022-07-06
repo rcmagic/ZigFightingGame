@@ -37,7 +37,7 @@
             "AttackHitboxGroups": [
                 {
                     "StartFrame": 8,
-                    "Duration": 4,
+                    "Duration": 2,
                     "Hitboxes": [
                         {
                             "top": 100000,
@@ -47,6 +47,14 @@
                         }
                     ]
                 }
+            ]
+        },
+        {
+            "Name": "Reaction",
+            "Duration": 100,
+            "VulnerableHitboxGroups": [
+            ],
+            "AttackHitboxGroups": [
             ]
         }
     ]

@@ -69,7 +69,7 @@ pub fn GameLoop() !void
             
         // Game Simulation
         {
-            GameSimulation.UpdateGame(&gameState);
+            try GameSimulation.UpdateGame(&gameState);
         }
         
         // Draw

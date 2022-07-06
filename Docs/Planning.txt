@@ -120,9 +120,23 @@
 - Trigger an attack action with a button press  [x]
 - Implemented a timeline component for dealing with action state active times [x]
 
-2022/7/*
+2022/7/6
+- Implement a hit reaction state. [x]
+- Hit stun support [x]
+- Return to idle when hit stun is over. [x]
+- Create reaction transition [x]
+- Add reaction action data to the character data file [x]
+- Create the reaction system [x]
+- Create Hit events [x]
+- Clear out hit events each frame [x]
+- Create a reaction component [x]
+- Make sure hit events are only generated for the frame they first occurred. [x]
 
-- Implement an action timer and transition to idle when the timer is up
+2022/7/*
+- Hit stop support for reacting player.
+- Hit stop support for attacking player.
+- Action timeline doesn't determined returning to idle, hit stun will.
+- Support returning to idle when the timer exceeds the action time on non-looping actions
 - Create a reaction state and trigger it on hit
 - Create a hit stun timer, when it runs out return to idle
 - Support debug pause / frame step

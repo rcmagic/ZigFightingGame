@@ -11,6 +11,7 @@ pub const CombatStateID = enum(u32)
     WalkingBackwards,
     Jump,
     Attack,
+    Reaction,
     _
 };
 
@@ -22,6 +23,7 @@ pub const CombatStateContext = struct
     InputCommand: Input.InputCommand = .{},
     PhysicsComponent: *Component.PhysicsComponent = undefined,
     TimelineComponent: *Component.TimelineComponent = undefined,
+    ReactionComponent: *Component.ReactionComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
 };
 
@@ -48,6 +50,43 @@ pub const CombatStateRegistery = struct
         self.CombatStates[@enumToInt(StateID)] = StateCallbacks;        
     }
 };
+
+pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: CharacterData.CharacterProperties,
+                                actionmap: std.StringHashMap(usize)) void
+{
+    if(stateMachine.Registery.CombatStates[@enumToInt(stateMachine.CurrentState)]) | State |
+    {
+        // Perform a state transition when requested
+        if(context.bTransition) 
+        {
+            // Call the OnEnd function of the previous state to do any cleanup required.
+            if(State.OnEnd) | OnEnd | { OnEnd(context); }
+
+            // Call the OnStart function on the next state to do any setup required
+            if(stateMachine.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
+            {
+                if(NextState.OnStart) | OnStart | { OnStart(context); }                              
+            }
+
+            // Make sure the transition isn't performed more than once.
+            context.bTransition = false;
+
+            // Make the next state current.
+            stateMachine.CurrentState = context.NextState;
+
+            if(stateMachine.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
+            {
+                context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.Name);
+            }
+
+            // Reset the timeline when a transition has occurred. 
+            context.TimelineComponent.framesElapsed = 0;
+
+            // Make it possible for the new action to hit an opponent
+            context.ReactionComponent.attackHasHit = false;
+        } 
+    }
+}
 
 // Runs and keeps track of a state machine
 pub const CombatStateMachineProcessor = struct
@@ -88,37 +127,9 @@ pub const CombatStateMachineProcessor = struct
                 }
             }         
 
-
             // Perform a state transition when requested
-            if(context.bTransition) 
-            {
-                // Call the OnEnd function of the previous state to do any cleanup required.
-                if(State.OnEnd) | OnEnd | { OnEnd(context); }
-
-                // Call the OnStart function on the next state to do any setup required
-                if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
-                {
-                    if(NextState.OnStart) | OnStart | { OnStart(context); }                              
-                }
-
-                // Make sure the transition isn't performed more than once.
-                context.bTransition = false;
-
-                // Make the next state current.
-                self.CurrentState = context.NextState;
-
-                if(self.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
-                {
-                    context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.Name);
-                }
-
-                // Reset the timeline when a transition has occurred. 
-                context.TimelineComponent.framesElapsed = 0;
-
-            } 
-        }      
-    
-
+            HandleTransition(self, context, characterData, actionmap);                              
+        }
     }
 
 };
