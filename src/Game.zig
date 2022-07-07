@@ -30,46 +30,69 @@ pub fn GameLoop() !void
     gameState.physicsComponents[0].position = .{.x = 200000, .y = 200000 };
     gameState.physicsComponents[1].position = .{.x = 600000, .y = 200000 };
 
+    var bPauseGame = false;   
+
+    var GameFrameCount : i32 = 0;
+
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
 
 
-            // Reset input to not held down before polling
-            gameState.inputComponents[0].inputCommand.Reset();
+        // Advance the game by one frame.
+        var bAdvanceOnce = false;
 
-            if(rl.IsWindowFocused() and rl.IsGamepadAvailable(0))
+        // Reset input to not held down before polling
+        gameState.inputComponents[0].inputCommand.Reset();
+
+        if(rl.IsWindowFocused())
+        {
+            if(rl.IsKeyPressed(rl.KeyboardKey.KEY_F3))
             {
-                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
-                {
-                    gameState.inputComponents[0].inputCommand.Up = true;
-                }
-
-                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
-                {
-                    gameState.inputComponents[0].inputCommand.Down = true;
-                }
-
-                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
-                {
-
-                    gameState.inputComponents[0].inputCommand.Left = true;
-                }
-
-                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
-                {
-                    gameState.inputComponents[0].inputCommand.Right = true;
-                }
-
-                if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
-                {
-                    gameState.inputComponents[0].inputCommand.Attack = true;
-                }
+                bPauseGame = !bPauseGame;
             }
+            else if(rl.IsKeyPressed(rl.KeyboardKey.KEY_F2))
+            {
+                bAdvanceOnce = true;
+            }
+        }
+
+        if(rl.IsWindowFocused() and rl.IsGamepadAvailable(0))
+        {
+            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
+            {
+                gameState.inputComponents[0].inputCommand.Up = true;
+            }
+
+            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
+            {
+                gameState.inputComponents[0].inputCommand.Down = true;
+            }
+
+            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
+            {
+
+                gameState.inputComponents[0].inputCommand.Left = true;
+            }
+
+            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
+            {
+                gameState.inputComponents[0].inputCommand.Right = true;
+            }
+
+            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+            {
+                gameState.inputComponents[0].inputCommand.Attack = true;
+            }
+        }
 
             
         // Game Simulation
+        if(!bPauseGame or bAdvanceOnce)
         {
             try GameSimulation.UpdateGame(&gameState);
+
+            // Count the number of game frames that have been simulated. 
+            GameFrameCount += 1;
         }
         
         // Draw
@@ -91,6 +114,14 @@ pub fn GameLoop() !void
         //     const hitbox = gameData.HitboxGroup.Hitboxes.items[0]; 
         //    rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);    
         // }
+
+        // Debug information
+        rl.DrawText(rl.FormatText("Game Frame: %d", GameFrameCount), 10, 10, 16, rl.DARKGRAY);
+
+        if(bPauseGame)
+        {
+            rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
+        }
 
         rl.EndDrawing();
         //----------------------------------------------------------------------------------
