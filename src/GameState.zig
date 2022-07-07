@@ -58,6 +58,16 @@ var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Walkin
 var AttackCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
 var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Reaction",  .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
 
+// Register states for our character
+fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
+{
+    registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
+    registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
+    registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
+    registery.RegisterCommonState(StateMachine.CombatStateID.Reaction, &ReactionCallbacks);
+}
+
+
 
 pub const HitEvent = struct {
     attackerID: usize,
@@ -65,9 +75,11 @@ pub const HitEvent = struct {
     hitStun: i32
 };
 
+
+
 pub const GameState = struct {
     frameCount: i32 = 0,
-    entityCount: usize = 2,
+    entityCount: usize = 0,
     physicsComponents: [10]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** 10,
     stateMachineComponents: [10]StateMachineComponent = [_]StateMachineComponent{.{}} ** 10,
     timelineComponents: [10]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** 10,
@@ -84,6 +96,22 @@ pub const GameState = struct {
 
     allocator: std.mem.Allocator,
     gameData: ?GameData = null,
+
+
+
+    // Boilerplate for setting up the components and state machine for one character.
+    fn CreateAndInitOneCharacter(self: *GameState) void
+    {
+        // Setup referenced components used by the action state machine for a character.
+        self.stateMachineComponents[self.entityCount].context.PhysicsComponent = &self.physicsComponents[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.TimelineComponent = &self.timelineComponents[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.ReactionComponent = &self.reactionComponents[self.entityCount];
+
+        // Register states
+        RegisterActionStates(&self.stateMachineComponents[self.entityCount].stateMachine.Registery);
+
+        self.entityCount += 1;
+    }
 
     pub fn init(self: *GameState, allocator: std.mem.Allocator) !void 
     {
@@ -104,24 +132,8 @@ pub const GameState = struct {
             .hitEvents = try std.ArrayList(HitEvent).initCapacity(allocator, 10)
         };
 
-
-        // testing initializing a single entity
-        self.stateMachineComponents[0].context.PhysicsComponent = &self.physicsComponents[0];
-        self.stateMachineComponents[0].context.TimelineComponent = &self.timelineComponents[0];
-        self.stateMachineComponents[0].context.ReactionComponent = &self.reactionComponents[0];
-        self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
-        self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
-        self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
-        self.stateMachineComponents[0].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Reaction, &ReactionCallbacks);
-
-
-        // testing initializing a second entity
-        self.stateMachineComponents[1].context.PhysicsComponent = &self.physicsComponents[1];
-        self.stateMachineComponents[1].context.TimelineComponent = &self.timelineComponents[1];
-        self.stateMachineComponents[1].context.ReactionComponent = &self.reactionComponents[1];
-        self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
-        self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
-        self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
-        self.stateMachineComponents[1].stateMachine.Registery.RegisterCommonState(StateMachine.CombatStateID.Reaction, &ReactionCallbacks);
+        // For now we are only creating two characters to work with.
+        self.CreateAndInitOneCharacter();
+        self.CreateAndInitOneCharacter();
     }
 };
