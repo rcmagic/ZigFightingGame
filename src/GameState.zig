@@ -55,6 +55,8 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 // specific data is stored.
 var StandingCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Standing",  .OnUpdate = CommonStates.Standing.OnUpdate, .OnStart = CommonStates.Standing.OnStart, .OnEnd = CommonStates.Standing.OnEnd };
 var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .Name = "WalkingForward", .OnUpdate = CommonStates.WalkingForward.OnUpdate, .OnStart = CommonStates.WalkingForward.OnStart, .OnEnd = CommonStates.WalkingForward.OnEnd };
+var WalkingBackwardCallbacks = StateMachine.CombatStateCallbacks{ .Name = "WalkingBackward", .OnUpdate = CommonStates.WalkingBackward.OnUpdate, .OnStart = CommonStates.WalkingBackward.OnStart, .OnEnd = CommonStates.WalkingBackward.OnEnd };
+var JumpCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Jump", .OnUpdate = CommonStates.Jump.OnUpdate, .OnStart = CommonStates.Jump.OnStart, .OnEnd = CommonStates.Jump.OnEnd };
 var AttackCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
 var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .Name = "Reaction",  .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
 
@@ -63,6 +65,8 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
 {
     registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
     registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
+    registery.RegisterCommonState(StateMachine.CombatStateID.WalkingBackward, &WalkingBackwardCallbacks);
+    registery.RegisterCommonState(StateMachine.CombatStateID.Jump, &JumpCallbacks);
     registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
     registery.RegisterCommonState(StateMachine.CombatStateID.Reaction, &ReactionCallbacks);
 }
@@ -72,7 +76,8 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
 pub const HitEvent = struct {
     attackerID: usize,
     defenderID: usize,
-    hitStun: i32
+    hitStun: i32,
+    hitStop: i32
 };
 
 

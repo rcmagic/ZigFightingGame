@@ -30,6 +30,22 @@
             ]
         },
         {
+            "Name": "WalkingBackward",
+            "Duration": 0,
+            "VulnerableHitboxGroups": [
+            ],
+            "AttackHitboxGroups": [
+            ]
+        },
+        {
+            "Name": "Jump",
+            "Duration": 0,
+            "VulnerableHitboxGroups": [
+            ],
+            "AttackHitboxGroups": [
+            ]
+        },
+        {
             "Name": "Attack",
             "Duration": 20,
             "VulnerableHitboxGroups": [

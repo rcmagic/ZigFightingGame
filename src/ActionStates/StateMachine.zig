@@ -8,7 +8,7 @@ pub const CombatStateID = enum(u32)
     Standing,
     Crouching,
     WalkingForward,
-    WalkingBackwards,
+    WalkingBackward,
     Jump,
     Attack,
     Reaction,

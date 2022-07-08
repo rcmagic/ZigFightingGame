@@ -17,11 +17,14 @@ fn PhysicsSystem(gameState: *GameState) void
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) 
     {
-        const component = &gameState.physicsComponents[entityIndex];
-
-        // move position based on the current velocity.
-        component.position = component.position.Add(component.velocity);
-        component.velocity = component.velocity.Add(component.acceleration);
+        // Only update physics when there is no hitstop
+        if(gameState.reactionComponents[entityIndex].hitStop <= 0)
+        {
+            const component = &gameState.physicsComponents[entityIndex];
+            // move position based on the current velocity.
+            component.position = component.position.Add(component.velocity);
+            component.velocity = component.velocity.Add(component.acceleration);
+        }
         entityIndex += 1;
     }
 }

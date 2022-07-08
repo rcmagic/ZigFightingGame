@@ -132,14 +132,25 @@
 - Create a reaction component [x]
 - Make sure hit events are only generated for the frame they first occurred. [x]
 
+2022/7/7
+- Support debug pause / frame step [x]
+- Backup State [x]
+- Jump State [x]
+- Jump Physics [x]
+- Colliding with ground triggers return to idle [x]
+- Hit stop support for reacting player. [x]
+- Hit stop support for attacking player. [x]
+- Stop physics update during hitstop [x]
+- Stop timeline updates during hitstop
+
+
 2022/7/*
-- Hit stop support for reacting player.
-- Hit stop support for attacking player.
+- Knockback Physics
+- Knockdowns
+- Launch reaction
+- Launch Physics
 - Action timeline doesn't determined returning to idle, hit stun will.
 - Support returning to idle when the timer exceeds the action time on non-looping actions
-- Create a reaction state and trigger it on hit
-- Create a hit stun timer, when it runs out return to idle
-- Support debug pause / frame step
 - Making the asset loading code use streaming reads instead of loading into a fixed sized buffer.
 - Implement the input buffer.
 - Implement first non-button holding input commands (positive edge button presses).
@@ -149,10 +160,10 @@
 - Save/Load attack data from/to individual files
 - In game hitbox editing.
 - Movement states and transitions (Walk, Jump, Run, Air Dash, etc)
-- Reaction system
-- Hit Stun / Block Stun / Hit Stop / Hit Shake
+- Block reaction
+- Block stun
 - Hit trades
-- Knockback/Launch physics
+
 - Knockdown state transitions
 - Clashing?
 

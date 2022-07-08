@@ -17,7 +17,11 @@ pub const ReactionSystem = struct
 
         for(gameState.reactionComponents) | *component, entityIndex |
         {
-            if(component.hitStun > 0)
+            if(component.hitStop > 0)
+            {
+                component.hitStop -= 1;
+            }
+            else if(component.hitStun > 0)
             {
                 component.hitStun -= 1;
 
@@ -36,8 +40,11 @@ pub const ReactionSystem = struct
             var defenderState = &gameState.stateMachineComponents[hitEvent.defenderID];
             defenderState.context.bTransition = true;
             defenderState.context.NextState = StateMachine.CombatStateID.Reaction;
-            
+                        
             gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
+            gameState.reactionComponents[hitEvent.defenderID].hitStop = hitEvent.hitStop;
+
+            gameState.reactionComponents[hitEvent.attackerID].hitStop = hitEvent.hitStop;
         }
 
     }

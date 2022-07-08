@@ -6,8 +6,9 @@ const GameState = @import("GameState.zig").GameState;
 
 fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
 {
+    const GroundOffset = 390;
     const ScreenX = math.WorldToScreen(position.x);
-    const ScreenY = math.WorldToScreen(position.y);
+    const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
 
     // Reflect the position of our game object on screen.
     rl.DrawCircle(ScreenX, ScreenY, 50, color);
@@ -27,8 +28,8 @@ pub fn GameLoop() !void
     try gameState.init(ArenaAllocator.allocator());
     
     // Initialize our game objects
-    gameState.physicsComponents[0].position = .{.x = 200000, .y = 200000 };
-    gameState.physicsComponents[1].position = .{.x = 600000, .y = 200000 };
+    gameState.physicsComponents[0].position = .{.x = 200000, .y = 0 };
+    gameState.physicsComponents[1].position = .{.x = 600000, .y = 0 };
 
     var bPauseGame = false;   
 
@@ -106,8 +107,12 @@ pub fn GameLoop() !void
         // // Reflect the position of our game object on screen.
         // rl.DrawCircle(ScreenX, ScreenY, 50, rl.MAROON);
 
+        
+        var hitShake  =  math.IntVector2D{.x =  -2000 + 4000*@mod(gameState.reactionComponents[0].hitStop,2), .y = 0};
+
+
         DrawCharacter(gameState.physicsComponents[0].position, rl.MAROON);
-        DrawCharacter(gameState.physicsComponents[1].position, rl.BLUE);
+        DrawCharacter( gameState.physicsComponents[1].position.Add(hitShake), rl.BLUE);
 
         // if(gameState.gameData) | gameData |
         // {
