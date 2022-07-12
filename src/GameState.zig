@@ -77,7 +77,8 @@ pub const HitEvent = struct {
     attackerID: usize,
     defenderID: usize,
     hitStun: i32,
-    hitStop: i32
+    hitStop: i32,
+    knockBack: i32,
 };
 
 

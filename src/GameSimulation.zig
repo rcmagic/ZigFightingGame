@@ -12,18 +12,41 @@ const GameState = @import("GameState.zig").GameState;
 
 
 // Handles moving all entities which have a physics component
-fn PhysicsSystem(gameState: *GameState) void 
+fn PhysicsSystem(gameState: *GameState) !void 
 {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) 
     {
+        const reactionComponent = &gameState.reactionComponents[entityIndex];
         // Only update physics when there is no hitstop
-        if(gameState.reactionComponents[entityIndex].hitStop <= 0)
+        if(reactionComponent.hitStop <= 0)
         {
-            const component = &gameState.physicsComponents[entityIndex];
+            var component = &gameState.physicsComponents[entityIndex];
+
+
+
             // move position based on the current velocity.
             component.position = component.position.Add(component.velocity);
             component.velocity = component.velocity.Add(component.acceleration);
+
+            // Apply knockback
+            if(reactionComponent.hitStun > 0 and reactionComponent.knockBack != 0)
+            {            
+                component.position.x += reactionComponent.knockBack;
+
+                // Handle reducing knockback overtime
+                const knockBackDeceleration : i32 = 1000;
+                const knockbackThreshold : i32 = 1100;
+                reactionComponent.knockBack -= knockBackDeceleration;
+
+                if(std.math.absCast(reactionComponent.knockBack) < knockbackThreshold)
+                {
+                    reactionComponent.knockBack = 0;
+                }
+            }
+
+
+
         }
         entityIndex += 1;
     }
@@ -113,7 +136,7 @@ test "Test adding an action with hitboxes to a character"
 pub fn UpdateGame(gameState: *GameState) !void {
     InputCommandSystem(gameState);
     ActionSystem(gameState);
-    PhysicsSystem(gameState);
+    try PhysicsSystem(gameState);
     try gameState.collisionSystem.Execute(gameState);
     try gameState.reactionSystem.Execute(gameState);
     gameState.frameCount += 1;

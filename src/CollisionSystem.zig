@@ -110,7 +110,7 @@ pub const CollisionSystem = struct
 
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
-                            try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 25, .hitStop = 10 });
+                            try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 25, .hitStop = 10, .knockBack = 10000 });
                         }
                     }
                 }

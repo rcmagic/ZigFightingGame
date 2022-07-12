@@ -143,9 +143,17 @@
 - Stop physics update during hitstop [x]
 - Stop timeline updates during hitstop
 
+2022/7/12
+- Knockback Physics
+
+2022/7/14
+- Implement flipping characters to face their opponent
+- Support flipped physics
+- Support flipped knockback physics
 
 2022/7/*
-- Knockback Physics
+- Apply knockback based on the current facing direction.
+- Implement hit properties in character data
 - Knockdowns
 - Launch reaction
 - Launch Physics
@@ -163,9 +171,7 @@
 - Block reaction
 - Block stun
 - Hit trades
-
-- Knockdown state transitions
-- Clashing?
+- Clean up the hit shake prototype code. Make it work for any character
 
 2022/8/*
 - Training Mode / Debug tools

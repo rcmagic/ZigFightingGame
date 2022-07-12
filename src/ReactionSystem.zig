@@ -43,8 +43,11 @@ pub const ReactionSystem = struct
                         
             gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
             gameState.reactionComponents[hitEvent.defenderID].hitStop = hitEvent.hitStop;
+            gameState.reactionComponents[hitEvent.defenderID].knockBack = hitEvent.knockBack;
 
             gameState.reactionComponents[hitEvent.attackerID].hitStop = hitEvent.hitStop;
+
+
         }
 
     }
