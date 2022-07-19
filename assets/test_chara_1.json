@@ -1,4 +1,18 @@
 {
+    "ImageSequences":
+    [
+        {
+            "Name": "stand",
+            "Images": 
+            [
+                {
+                    "Source": "assets/animation/test_chara_1/color1/idle_00.png",
+                    "x": -32,
+                    "y": -152
+                }
+            ]
+        }
+    ],
     "MaxHealth": 10000,
     "Actions": [
         {

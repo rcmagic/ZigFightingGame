@@ -8,9 +8,19 @@ const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
 
 pub const GameData = struct {
-    Characters: std.ArrayList(CharacterData.CharacterProperties), 
-    ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
+    Characters: std.ArrayList(CharacterData.CharacterProperties),     
+ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
+    ImageSequences: std.ArrayList(std.ArrayList(CharacterData.SequenceTexRef)),
+    ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
 
+    pub fn FindSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*CharacterData.SequenceTexRef
+    {
+        if(self.ImageSequenceMap.items[characterIndex].get(SequenceName)) | index |
+        {
+            return &self.ImageSequences.items[characterIndex].items[index];            
+        }
+        return null;
+    }
 };
 
 
@@ -29,7 +39,9 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 {
     var gameData = GameData { 
         .Characters = std.ArrayList(CharacterData.CharacterProperties).init(allocator),
-        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator)
+        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
+        .ImageSequences = std.ArrayList(std.ArrayList(CharacterData.SequenceTexRef)).init(allocator),
+        .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator)        
     };
 
     var data1 = try CharacterData.LoadAsset("assets/test_chara_1.json", allocator);
@@ -38,13 +50,23 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
     if(data1) | loadedData |
     {
         try gameData.Characters.append(loadedData);
+        try gameData.ImageSequences.append(try CharacterData.LoadSequenceImages(loadedData, allocator));
+
         try gameData.ActionMaps.append(try CharacterData.GenerateActionNameMap(loadedData, allocator));
+        // Create a hash map that lets us reference textures with a sequence name and index
+        try gameData.ImageSequenceMap.append(try CharacterData.GenerateImageSequenceMap(loadedData, allocator));
+        
     }
 
     if(data2) | loadedData |
     {
         try gameData.Characters.append(loadedData);
+        try gameData.ImageSequences.append(try CharacterData.LoadSequenceImages(loadedData, allocator));
+
         try gameData.ActionMaps.append(try CharacterData.GenerateActionNameMap(loadedData, allocator));
+        // Create a hash map that lets us reference textures with a sequence name and index
+        try gameData.ImageSequenceMap.append(try CharacterData.GenerateImageSequenceMap(loadedData, allocator));
+        
     }
 
     return gameData;
@@ -102,7 +124,6 @@ pub const GameState = struct {
 
     allocator: std.mem.Allocator,
     gameData: ?GameData = null,
-
 
 
     // Boilerplate for setting up the components and state machine for one character.

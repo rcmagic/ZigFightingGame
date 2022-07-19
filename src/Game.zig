@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
 const GameState = @import("GameState.zig").GameState;
+const CharacterData = @import("CharacterData.zig");
 
 fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
 {
@@ -13,6 +14,11 @@ fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
     // Reflect the position of our game object on screen.
     rl.DrawCircle(ScreenX, ScreenY, 50, color);
 }
+
+
+
+
+
 
 pub fn GameLoop() !void
 {
@@ -28,12 +34,27 @@ pub fn GameLoop() !void
     try gameState.init(ArenaAllocator.allocator());
     
     // Initialize our game objects
-    gameState.physicsComponents[0].position = .{.x = 200000, .y = 0 };
-    gameState.physicsComponents[1].position = .{.x = 600000, .y = 0 };
+    gameState.physicsComponents[0].position = .{.x = 0, .y = 0 };
+    gameState.physicsComponents[1].position = .{.x = 200000, .y = 0 };
 
     var bPauseGame = false;   
 
     var GameFrameCount : i32 = 0;
+
+
+    
+    //const texture = rl.LoadTexture("assets/animation/test_chara_1/color1/idle_00.png");
+
+    var texture : rl.Texture2D = undefined;
+
+
+    if(gameState.gameData) | gameData |
+    {
+        if(gameData.FindSequenceTextures(0, "stand")) | sequence |
+        {
+            texture = sequence.textures.items[0];
+        }
+    }
 
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
@@ -128,6 +149,10 @@ pub fn GameLoop() !void
             rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
         }
 
+    
+        rl.DrawTexture(texture, 100, 100, rl.WHITE);
+        
+        
         rl.EndDrawing();
         //----------------------------------------------------------------------------------
     }

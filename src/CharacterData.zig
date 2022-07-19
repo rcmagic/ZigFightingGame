@@ -1,5 +1,5 @@
 const std = @import("std");
-
+const rl = @import("raylib");
 
 pub const Hitbox = struct
 {
@@ -41,6 +41,13 @@ pub const HitboxGroup = struct
     }
 };
 
+pub const ImageRange = struct
+{
+    Sequence:  []const u8 = "",
+    Index: i32 = 0,
+    Start:  i32 = 0,
+    Duration: i32 = 1,
+};
 
 pub const ActionProperties = struct
 {
@@ -48,6 +55,8 @@ pub const ActionProperties = struct
     IsLooping: bool = false,
     VulnerableHitboxGroups: std.ArrayList(HitboxGroup),
     AttackHitboxGroups: std.ArrayList(HitboxGroup),
+
+    AnimationTimeline: std.ArrayList(ImageRange),
 
     Name: []const u8 = "",
 
@@ -68,6 +77,7 @@ pub const ActionProperties = struct
         return ActionProperties {            
             .VulnerableHitboxGroups = std.ArrayList(HitboxGroup).init(allocator),
             .AttackHitboxGroups = std.ArrayList(HitboxGroup).init(allocator),
+            .AnimationTimeline = std.ArrayList(ImageRange).init(allocator)
         };
     }
 };
@@ -81,6 +91,16 @@ pub fn FindAction(character: CharacterProperties, map: std.StringHashMap(usize),
     return null;
 }
 
+pub fn FindSequence(character: CharacterProperties, map: std.StringHashMap(usize), SequenceName: []const u8) ?*ImageSequence
+{
+    if(map.get(SequenceName)) | index |
+    {            
+        return &character.ImageSequences.items[index];
+    }
+    return null;
+}
+
+
 pub fn GenerateActionNameMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize)
 {
 
@@ -93,15 +113,86 @@ pub fn GenerateActionNameMap(character: CharacterProperties, allocator: std.mem.
     return ActionNameMap;
 }
 
+
+pub const SequenceTexRef = struct
+{
+    textures: std.ArrayList(rl.Texture2D),
+
+    pub fn init(allocator: std.mem.Allocator) !SequenceTexRef {
+        return SequenceTexRef {
+            .textures = std.ArrayList(rl.Texture2D).init(allocator)
+        };
+    }
+};
+
+pub fn GenerateImageSequenceMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize)
+{
+    var SequenceNameMap = std.StringHashMap(usize).init(allocator);
+
+    for(character.ImageSequences.items) | sequence, index |
+    {
+        try SequenceNameMap.putNoClobber(sequence.Name, index);
+    }
+
+    return SequenceNameMap;
+}
+
+// Sequences are loaded in the same order as the character data asset.
+pub fn LoadSequenceImages(character: CharacterProperties, allocator: std.mem.Allocator) !std.ArrayList(SequenceTexRef)
+{
+    var imageSequences = std.ArrayList(SequenceTexRef).init(allocator);
+
+    for(character.ImageSequences.items) | sequence |
+    {        
+        try imageSequences.append(try SequenceTexRef.init(allocator));
+        var sequenceTexRef = &imageSequences.items[imageSequences.items.len - 1];
+
+        for(sequence.Images.items) | image |
+        {
+            // Need a better way to handle conversion from non-null terminated strings to c strings.
+            const source = try allocator.alloc(u8, image.Source.len+1); 
+            defer allocator.free(source);
+            std.mem.copy(u8, source, image.Source);
+            source[source.len-1] = 0;
+            try sequenceTexRef.textures.append(rl.LoadTexture(@ptrCast([*c]const u8, source)));
+        }
+    }
+
+    return imageSequences;
+}
+
+// A single image with an offset.
+pub const Image = struct
+{
+    Source: []const u8 = "",
+    x: i32 = 0,
+    y: i32 = 0,
+};
+
+// A list of images associated with an sequence name
+pub const ImageSequence = struct{
+    Name: []const u8 = "",
+    Images: std.ArrayList(Image),
+
+    pub fn init(allocator: std.mem.Allocator) !ImageSequence {
+        return ImageSequence {
+            .Images = std.ArrayList(Image).init(allocator)
+        };
+    }
+};
+
 pub const CharacterProperties = struct 
 {
     MaxHealth : i32 = 10000,
     Actions: std.ArrayList(ActionProperties),
 
+    ImageSequences: std.ArrayList(ImageSequence),
+
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
         return CharacterProperties {
-            .Actions = std.ArrayList(ActionProperties).init(allocator)
+            .Actions = std.ArrayList(ActionProperties).init(allocator),
+            .ImageSequences = std.ArrayList(ImageSequence).init(allocator)
         };
     }
 
@@ -126,7 +217,7 @@ pub fn LoadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProp
     const file = try std.fs.cwd().openFile(path, .{.read = true});    
     defer(file.close());
 
-    var buffer: [2048]u8 = undefined;
+    var buffer: [4*2048]u8 = undefined;
     const bytesRead = try file.readAll(&buffer);
     const message = buffer[0..bytesRead];
 
