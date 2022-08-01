@@ -33,7 +33,10 @@
                     ]
                 }
             ],
-            "AttackHitboxGroups": []
+            "AttackHitboxGroups": [],
+            "AnimationTimeline": [
+                {"Sequence": "stand", "Index": 0, "Start": 0, "Duration": 100 }
+            ]
         },
         {
             "Name": "WalkingForward",

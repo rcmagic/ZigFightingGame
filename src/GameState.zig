@@ -9,9 +9,10 @@ const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
 
 pub const GameData = struct {
     Characters: std.ArrayList(CharacterData.CharacterProperties),     
-ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
+    ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
     ImageSequences: std.ArrayList(std.ArrayList(CharacterData.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
+
 
     pub fn FindSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*CharacterData.SequenceTexRef
     {

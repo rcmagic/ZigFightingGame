@@ -47,6 +47,11 @@ pub const ImageRange = struct
     Index: i32 = 0,
     Start:  i32 = 0,
     Duration: i32 = 1,
+
+    pub fn IsActiveOnFrame(self: ImageRange, frame: i32) bool
+    {
+        return (frame >= self.Start) and (frame < (self.Start + self.Duration));
+    }
 };
 
 pub const ActionProperties = struct
@@ -80,6 +85,19 @@ pub const ActionProperties = struct
             .AnimationTimeline = std.ArrayList(ImageRange).init(allocator)
         };
     }
+
+    pub fn GetActiveImage(self: ActionProperties, frame: i32) ImageRange
+    {
+        for(self.AnimationTimeline.items) | image |
+        {
+            if(image.IsActiveOnFrame(frame))
+            {
+                return image;
+            }
+        }
+
+        return ImageRange{};
+    }
 };
 
 pub fn FindAction(character: CharacterProperties, map: std.StringHashMap(usize), ActionName: []const u8) ?*ActionProperties
@@ -87,15 +105,6 @@ pub fn FindAction(character: CharacterProperties, map: std.StringHashMap(usize),
     if(map.get(ActionName)) | index |
     {            
         return &character.Actions.items[index];
-    }
-    return null;
-}
-
-pub fn FindSequence(character: CharacterProperties, map: std.StringHashMap(usize), SequenceName: []const u8) ?*ImageSequence
-{
-    if(map.get(SequenceName)) | index |
-    {            
-        return &character.ImageSequences.items[index];
     }
     return null;
 }
@@ -209,6 +218,15 @@ pub const CharacterProperties = struct
                 .MaxHealth = value.MaxHealth,
                 .Actions = value.Actions.items,
             } , options, out_stream);
+    }
+
+    pub fn FindSequence(self: *CharacterProperties, map: std.StringHashMap(usize), SequenceName: []const u8) ?*ImageSequence
+    {
+        if(map.get(SequenceName)) | index |
+        {            
+            return &self.ImageSequences.items[index];
+        }
+        return null;
     }
 };
 

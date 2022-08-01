@@ -5,6 +5,72 @@ const GameSimulation = @import("GameSimulation.zig");
 const GameState = @import("GameState.zig").GameState;
 const CharacterData = @import("CharacterData.zig");
 
+var texture : rl.Texture2D = undefined;
+
+
+const DrawState = struct 
+{
+    x: i32 = 0,
+    y: i32 = 0,
+    texture: rl.Texture2D = undefined
+};
+
+// Prepare state struct which describes how to draw a character
+fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
+{
+
+    const GroundOffset = 390;
+    const ScreenCenter = 400;
+
+    const position = gameState.physicsComponents[entity].position;
+
+    const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
+    const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
+
+
+    var drawState = DrawState{.x = ScreenX, .y = ScreenY};
+
+    // Get textured used to render the sprite
+    if(gameState.gameData) | gameData |
+    {
+        const stateMachine = &gameState.stateMachineComponents[entity].stateMachine;
+        
+        const CurrentState = stateMachine.CurrentState;
+
+        var actionName : []const u8 = "";
+        if(stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
+        {
+            actionName = state.Name;
+        }
+
+        if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        {                
+            const imageRange = actionData.GetActiveImage(gameState.timelineComponents[entity].framesElapsed);
+
+            // Get the sprite texture
+            if(gameData.FindSequenceTextures(entity, imageRange.Sequence)) | sequence |
+            {
+                drawState.texture = sequence.textures.items[@intCast(usize,imageRange.Index)];
+            }
+
+            // Get the sprite offset
+            if(gameData.Characters.items[entity].FindSequence(gameData.ImageSequenceMap.items[entity], imageRange.Sequence)) | sequence |
+            {
+                const image = sequence.Images.items[@intCast(usize,imageRange.Index)];
+                drawState.x += image.x;
+                drawState.y += image.y;
+            }
+        }
+    }
+
+    return drawState;
+}
+
+fn RenderDrawState(state: DrawState) void
+{
+    rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
+}
+
 fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
 {
     const GroundOffset = 390;
@@ -13,6 +79,12 @@ fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
 
     // Reflect the position of our game object on screen.
     rl.DrawCircle(ScreenX, ScreenY, 50, color);
+
+    // Calculate the sprite coordinates
+    const SpriteX = ScreenX;
+    const SpriteY = ScreenY;
+
+    rl.DrawTexture(texture, SpriteX, SpriteY, rl.WHITE);
 }
 
 
@@ -34,19 +106,14 @@ pub fn GameLoop() !void
     try gameState.init(ArenaAllocator.allocator());
     
     // Initialize our game objects
-    gameState.physicsComponents[0].position = .{.x = 0, .y = 0 };
+    gameState.physicsComponents[0].position = .{.x = -200000, .y = 0 };
     gameState.physicsComponents[1].position = .{.x = 200000, .y = 0 };
 
     var bPauseGame = false;   
 
     var GameFrameCount : i32 = 0;
-
-
     
     //const texture = rl.LoadTexture("assets/animation/test_chara_1/color1/idle_00.png");
-
-    var texture : rl.Texture2D = undefined;
-
 
     if(gameState.gameData) | gameData |
     {
@@ -129,11 +196,14 @@ pub fn GameLoop() !void
         // rl.DrawCircle(ScreenX, ScreenY, 50, rl.MAROON);
 
         
-        var hitShake  =  math.IntVector2D{.x =  -2000 + 4000*@mod(gameState.reactionComponents[0].hitStop,2), .y = 0};
+        //var hitShake  =  math.IntVector2D{.x =  -2000 + 4000*@mod(gameState.reactionComponents[0].hitStop,2), .y = 0};
 
 
-        DrawCharacter(gameState.physicsComponents[0].position, rl.MAROON);
-        DrawCharacter( gameState.physicsComponents[1].position.Add(hitShake), rl.BLUE);
+        // DrawCharacter(gameState.physicsComponents[0].position, rl.MAROON);
+        // DrawCharacter( gameState.physicsComponents[1].position.Add(hitShake), rl.BLUE);
+
+        RenderDrawState(PrepareDrawState(gameState, 0));
+        RenderDrawState(PrepareDrawState(gameState, 1));
 
         // if(gameState.gameData) | gameData |
         // {
@@ -148,9 +218,6 @@ pub fn GameLoop() !void
         {
             rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
         }
-
-    
-        rl.DrawTexture(texture, 100, 100, rl.WHITE);
         
         
         rl.EndDrawing();
