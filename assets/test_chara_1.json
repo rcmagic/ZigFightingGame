@@ -11,6 +11,28 @@
                     "y": -152
                 }
             ]
+
+        },
+        {
+            "Name": "attack",
+            "Images": 
+            [
+                {
+                    "Source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "x": -108,
+                    "y": -131
+                },
+                {
+                    "Source": "assets/animation/test_chara_1/color1/attack_01.png",
+                    "x": -103,
+                    "y": -146
+                },
+                {
+                    "Source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "x": -32,
+                    "y": -63
+                }
+            ]
         }
     ],
     "MaxHealth": 10000,
@@ -44,6 +66,9 @@
             "VulnerableHitboxGroups": [
             ],
             "AttackHitboxGroups": [
+            ],
+            "AnimationTimeline": [
+                {"Sequence": "stand", "Index": 0, "Start": 0, "Duration": 100 }
             ]
         },
         {
@@ -52,6 +77,9 @@
             "VulnerableHitboxGroups": [
             ],
             "AttackHitboxGroups": [
+            ],
+            "AnimationTimeline": [
+                {"Sequence": "stand", "Index": 0, "Start": 0, "Duration": 100 }
             ]
         },
         {
@@ -60,6 +88,9 @@
             "VulnerableHitboxGroups": [
             ],
             "AttackHitboxGroups": [
+            ],
+            "AnimationTimeline": [
+                {"Sequence": "stand", "Index": 0, "Start": 0, "Duration": 100 }
             ]
         },
         {
@@ -80,6 +111,11 @@
                         }
                     ]
                 }
+            ],
+            "AnimationTimeline": [
+                {"Sequence": "attack", "Index": 0, "Start": 0, "Duration": 4 },
+                {"Sequence": "attack", "Index": 1, "Start": 4, "Duration": 10 },
+                {"Sequence": "attack", "Index": 2, "Start": 14, "Duration": 20 }
             ]
         },
         {
@@ -88,6 +124,9 @@
             "VulnerableHitboxGroups": [
             ],
             "AttackHitboxGroups": [
+            ],
+            "AnimationTimeline": [
+                {"Sequence": "stand", "Index": 0, "Start": 0, "Duration": 100 }
             ]
         }
     ]
