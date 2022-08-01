@@ -196,19 +196,6 @@ pub fn GameLoop() !void
 
         rl.ClearBackground(rl.WHITE);
 
-        // const ScreenX = math.WorldToScreen(gameState.physicsComponents[0].position.x);
-        // const ScreenY = math.WorldToScreen(gameState.physicsComponents[0].position.y);
-
-        // // Reflect the position of our game object on screen.
-        // rl.DrawCircle(ScreenX, ScreenY, 50, rl.MAROON);
-
-        
-        //var hitShake  =  math.IntVector2D{.x =  -2000 + 4000*@mod(gameState.reactionComponents[0].hitStop,2), .y = 0};
-
-
-        // DrawCharacter(gameState.physicsComponents[0].position, rl.MAROON);
-        // DrawCharacter( gameState.physicsComponents[1].position.Add(hitShake), rl.BLUE);
-
         RenderDrawState(PrepareDrawState(gameState, 0));
         RenderDrawState(PrepareDrawState(gameState, 1));
 
