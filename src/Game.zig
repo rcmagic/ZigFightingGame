@@ -27,7 +27,6 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
     const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
 
-
     var drawState = DrawState{.x = ScreenX, .y = ScreenY};
 
     // Get textured used to render the sprite
@@ -61,6 +60,14 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
                 drawState.y += image.y;
             }
         }
+    }
+
+    // Hit shake
+    if(gameState.reactionComponents[0].hitStop > 0)
+    {
+        const hitShakeDist = 4;
+        const hitShake = -(hitShakeDist / 2) + hitShakeDist*@mod(gameState.reactionComponents[0].hitStop,2);
+        drawState.x += hitShake;
     }
 
     return drawState;
