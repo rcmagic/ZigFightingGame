@@ -12,6 +12,8 @@ const DrawState = struct
 {
     x: i32 = 0,
     y: i32 = 0,
+    xScale: f32 = 1.0,
+    yScale: f32 = 1.0,
     texture: rl.Texture2D = undefined
 };
 
@@ -26,8 +28,16 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
     const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
+    
 
     var drawState = DrawState{.x = ScreenX, .y = ScreenY};
+
+
+    // Drawing the sprite flipped when the entity is facing left.
+    if(gameState.physicsComponents[entity].facingLeft)
+    {
+        drawState.xScale = -1.0;
+    }
 
     // Get textured used to render the sprite
     if(gameState.gameData) | gameData |
@@ -70,34 +80,18 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
         drawState.x += hitShake;
     }
 
+
+
     return drawState;
 }
 
+// Render a single DrawState. Uses the results from PrepareDrawState() and renders one Character.
 fn RenderDrawState(state: DrawState) void
 {
-    rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
+    //rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
+    rl.DrawTextureRec(state.texture, rl.Rectangle{.x=0, .y=0, .width=@intToFloat(f32, state.texture.width)*state.xScale, .height=@intToFloat(f32, state.texture.height)*state.yScale}, 
+                        rl.Vector2{.x=@intToFloat(f32, state.x),.y= @intToFloat(f32, state.y)}, rl.WHITE);
 }
-
-fn DrawCharacter(position: math.IntVector2D, color: rl.Color) void
-{
-    const GroundOffset = 390;
-    const ScreenX = math.WorldToScreen(position.x);
-    const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
-
-    // Reflect the position of our game object on screen.
-    rl.DrawCircle(ScreenX, ScreenY, 50, color);
-
-    // Calculate the sprite coordinates
-    const SpriteX = ScreenX;
-    const SpriteY = ScreenY;
-
-    rl.DrawTexture(texture, SpriteX, SpriteY, rl.WHITE);
-}
-
-
-
-
-
 
 pub fn GameLoop() !void
 {
@@ -115,6 +109,8 @@ pub fn GameLoop() !void
     // Initialize our game objects
     gameState.physicsComponents[0].position = .{.x = -200000, .y = 0 };
     gameState.physicsComponents[1].position = .{.x = 200000, .y = 0 };
+    gameState.physicsComponents[0].facingLeft = false;
+    gameState.physicsComponents[1].facingLeft = true;
 
     var bPauseGame = false;   
 

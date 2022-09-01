@@ -31,8 +31,16 @@ fn PhysicsSystem(gameState: *GameState) !void
 
             // Apply knockback
             if(reactionComponent.hitStun > 0 and reactionComponent.knockBack != 0)
-            {            
-                component.position.x += reactionComponent.knockBack;
+            {        
+                // Knock the entity back depending on which direction they are facing    
+                if(component.facingLeft)
+                {
+                    component.position.x += reactionComponent.knockBack;
+                }
+                else 
+                {
+                    component.position.x -= reactionComponent.knockBack;
+                }
 
                 // Handle reducing knockback overtime
                 const knockBackDeceleration : i32 = 1000;

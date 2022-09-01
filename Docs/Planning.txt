@@ -148,8 +148,18 @@
 
 2022/7/14
 - Implement flipping characters to face their opponent
+
+
+2022/9/1
+- Review offstream changes [x]
+- Prioritize what to do next [x]
+- Support drawing flipped sprites [x]
+- Support flipped knockback physics [x]
+
+2022/9/*
 - Support flipped physics
-- Support flipped knockback physics
+- Flip the character to face the attacking opponent on hit.
+
 
 2022/7/*
 - Apply knockback based on the current facing direction.
