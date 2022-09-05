@@ -98,6 +98,12 @@ pub fn GameLoop() !void
     // The ArenaAllocator lets use free all the persistent store memory at once.
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
+    // We create this allocator to easily release all our assets at once without influencing other systems.
+    var AssetAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+
+    // Free all memory used by the allocator at once
+    defer AssetAllocator.deinit();
+
     // Free all memory used by the allocator at once
     defer ArenaAllocator.deinit();
 
@@ -105,7 +111,9 @@ pub fn GameLoop() !void
 
     var gameState: GameState = undefined;
     try gameState.init(ArenaAllocator.allocator());
-    
+    try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
+
+
     // Initialize our game objects
     gameState.physicsComponents[0].position = .{.x = -200000, .y = 0 };
     gameState.physicsComponents[1].position = .{.x = 200000, .y = 0 };
@@ -145,6 +153,15 @@ pub fn GameLoop() !void
             else if(rl.IsKeyPressed(rl.KeyboardKey.KEY_F2))
             {
                 bAdvanceOnce = true;
+            }
+
+            // Force reload assets with ctrl+F5
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5))
+            {
+                std.debug.print("Reloading assets...\n", .{}); 
+                AssetAllocator.deinit();
+                AssetAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+                try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
             }
         }
 

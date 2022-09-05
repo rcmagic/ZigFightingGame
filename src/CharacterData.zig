@@ -122,7 +122,8 @@ pub fn GenerateActionNameMap(character: CharacterProperties, allocator: std.mem.
     return ActionNameMap;
 }
 
-
+// Stores the textures used in an image sequence. Use the referenced image index
+// to get the associated texture.
 pub const SequenceTexRef = struct
 {
     textures: std.ArrayList(rl.Texture2D),

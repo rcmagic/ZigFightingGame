@@ -123,7 +123,6 @@ pub const GameState = struct {
 
     reactionSystem: ReactionSystem,
 
-    allocator: std.mem.Allocator,
     gameData: ?GameData = null,
 
 
@@ -141,15 +140,19 @@ pub const GameState = struct {
         self.entityCount += 1;
     }
 
+
+    // Load data from assets that will not be changed during runtime
+    pub fn LoadPersistentGameAssets(self: *GameState, allocator: std.mem.Allocator) !void
+    {
+        self.gameData = try InitializeGameData(allocator);
+    }
+
+    // Load data that may change during runtime. 
     pub fn init(self: *GameState, allocator: std.mem.Allocator) !void 
     {
         
         self.* = GameState {
-            .allocator = allocator,
-            
-            // Game data initialization
-            .gameData = try InitializeGameData(allocator),
-
+                
             // Initialize Systems
             .collisionSystem = try CollisionSystem.init(allocator),
 

@@ -159,6 +159,7 @@
 2022/9/*
 - Support flipped physics
 - Flip the character to face the attacking opponent on hit.
+- Avoid reloading textures with hot reload. Or make 2 reloads, with one forcing a texture reload.
 
 
 2022/7/*
@@ -205,6 +206,8 @@
 - Rollbacks
 
 ** TODO **
+- See if deinit() the asset allocators works properly when reloading assets.
+- How do we free textures? How can we avoid reloading textures each time? 
 
 - Setup character data that will be used in the collision system.
 - Run the hitbox data through the collision system
@@ -224,6 +227,7 @@
 - Move the TranslateHitbox function to common.zig
 - Implement function for getting active attack boxes offset by the character position.
 - Verify what we're doing with the character data in the test "Test clearing out scratch hitbox data each frame"
+
 
 ** TBD **
 - Create hit properties struct
