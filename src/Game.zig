@@ -14,15 +14,17 @@ const DrawState = struct
     y: i32 = 0,
     xScale: f32 = 1.0,
     yScale: f32 = 1.0,
+    flipped: bool = false,
     texture: rl.Texture2D = undefined
 };
+
+const GroundOffset = 390;
+const ScreenCenter = 400;
 
 // Prepare state struct which describes how to draw a character
 fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 {
 
-    const GroundOffset = 390;
-    const ScreenCenter = 400;
 
     const position = gameState.physicsComponents[entity].position;
 
@@ -33,11 +35,14 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     var drawState = DrawState{.x = ScreenX, .y = ScreenY};
 
 
+    const facingLeft = gameState.physicsComponents[entity].facingLeft;
     // Drawing the sprite flipped when the entity is facing left.
-    if(gameState.physicsComponents[entity].facingLeft)
+    if(facingLeft)
     {
         drawState.xScale = -1.0;
     }
+
+    drawState.flipped = facingLeft;
 
     // Get textured used to render the sprite
     if(gameState.gameData) | gameData |
@@ -66,7 +71,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
             if(gameData.Characters.items[entity].FindSequence(gameData.ImageSequenceMap.items[entity], imageRange.Sequence)) | sequence |
             {
                 const image = sequence.Images.items[@intCast(usize,imageRange.Index)];
-                drawState.x += image.x;
+                drawState.x += if(facingLeft) -image.x else image.x;
                 drawState.y += image.y;
             }
         }
@@ -90,7 +95,93 @@ fn RenderDrawState(state: DrawState) void
 {
     //rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
     rl.DrawTextureRec(state.texture, rl.Rectangle{.x=0, .y=0, .width=@intToFloat(f32, state.texture.width)*state.xScale, .height=@intToFloat(f32, state.texture.height)*state.yScale}, 
-                        rl.Vector2{.x=@intToFloat(f32, state.x),.y= @intToFloat(f32, state.y)}, rl.WHITE);
+                        rl.Vector2{.x=@intToFloat(f32, 
+                        if(state.flipped) (state.x - state.texture.width) else state.x),.y= @intToFloat(f32, state.y)}, rl.WHITE);
+}
+
+fn GetActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
+{
+    var count: usize = 0;
+    for(hitboxGroups) | hitboxGroup |
+    {                
+        if(hitboxGroup.IsActiveOnFrame(framesElapsed))
+        {
+            for(hitboxGroup.Hitboxes.items) | hitbox |
+            {
+                hitboxes[count] = hitbox;
+                count += 1;
+            }
+        }
+    }
+
+    return count;
+}
+
+// Hitboxes to draw.
+var debugDrawHitboxes : [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100;
+
+fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
+{
+    const position = gameState.physicsComponents[entity].position;
+    const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
+
+    const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
+    const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
+    
+    const AxisLength = 40;
+    const AxisThickness = 2;
+    // Draw axis
+    rl.DrawRectangle(ScreenX - AxisLength/2, ScreenY, AxisLength, AxisThickness, rl.BLACK);
+    rl.DrawRectangle(ScreenX, ScreenY-AxisLength/2, AxisThickness, AxisLength, rl.BLACK);
+
+    if(gameState.gameData) | gameData |
+    {
+        const stateMachine = &gameState.stateMachineComponents[entity].stateMachine;
+        const CurrentState = stateMachine.CurrentState;
+
+        var actionName : []const u8 = "";
+        if(stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
+        {
+            actionName = state.Name;
+        }
+
+        if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        { 
+
+            const vulCount = GetActiveHitboxes(actionData.VulnerableHitboxGroups.items,
+                                    debugDrawHitboxes[0..], framesElapsed);
+
+            if(vulCount > 0)
+            {
+                var temp = debugDrawHitboxes[0..vulCount];
+                for(temp) | hitbox|
+                {
+                    const left = ScreenX + math.WorldToScreen(hitbox.left);
+                    const top = ScreenY - math.WorldToScreen(hitbox.top);
+                    const width = math.WorldToScreen(hitbox.right - hitbox.left);
+                    const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
+                    rl.DrawRectangleLines(left, top, width, height, rl.BLUE); 
+                }
+            }
+
+
+            const atkCount = GetActiveHitboxes(actionData.AttackHitboxGroups.items,
+                        debugDrawHitboxes[0..], framesElapsed);
+
+            if(atkCount > 0)
+            {
+                var temp = debugDrawHitboxes[0..atkCount];
+                for(temp) | hitbox|
+                {
+                    const left = ScreenX + math.WorldToScreen(hitbox.left);
+                    const top = ScreenY - math.WorldToScreen(hitbox.top);
+                    const width = math.WorldToScreen(hitbox.right - hitbox.left);
+                    const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
+                    rl.DrawRectangleLines(left, top, width, height, rl.RED); 
+                }
+            }
+        }
+    }
 }
 
 pub fn GameLoop() !void
@@ -120,8 +211,11 @@ pub fn GameLoop() !void
     gameState.physicsComponents[0].facingLeft = false;
     gameState.physicsComponents[1].facingLeft = true;
 
-    var bPauseGame = false;   
 
+    // Flag for showing hitboxes
+    var bDebugShowHitboxes = false;
+
+    var bPauseGame = false;   
     var GameFrameCount : i32 = 0;
     
     //const texture = rl.LoadTexture("assets/animation/test_chara_1/color1/idle_00.png");
@@ -154,9 +248,13 @@ pub fn GameLoop() !void
             {
                 bAdvanceOnce = true;
             }
-
+            // Toggle hitbox display
+            else if(rl.IsKeyPressed(rl.KeyboardKey.KEY_F4))
+            {
+                bDebugShowHitboxes = !bDebugShowHitboxes;
+            }
             // Force reload assets with ctrl+F5
-            if(rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5))
+            else if(rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5))
             {
                 std.debug.print("Reloading assets...\n", .{}); 
                 AssetAllocator.deinit();
@@ -211,6 +309,14 @@ pub fn GameLoop() !void
 
         RenderDrawState(PrepareDrawState(gameState, 0));
         RenderDrawState(PrepareDrawState(gameState, 1));
+
+
+        // Draw hitboxes when enabled.
+        if(bDebugShowHitboxes)
+        {
+            DrawCharacterHitboxes(gameState, 0);
+            DrawCharacterHitboxes(gameState, 1);
+        }
 
         // if(gameState.gameData) | gameData |
         // {

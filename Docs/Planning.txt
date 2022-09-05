@@ -160,7 +160,7 @@
 - Support flipped physics
 - Flip the character to face the attacking opponent on hit.
 - Avoid reloading textures with hot reload. Or make 2 reloads, with one forcing a texture reload.
-
+- Fix a bug where an action with vulnerable hitboxes cannot hit an opponent even if it has attack boxes.
 
 2022/7/*
 - Apply knockback based on the current facing direction.
