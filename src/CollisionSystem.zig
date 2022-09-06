@@ -166,7 +166,7 @@ pub const CollisionSystem = struct
                         // Store the slice for this entity that points to a range on the hitbox scratch array
                         if(atkCount > 0)
                         {
-                            self.AttackSlices[entity] = self.AttackHitboxScratch[ AttackScratchCount .. atkCount ];
+                            self.AttackSlices[entity] = self.AttackHitboxScratch[ AttackScratchCount .. (AttackScratchCount + atkCount) ];
                         }
                         else
                         {
@@ -186,7 +186,7 @@ pub const CollisionSystem = struct
                         if(vulCount > 0)
                         {
                             // Store the slice for this entity that points to a range on the hitbox scratch array
-                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[ VulnerableScratchCount .. vulCount ];
+                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[ VulnerableScratchCount .. (VulnerableScratchCount + vulCount) ];
                         }
                         else
                         {
