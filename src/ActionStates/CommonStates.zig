@@ -57,6 +57,13 @@ pub const Standing = struct
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.Attack;
         }
+
+        // Flip the character to face the opponent.
+        if(!context.PhysicsComponent.facingOpponent)
+        {
+            context.PhysicsComponent.facingLeft = !context.PhysicsComponent.facingLeft;
+            context.PhysicsComponent.facingOpponent = true;
+        }
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void

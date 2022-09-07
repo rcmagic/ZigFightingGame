@@ -14,16 +14,27 @@ const GameState = @import("GameState.zig").GameState;
 // Handles moving all entities which have a physics component
 fn PhysicsSystem(gameState: *GameState) !void 
 {
+
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) 
     {
+
+        var component = &gameState.physicsComponents[entityIndex];
+
+        // Check if the entity is facing its opponent
+        {
+            const opponent : usize = if(entityIndex == 0) 1 else 0;
+            const opponentX = gameState.physicsComponents[opponent].position.x;
+
+            component.facingOpponent =
+                ( (opponentX < component.position.x) and component.facingLeft) or
+                ( (opponentX > component.position.x) and !component.facingLeft);
+
+        }
         const reactionComponent = &gameState.reactionComponents[entityIndex];
         // Only update physics when there is no hitstop
         if(reactionComponent.hitStop <= 0)
         {
-            var component = &gameState.physicsComponents[entityIndex];
-
-
 
             // move position based on the current velocity.
             component.position = component.position.Add(component.velocity);

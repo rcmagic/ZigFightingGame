@@ -16,6 +16,15 @@ fn TranslateHitbox(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) Chara
     };
 }
 
+fn TranslateHitboxFlipped(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
+{
+    return CharacterData.Hitbox {   .left   =   (-hitbox.right + offset.x), 
+                                    .top    =   (hitbox.top + offset.y),
+                                    .right  =   (-hitbox.left + offset.x),
+                                    .bottom =   (hitbox.bottom + offset.y)
+    };
+}
+
 // Check to see if two hitboxes overlap 
 fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
 {
@@ -26,7 +35,7 @@ fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
     return !IsNotOverlapping;                      
 }
 
-fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
+fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, flipHitbox: bool, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
 {
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
@@ -35,7 +44,8 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
         {
             for(hitboxGroup.Hitboxes.items) | hitbox |
             {
-                const translateBox = TranslateHitbox(hitbox, offset);                            
+                _ = flipHitbox;
+                const translateBox = if(flipHitbox) TranslateHitboxFlipped(hitbox, offset) else TranslateHitbox(hitbox, offset);                            
 
                 hitboxes[count] = translateBox;
                 count += 1;
@@ -134,6 +144,7 @@ pub const CollisionSystem = struct
             self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
             
             const entityOffset = gameState.physicsComponents[entity].position;
+            const facingLeft = gameState.physicsComponents[entity].facingLeft;
 
             const component = &gameState.stateMachineComponents[entity];
             const timeline = &gameState.timelineComponents[entity];
@@ -160,7 +171,7 @@ pub const CollisionSystem = struct
                     // Gather attack boxes    
                     {
                         // Here we insert the translated hitboxes for the action into AttackHitboxScratch
-                        const atkCount = GetTranslatedActiveHitboxes(actionData.AttackHitboxGroups.items, entityOffset, 
+                        const atkCount = GetTranslatedActiveHitboxes(actionData.AttackHitboxGroups.items, entityOffset, facingLeft,
                                             self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
@@ -179,7 +190,7 @@ pub const CollisionSystem = struct
                     // Gather vulnerable boxes
                     {
                         // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
-                        const vulCount = GetTranslatedActiveHitboxes(actionData.VulnerableHitboxGroups.items, entityOffset, 
+                        const vulCount = GetTranslatedActiveHitboxes(actionData.VulnerableHitboxGroups.items, entityOffset, facingLeft,
                                  self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
 
 
