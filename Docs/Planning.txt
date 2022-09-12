@@ -156,54 +156,53 @@
 - Support drawing flipped sprites [x]
 - Support flipped knockback physics [x]
 
-2022/9/*
-- Support flipped physics
-- Flip the character to face the attacking opponent on hit.
-- Avoid reloading textures with hot reload. Or make 2 reloads, with one forcing a texture reload.
-- Fix a bug where an action with vulnerable hitboxes cannot hit an opponent even if it has attack boxes.
+2022/9/6
+- Review changes [x]
+- Fix a bug where an action with vulnerable hitboxes cannot hit an opponent even if it has attack boxes. [x]
+- Make it so characters always face their opponent during idle actions [x]
+- Support flipped hitboxes [x]
 
-2022/7/*
-- Apply knockback based on the current facing direction.
-- Implement hit properties in character data
-- Knockdowns
-- Launch reaction
-- Launch Physics
+
+2022/9/8
+- Flip the character to face the attacking opponent on hit. [x]
+
+2022/9/*
 - Action timeline doesn't determined returning to idle, hit stun will.
-- Support returning to idle when the timer exceeds the action time on non-looping actions
-- Making the asset loading code use streaming reads instead of loading into a fixed sized buffer.
-- Implement the input buffer.
-- Implement first non-button holding input commands (positive edge button presses).
-- Separate components and system state to avoid circular dependencies. 
-- Support in-game reloading of character data to support rapid iteration.
 - Support two input devices to control two characters.
-- Save/Load attack data from/to individual files
-- In game hitbox editing.
-- Movement states and transitions (Walk, Jump, Run, Air Dash, etc)
+- Hit trades
+- Launch reaction
+- Launch physics
+- Avoid reloading textures with hot reload. Or make 2 reloads, with one forcing a texture reload.
 - Block reaction
 - Block stun
-- Hit trades
-- Clean up the hit shake prototype code. Make it work for any character
+- Implement hit properties in character data
+- Knockdowns
 
-2022/8/*
-- Training Mode / Debug tools
+2022/10/*
 - Input history buffer
+- Implement first non-button holding input commands (positive edge button presses).
 - Special attack input motion detection.
 - Implement special attacks
-- Camera tracking
 
-
-
-2022/9/*
+2022/11/*
 - Match state (Round Start, During Match, Round End, Rematch, etc)
 - Combo damage and hit stun scaling.
 - Throws and the a locking mechanism.
 - Super Freeze.
-- Cinematics
+- Camera tracking
 
-2022/10/*
+2022/12/*
 - Network session support.
 - Lock-step synchronization 
 - Rollbacks
+
+2022/*/*
+- Making the asset loading code use streaming reads instead of loading into a fixed sized buffer.
+- Save/Load attack data from/to individual files
+- In game hitbox editing.
+- Cinematics
+- Training Mode / Debug tools
+- Separate components and system state to avoid circular dependencies. 
 
 ** TODO **
 - See if deinit() the asset allocators works properly when reloading assets.
@@ -242,6 +241,6 @@
 - Look into how to deal with parsing large files with JSON.
 - Look into memory allocation tradeoffs for dealing with loading data.
 - What do we do about allocated memory inside of deep struct hierarchies such as strings and ArrayLists?
-
+- Support flipped physics (What did I intend with this again?)
 
 

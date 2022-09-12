@@ -2,6 +2,20 @@ const std = @import("std");
 const assert = std.debug.assert;
 const math = @import("utils/math.zig");
 const CharacterData = @import("CharacterData.zig");
+const Component = @import("Component.zig");
+
+
+// Conditionally flip the character to face the opponent if not already facing them
+pub fn FlipToFaceOpponent(physicsComponent: *Component.PhysicsComponent) void
+{
+    if(!physicsComponent.facingOpponent)
+    {
+        physicsComponent.facingLeft = !physicsComponent.facingLeft;
+        physicsComponent.facingOpponent = true;
+    }
+}
+
+
 
 // Get all active vulnerable hitboxes translated by the character's position.
 fn GetVulnerableBoxes(

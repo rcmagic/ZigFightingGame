@@ -1,6 +1,7 @@
 const std = @import("std");
 const StateMachine = @import("StateMachine.zig");
-
+const Component = @import("../Component.zig");
+const common = @import("../common.zig");
 
 // When the character collides with the ground, return to ground states.
 fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
@@ -58,12 +59,7 @@ pub const Standing = struct
             context.NextState = StateMachine.CombatStateID.Attack;
         }
 
-        // Flip the character to face the opponent.
-        if(!context.PhysicsComponent.facingOpponent)
-        {
-            context.PhysicsComponent.facingLeft = !context.PhysicsComponent.facingLeft;
-            context.PhysicsComponent.facingOpponent = true;
-        }
+        common.FlipToFaceOpponent(context.PhysicsComponent);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -93,6 +89,8 @@ pub const WalkingForward = struct
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.Standing;
         }
+
+        common.FlipToFaceOpponent(context.PhysicsComponent);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -122,6 +120,8 @@ pub const WalkingBackward = struct
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.Standing;
         }
+
+        common.FlipToFaceOpponent(context.PhysicsComponent);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -244,6 +244,8 @@ pub const Reaction = struct
     {
         _ = context;
         std.debug.print("Reaction.OnStart()\n", .{});
+
+        common.FlipToFaceOpponent(context.PhysicsComponent);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void

@@ -48,7 +48,7 @@
                     "Hitboxes": [
                         {
                             "top": 100000,
-                            "left": -100000,
+                            "left": -50000,
                             "bottom": 0,
                             "right": 100000
                         }
@@ -62,8 +62,21 @@
         },
         {
             "Name": "WalkingForward",
-            "Duration": 0,
+            "Duration": 1,
+            "IsLooping": true,
             "VulnerableHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 100,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
             ],
             "AttackHitboxGroups": [
             ],
@@ -73,8 +86,21 @@
         },
         {
             "Name": "WalkingBackward",
-            "Duration": 0,
+            "Duration": 1,
+            "IsLooping": true,
             "VulnerableHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 100,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
             ],
             "AttackHitboxGroups": [
             ],
@@ -86,6 +112,18 @@
             "Name": "Jump",
             "Duration": 0,
             "VulnerableHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 100,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
             ],
             "AttackHitboxGroups": [
             ],
@@ -97,6 +135,18 @@
             "Name": "Attack",
             "Duration": 20,
             "VulnerableHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 100,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
             ],
             "AttackHitboxGroups": [
                 {
@@ -105,9 +155,9 @@
                     "Hitboxes": [
                         {
                             "top": 100000,
-                            "left": -100000,
+                            "left": 0,
                             "bottom": 0,
-                            "right": 100000
+                            "right": 200000
                         }
                     ]
                 }
@@ -122,6 +172,18 @@
             "Name": "Reaction",
             "Duration": 100,
             "VulnerableHitboxGroups": [
+                {
+                    "StartFrame": 0,
+                    "Duration": 100,
+                    "Hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
             ],
             "AttackHitboxGroups": [
             ],

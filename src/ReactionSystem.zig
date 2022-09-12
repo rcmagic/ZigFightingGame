@@ -3,6 +3,7 @@ const CharacterData = @import("CharacterData.zig");
 const Component = @import("Component.zig");
 const GameState = @import("GameState.zig").GameState;
 const StateMachine = @import("ActionStates/StateMachine.zig");
+const common = @import("common.zig");
 
 pub const ReactionSystem = struct 
 {
@@ -46,7 +47,6 @@ pub const ReactionSystem = struct
             gameState.reactionComponents[hitEvent.defenderID].knockBack = hitEvent.knockBack;
 
             gameState.reactionComponents[hitEvent.attackerID].hitStop = hitEvent.hitStop;
-
 
         }
 
