@@ -4,6 +4,7 @@ const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
 const GameState = @import("GameState.zig").GameState;
 const CharacterData = @import("CharacterData.zig");
+const common = @import("common.zig");
 
 var texture : rl.Texture2D = undefined;
 
@@ -124,6 +125,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
 {
     const position = gameState.physicsComponents[entity].position;
     const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
+    const facingLeft = gameState.physicsComponents[entity].facingLeft;
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
     const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
@@ -154,8 +156,9 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             if(vulCount > 0)
             {
                 var temp = debugDrawHitboxes[0..vulCount];
-                for(temp) | hitbox|
+                for(temp) | hitboxTmp|
                 {
+                    const hitbox = if(facingLeft) common.TranslateHitboxFlipped(hitboxTmp,.{}) else common.TranslateHitbox(hitboxTmp,.{});
                     const left = ScreenX + math.WorldToScreen(hitbox.left);
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
                     const width = math.WorldToScreen(hitbox.right - hitbox.left);
@@ -181,6 +184,48 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
                 }
             }
         }
+    }
+}
+
+pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
+{
+    const reaction = gameState.reactionComponents[entity];
+    const player : i32 = @intCast(i32, entity);
+    const offset : i32 = player*200+10;
+    rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d", player, reaction.hitStop, reaction.hitStun), offset, 50, 16, rl.BLACK);
+}
+
+pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void
+{
+    if(!rl.IsGamepadAvailable(controller))
+    {
+        return;
+    }
+
+    if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
+    {
+        gameState.inputComponents[entity].inputCommand.Up = true;
+    }
+
+    if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
+    {
+        gameState.inputComponents[entity].inputCommand.Down = true;
+    }
+
+    if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
+    {
+
+        gameState.inputComponents[entity].inputCommand.Left = true;
+    }
+
+    if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
+    {
+        gameState.inputComponents[entity].inputCommand.Right = true;
+    }
+
+    if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+    {
+        gameState.inputComponents[entity].inputCommand.Attack = true;
     }
 }
 
@@ -237,6 +282,7 @@ pub fn GameLoop() !void
 
         // Reset input to not held down before polling
         gameState.inputComponents[0].inputCommand.Reset();
+        gameState.inputComponents[1].inputCommand.Reset();
 
         if(rl.IsWindowFocused())
         {
@@ -263,30 +309,36 @@ pub fn GameLoop() !void
             }
         }
 
-        if(rl.IsWindowFocused() and rl.IsGamepadAvailable(0))
+        if(rl.IsWindowFocused() )
         {
-            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
+            PollGamepadInput(&gameState, 0, 0);
+            PollGamepadInput(&gameState, 1, 1);
+        }
+
+        if(rl.IsWindowFocused())
+        {
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_W))
             {
                 gameState.inputComponents[0].inputCommand.Up = true;
             }
 
-            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_S))
             {
                 gameState.inputComponents[0].inputCommand.Down = true;
             }
 
-            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_A))
             {
 
                 gameState.inputComponents[0].inputCommand.Left = true;
             }
 
-            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_D))
             {
                 gameState.inputComponents[0].inputCommand.Right = true;
             }
 
-            if(rl.IsGamepadButtonDown(0, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_J))
             {
                 gameState.inputComponents[0].inputCommand.Attack = true;
             }
@@ -327,12 +379,14 @@ pub fn GameLoop() !void
         // Debug information
         rl.DrawText(rl.FormatText("Game Frame: %d", GameFrameCount), 10, 10, 16, rl.DARKGRAY);
 
+        DrawCharacterDebugInfo(gameState, 0);
+        DrawCharacterDebugInfo(gameState, 1);
+
         if(bPauseGame)
         {
             rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
         }
-        
-        
+  
         rl.EndDrawing();
         //----------------------------------------------------------------------------------
     }

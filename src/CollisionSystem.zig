@@ -3,27 +3,8 @@ const math = @import("utils/math.zig");
 const CharacterData = @import("CharacterData.zig");
 const Component = @import("Component.zig");
 const GameState = @import("GameState.zig").GameState;
+const common = @import("common.zig");
 
-
-
-// Create a new hitbox translated by the offset provided.
-fn TranslateHitbox(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
-{
-    return CharacterData.Hitbox {   .left   =   (hitbox.left + offset.x), 
-                                    .top    =   (hitbox.top + offset.y),
-                                    .right  =   (hitbox.right + offset.x),
-                                    .bottom =   (hitbox.bottom + offset.y)
-    };
-}
-
-fn TranslateHitboxFlipped(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
-{
-    return CharacterData.Hitbox {   .left   =   (-hitbox.right + offset.x), 
-                                    .top    =   (hitbox.top + offset.y),
-                                    .right  =   (-hitbox.left + offset.x),
-                                    .bottom =   (hitbox.bottom + offset.y)
-    };
-}
 
 // Check to see if two hitboxes overlap 
 fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
@@ -45,7 +26,7 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
             for(hitboxGroup.Hitboxes.items) | hitbox |
             {
                 _ = flipHitbox;
-                const translateBox = if(flipHitbox) TranslateHitboxFlipped(hitbox, offset) else TranslateHitbox(hitbox, offset);                            
+                const translateBox = if(flipHitbox) common.TranslateHitboxFlipped(hitbox, offset) else common.TranslateHitbox(hitbox, offset);                            
 
                 hitboxes[count] = translateBox;
                 count += 1;

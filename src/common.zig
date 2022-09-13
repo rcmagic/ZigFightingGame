@@ -15,7 +15,25 @@ pub fn FlipToFaceOpponent(physicsComponent: *Component.PhysicsComponent) void
     }
 }
 
+// Create a new hitbox translated by the offset provided.
+pub fn TranslateHitbox(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
+{
+    return CharacterData.Hitbox {   .left   =   (hitbox.left + offset.x), 
+                                    .top    =   (hitbox.top + offset.y),
+                                    .right  =   (hitbox.right + offset.x),
+                                    .bottom =   (hitbox.bottom + offset.y)
+    };
+}
 
+
+pub fn TranslateHitboxFlipped(hitbox: CharacterData.Hitbox, offset: math.IntVector2D) CharacterData.Hitbox
+{
+    return CharacterData.Hitbox {   .left   =   (-hitbox.right + offset.x), 
+                                    .top    =   (hitbox.top + offset.y),
+                                    .right  =   (-hitbox.left + offset.x),
+                                    .bottom =   (hitbox.bottom + offset.y)
+    };
+}
 
 // Get all active vulnerable hitboxes translated by the character's position.
 fn GetVulnerableBoxes(
