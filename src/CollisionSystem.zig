@@ -25,7 +25,6 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
         {
             for(hitboxGroup.Hitboxes.items) | hitbox |
             {
-                _ = flipHitbox;
                 const translateBox = if(flipHitbox) common.TranslateHitboxFlipped(hitbox, offset) else common.TranslateHitbox(hitbox, offset);                            
 
                 hitboxes[count] = translateBox;

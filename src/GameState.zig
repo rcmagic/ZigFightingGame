@@ -114,6 +114,7 @@ pub const GameState = struct {
     timelineComponents: [10]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** 10,
     reactionComponents: [10]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** 10,
     inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
+    statsComponents: [10]Component.StatsComponent = [_]Component.StatsComponent{.{}} ** 10,
 
     // Transient Events
     hitEvents: std.ArrayList(HitEvent),

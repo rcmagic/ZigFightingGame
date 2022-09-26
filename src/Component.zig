@@ -17,3 +17,7 @@ pub const ReactionComponent = struct {
     knockBack: i32 = 0,
     attackHasHit: bool = false
 };
+
+pub const StatsComponent = struct {
+    totalHitStun: i32 = 0
+};

@@ -48,6 +48,9 @@ pub const ReactionSystem = struct
 
             gameState.reactionComponents[hitEvent.attackerID].hitStop = hitEvent.hitStop;
 
+            // Update non gameplay effecting statistics 
+            gameState.statsComponents[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;
+
         }
 
     }
