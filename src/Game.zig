@@ -4,7 +4,9 @@ const math = @import("utils/math.zig");
 const GameSimulation = @import("GameSimulation.zig");
 const GameState = @import("GameState.zig").GameState;
 const CharacterData = @import("CharacterData.zig");
+const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const common = @import("common.zig");
+
 
 var texture : rl.Texture2D = undefined;
 
@@ -16,11 +18,16 @@ const DrawState = struct
     xScale: f32 = 1.0,
     yScale: f32 = 1.0,
     flipped: bool = false,
+    color: rl.Color = rl.WHITE,
     texture: rl.Texture2D = undefined
 };
 
 const GroundOffset = 390;
 const ScreenCenter = 400;
+
+// Indicate whether or not we draw the debug colors for various character states
+var bDebugColorEnabled = false;
+
 
 // Prepare state struct which describes how to draw a character
 fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
@@ -79,14 +86,32 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     }
 
     // Hit shake
-    if(gameState.reactionComponents[0].hitStop > 0)
+    if(gameState.reactionComponents[entity].hitStop > 0)
     {
         const hitShakeDist = 4;
         const hitShake = -(hitShakeDist / 2) + hitShakeDist*@mod(gameState.reactionComponents[0].hitStop,2);
         drawState.x += hitShake;
     }
 
+    if(bDebugColorEnabled)
+    {
+        const CurrentState = gameState.stateMachineComponents[entity].stateMachine.CurrentState;
 
+        drawState.color = switch(CurrentState)
+        {
+            CombatStateID.Standing, CombatStateID.WalkingForward, 
+            CombatStateID.WalkingBackward, CombatStateID.Jump => rl.YELLOW,
+            CombatStateID.Attack => rl.RED,
+            else => rl.WHITE
+        };
+
+
+        // Color the character when they are hit.
+        if(gameState.reactionComponents[entity].hitStun > 0)
+        {
+            drawState.color = rl.BLUE;
+        }
+    }
 
     return drawState;
 }
@@ -97,7 +122,7 @@ fn RenderDrawState(state: DrawState) void
     //rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
     rl.DrawTextureRec(state.texture, rl.Rectangle{.x=0, .y=0, .width=@intToFloat(f32, state.texture.width)*state.xScale, .height=@intToFloat(f32, state.texture.height)*state.yScale}, 
                         rl.Vector2{.x=@intToFloat(f32, 
-                        if(state.flipped) (state.x - state.texture.width) else state.x),.y= @intToFloat(f32, state.y)}, rl.WHITE);
+                        if(state.flipped) (state.x - state.texture.width) else state.x),.y= @intToFloat(f32, state.y)}, state.color);
 }
 
 fn GetActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
@@ -174,8 +199,10 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             if(atkCount > 0)
             {
                 var temp = debugDrawHitboxes[0..atkCount];
-                for(temp) | hitbox|
+                for(temp) | hitboxTmp|
                 {
+                    const hitbox = if(facingLeft) common.TranslateHitboxFlipped(hitboxTmp,.{}) else common.TranslateHitbox(hitboxTmp,.{});
+
                     const left = ScreenX + math.WorldToScreen(hitbox.left);
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
                     const width = math.WorldToScreen(hitbox.right - hitbox.left);
@@ -191,8 +218,48 @@ pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
 {
     const reaction = gameState.reactionComponents[entity];
     const player : i32 = @intCast(i32, entity);
-    const offset : i32 = player*200+10;
-    rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d", player, reaction.hitStop, reaction.hitStun), offset, 50, 16, rl.BLACK);
+    const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
+    const XOffset : i32 = player*200+10;
+    const YOffset : i32 = 80;
+    rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d\nframesElapsed: %d", player, reaction.hitStop, reaction.hitStun, framesElapsed), XOffset, YOffset, 16, rl.BLACK);
+}
+
+pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
+{
+    _ = gameState;
+    _ = entity;
+
+    const player = @intCast(i32, entity);
+    const timelineHeight = 10;
+    const timelineXOffset = 10;
+    const timelineYOffset = 30+player*(timelineHeight+10);
+    const frameWidth = 15;
+    const padding = 4;
+
+    var totalFrames : i32 = 0;
+    var activeFrame : i32 = 0;
+
+    // Pull duration from the current action for the timelin
+    if(gameState.stateMachineComponents[entity].context.ActionData) | actionData |
+    {
+        totalFrames = actionData.Duration;
+        activeFrame = gameState.timelineComponents[entity].framesElapsed;
+    }
+
+    // When there is hitstun use the hitstun from the last hit for drawing the timeline
+    const hitStun = gameState.reactionComponents[entity].hitStun;
+    if(hitStun > 0)
+    {
+        totalFrames = gameState.statsComponents[entity].totalHitStun;
+        activeFrame = totalFrames - hitStun;
+    }
+
+    var index : i32 = 0;
+    while(index < totalFrames) : (index+=1)
+    {
+        const color = if(index == activeFrame) rl.YELLOW else rl.BLACK;
+        rl.DrawRectangle(timelineXOffset+index*(frameWidth+padding), timelineYOffset, frameWidth, timelineHeight,  color);
+    }
 }
 
 pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void
@@ -299,13 +366,21 @@ pub fn GameLoop() !void
             {
                 bDebugShowHitboxes = !bDebugShowHitboxes;
             }
+
+
             // Force reload assets with ctrl+F5
-            else if(rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5))
+            if(rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5))
             {
                 std.debug.print("Reloading assets...\n", .{}); 
                 AssetAllocator.deinit();
                 AssetAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
                 try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
+            }
+
+            // Debug color toggle
+            if(rl.IsKeyPressed(rl.KeyboardKey.KEY_F9))
+            {
+                bDebugColorEnabled = !bDebugColorEnabled;
             }
         }
 
@@ -381,6 +456,9 @@ pub fn GameLoop() !void
 
         DrawCharacterDebugInfo(gameState, 0);
         DrawCharacterDebugInfo(gameState, 1);
+
+        DebugDrawTimeline(gameState, 0);
+        DebugDrawTimeline(gameState, 1);
 
         if(bPauseGame)
         {
