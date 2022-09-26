@@ -103,8 +103,11 @@ pub const CombatStateMachineProcessor = struct
             // Run the update function on the current action
             if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
 
-            // Advance the timeline              
-            context.TimelineComponent.framesElapsed += 1; 
+            // Advance the timeline when there is no hitstop
+            if(context.ReactionComponent.hitStop <= 0)     
+            {      
+                context.TimelineComponent.framesElapsed += 1; 
+            }
             
             // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
@@ -121,7 +124,16 @@ pub const CombatStateMachineProcessor = struct
                         // Otherwise return to idle
                         else 
                         {
-                            // TODO: Support going back to idle
+                            // Go back to idle
+                            if(context.PhysicsComponent.position.y > 0)
+                            {
+                                context.NextState = CombatStateID.Jump;
+                            }
+                            else
+                            {
+                                context.NextState = CombatStateID.Standing;
+                            }
+                            context.bTransition = true;
                         }
                     }
                 }

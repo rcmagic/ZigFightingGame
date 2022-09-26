@@ -193,16 +193,16 @@ pub const Attack = struct
 
             if(context.TimelineComponent.framesElapsed >= actionData.Duration)
             {
-                context.bTransition = true;
+                // context.bTransition = true;
 
-                if(context.PhysicsComponent.position.y > 0)
-                {
-                     context.NextState = StateMachine.CombatStateID.Jump;
-                }
-                else 
-                {
-                    context.NextState = StateMachine.CombatStateID.Standing;
-                }
+                // if(context.PhysicsComponent.position.y > 0)
+                // {
+                //      context.NextState = StateMachine.CombatStateID.Jump;
+                // }
+                // else 
+                // {
+                //     context.NextState = StateMachine.CombatStateID.Standing;
+                // }
             }
         }
 
