@@ -166,13 +166,12 @@
 2022/9/8
 - Flip the character to face the attacking opponent on hit. [x]
 
-2022/9/next
-- Implement transitioning to actions directly instead of going through idle first.
-- Show how this influences frame advantage.
+2022/9/27
+- Implement transitioning to actions directly instead of going through idle (standing/jumping) first. [x]
+- Show how this influences frame advantage. [x]
 
 2022/9/*
 - Action timeline doesn't determined returning to idle, hit stun will.
-- Support two input devices to control two characters.
 - Hit trades
 - Launch reaction
 - Launch physics

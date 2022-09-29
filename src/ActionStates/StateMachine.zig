@@ -100,14 +100,14 @@ pub const CombatStateMachineProcessor = struct
     { 
         if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
         {
-            // Run the update function on the current action
-            if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
-
             // Advance the timeline when there is no hitstop
             if(context.ReactionComponent.hitStop <= 0)     
             {      
                 context.TimelineComponent.framesElapsed += 1; 
             }
+
+            // Run the update function on the current action
+            if(State.OnUpdate) | OnUpdate | { OnUpdate(context); }
             
             // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
@@ -122,7 +122,7 @@ pub const CombatStateMachineProcessor = struct
                             context.TimelineComponent.framesElapsed = 0;                        
                         }
                         // Otherwise return to idle
-                        else 
+                        else if(!context.bTransition)
                         {
                             // Go back to idle
                             if(context.PhysicsComponent.position.y > 0)

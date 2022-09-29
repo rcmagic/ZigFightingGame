@@ -3,6 +3,7 @@ const CharacterData = @import("CharacterData.zig");
 const Component = @import("Component.zig");
 const GameState = @import("GameState.zig").GameState;
 const StateMachine = @import("ActionStates/StateMachine.zig");
+const CommonStates = @import("ActionStates/CommonStates.zig");
 const common = @import("common.zig");
 
 pub const ReactionSystem = struct 
@@ -29,8 +30,7 @@ pub const ReactionSystem = struct
                 if(component.hitStun <= 0)
                 {
                     var defenderState = &gameState.stateMachineComponents[entityIndex];
-                    defenderState.context.bTransition = true;
-                    defenderState.context.NextState = StateMachine.CombatStateID.Standing;
+                    CommonStates.CommonReactionTransitions(&defenderState.context);
                 }
             }
         }

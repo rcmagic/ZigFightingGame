@@ -21,6 +21,50 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
     return false;
 }
 
+fn CommonTransitions(context: *StateMachine.CombatStateContext) void
+{
+    if(context.InputCommand.Right)
+    {
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.WalkingForward;
+    }
+    else if(context.InputCommand.Left)
+    {
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.WalkingBackward;
+    }
+    else if(context.InputCommand.Up)
+    {
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.Jump;   
+    }
+    else if(context.InputCommand.Attack)
+    {
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.Attack;
+    }
+}
+
+pub fn CommonReactionTransitions(context: *StateMachine.CombatStateContext) void
+{
+    CommonTransitions(context);
+}
+
+fn CommonIdleTransitions(context: *StateMachine.CombatStateContext) void
+{
+    if(context.ActionData) | actionData |
+    {
+        // Only check for idle action transitions on the final frame.
+        if(context.TimelineComponent.framesElapsed < actionData.Duration)
+        { 
+            return;
+        }
+    }
+
+    CommonTransitions(context);
+
+}
+
 
 // Standing state
 pub const Standing = struct 
@@ -184,28 +228,12 @@ pub const Attack = struct
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
     {
 
-        if(context.ActionData) | actionData |
+        if(HandleGroundCollision(context))
         {
-            if(HandleGroundCollision(context))
-            {
-                return;
-            }
-
-            if(context.TimelineComponent.framesElapsed >= actionData.Duration)
-            {
-                // context.bTransition = true;
-
-                // if(context.PhysicsComponent.position.y > 0)
-                // {
-                //      context.NextState = StateMachine.CombatStateID.Jump;
-                // }
-                // else 
-                // {
-                //     context.NextState = StateMachine.CombatStateID.Standing;
-                // }
-            }
+            return;
         }
 
+        CommonIdleTransitions(context);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void

@@ -155,9 +155,9 @@ test "Test adding an action with hitboxes to a character"
 
 pub fn UpdateGame(gameState: *GameState) !void {
     InputCommandSystem(gameState);
-    ActionSystem(gameState);
     try PhysicsSystem(gameState);
     try gameState.collisionSystem.Execute(gameState);
     try gameState.reactionSystem.Execute(gameState);
+    ActionSystem(gameState);
     gameState.frameCount += 1;
 }
