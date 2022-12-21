@@ -24,6 +24,7 @@ pub const CombatStateContext = struct
     PhysicsComponent: *Component.PhysicsComponent = undefined,
     TimelineComponent: *Component.TimelineComponent = undefined,
     ReactionComponent: *Component.ReactionComponent = undefined,
+    ActionFlagsComponent: *Component.ActionFlagsComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
 };
 

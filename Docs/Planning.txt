@@ -170,6 +170,10 @@
 - Implement transitioning to actions directly instead of going through idle (standing/jumping) first. [x]
 - Show how this influences frame advantage. [x]
 
+
+2022/12/19
+- Fix diagonals on the game controller not causing diagonal jumps. [x]
+
 2022/9/*
 - Action timeline doesn't determined returning to idle, hit stun will.
 - Hit trades

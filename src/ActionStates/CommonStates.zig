@@ -21,9 +21,56 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
     return false;
 }
 
+
+
+fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
+{
+    if(context.InputCommand.Up)
+    {
+        context.ActionFlagsComponent.jumpFlags = .None;
+
+        if(context.InputCommand.Right)
+        {
+            context.ActionFlagsComponent.jumpFlags = .JumpForward;
+        }
+        else if(context.InputCommand.Left)
+        {
+            context.ActionFlagsComponent.jumpFlags = .JumpBack;
+        }
+
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.Jump;   
+        
+        return true;
+    }
+
+    return false;
+}
+
+
+fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
+{
+    if(context.InputCommand.Attack)
+    {
+        context.bTransition = true;
+        context.NextState = StateMachine.CombatStateID.Attack;
+        return true;
+    }
+
+    return false;
+}
+
 fn CommonTransitions(context: *StateMachine.CombatStateContext) void
 {
-    if(context.InputCommand.Right)
+    if(CommonAttackTransitions(context))
+    {
+        return;
+    }
+    else if(CommonJumpTransitions(context))
+    {
+        return;
+    }
+    else if(context.InputCommand.Right)
     {
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingForward;
@@ -33,16 +80,7 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) void
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingBackward;
     }
-    else if(context.InputCommand.Up)
-    {
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.Jump;   
-    }
-    else if(context.InputCommand.Attack)
-    {
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.Attack;
-    }
+
 }
 
 pub fn CommonReactionTransitions(context: *StateMachine.CombatStateContext) void
@@ -82,26 +120,7 @@ pub const Standing = struct
         //  Stop character movement on standing.
         context.PhysicsComponent.velocity.x = 0;
 
-        if(context.InputCommand.Right)
-        {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.WalkingForward;
-        }
-        else if(context.InputCommand.Left)
-        {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.WalkingBackward;
-        }
-        else if(context.InputCommand.Up)
-        {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.Jump;   
-        }
-        else if(context.InputCommand.Attack)
-        {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.Attack;
-        }
+        CommonTransitions(context);
 
         common.FlipToFaceOpponent(context.PhysicsComponent);
     }
@@ -127,6 +146,22 @@ pub const WalkingForward = struct
 
         //  Move the character right when the player presses right on the controller.
         context.PhysicsComponent.velocity.x = 2000;        
+
+        if(CommonAttackTransitions(context))
+        {
+            return; // Bail out of this state when a transition has been detected
+        }
+        else if(CommonJumpTransitions(context))
+        {
+            return; // Bail out of this state when a transition has been detected
+        }
+        else if(context.InputCommand.Left)
+        {
+            context.bTransition = true;
+            context.NextState = StateMachine.CombatStateID.WalkingBackward;
+            return;
+        }
+
 
         if(!context.InputCommand.Right)
         {
@@ -156,8 +191,24 @@ pub const WalkingBackward = struct
     {
         _ = context;
 
+        if(CommonAttackTransitions(context))
+        {
+            return; // Bail out of this state when a transition has been detected
+        }
+        else if(CommonJumpTransitions(context))
+        {
+            return; // Bail out of this state when a transition has been detected
+        }
+        else if(context.InputCommand.Right)
+        {
+            context.bTransition = true;
+            context.NextState = StateMachine.CombatStateID.WalkingForward;
+            return;
+        }
+
+
         //  Move the character right when the player presses right on the controller.
-        context.PhysicsComponent.velocity.x = -2000;        
+        context.PhysicsComponent.velocity.x = -2000; 
 
         if(!context.InputCommand.Left)
         {
@@ -190,6 +241,13 @@ pub const Jump = struct
         }
 
         context.PhysicsComponent.acceleration.y = -260;
+
+        context.PhysicsComponent.velocity.x = switch(context.ActionFlagsComponent.jumpFlags)
+        {
+            .None => 0,
+            .JumpForward => 1000,
+            .JumpBack => -1000,
+        };
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void

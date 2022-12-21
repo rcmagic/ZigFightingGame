@@ -105,16 +105,20 @@ pub const HitEvent = struct {
 };
 
 
+const MAX_ENTITIES = 10;
 
 pub const GameState = struct {
     frameCount: i32 = 0,
     entityCount: usize = 0,
-    physicsComponents: [10]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** 10,
-    stateMachineComponents: [10]StateMachineComponent = [_]StateMachineComponent{.{}} ** 10,
-    timelineComponents: [10]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** 10,
-    reactionComponents: [10]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** 10,
+    physicsComponents: [MAX_ENTITIES]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** MAX_ENTITIES,
+    stateMachineComponents: [MAX_ENTITIES]StateMachineComponent = [_]StateMachineComponent{.{}} ** MAX_ENTITIES,
+    timelineComponents: [MAX_ENTITIES]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** MAX_ENTITIES,
+    reactionComponents: [MAX_ENTITIES]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** MAX_ENTITIES,
+    actionFlagsComponents: [MAX_ENTITIES]Component.ActionFlagsComponent = [_]Component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
+    statsComponents: [MAX_ENTITIES]Component.StatsComponent = [_]Component.StatsComponent{.{}} ** MAX_ENTITIES,
+
+    // "Global" components
     inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
-    statsComponents: [10]Component.StatsComponent = [_]Component.StatsComponent{.{}} ** 10,
 
     // Transient Events
     hitEvents: std.ArrayList(HitEvent),
@@ -134,6 +138,7 @@ pub const GameState = struct {
         self.stateMachineComponents[self.entityCount].context.PhysicsComponent = &self.physicsComponents[self.entityCount];
         self.stateMachineComponents[self.entityCount].context.TimelineComponent = &self.timelineComponents[self.entityCount];
         self.stateMachineComponents[self.entityCount].context.ReactionComponent = &self.reactionComponents[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.ActionFlagsComponent = &self.actionFlagsComponents[self.entityCount];
 
         // Register states
         RegisterActionStates(&self.stateMachineComponents[self.entityCount].stateMachine.Registery);

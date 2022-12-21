@@ -16,6 +16,13 @@
 - generics / code generation
 
 
+** Building/Running
+// initialize a zig project
+zig init-exe 
+
+
+// run and build a zig project
+zig build run
 
 ** VARIABLES**
 
@@ -213,10 +220,7 @@ var my_hash_map = std.StringHashMapUnmanaged(V){};
 - You can index the underlying data like an array
 - You can remove data with a swap or shifting all elements forward to maintain order. 
 
-** Building/Running
-// initialize a zig project
-zig init-exe 
 
 
-// run and build a zig project
-zig build run
+** Bit Flags / Bit Fields ***
+- "Packed structs in Zig make bit/flag sets trivial." https://devlog.hexops.com/2022/packed-structs-in-zig/
