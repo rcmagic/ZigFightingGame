@@ -286,11 +286,11 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
 
         if(bFlipInput)
         {
-            gameState.inputComponents[entity].inputCommand.Right = true;
+            gameState.inputComponents[entity].inputCommand.Forward = true;
         }
         else
         {
-            gameState.inputComponents[entity].inputCommand.Left = true;
+            gameState.inputComponents[entity].inputCommand.Back = true;
         }
     }
 
@@ -298,11 +298,11 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
     {
         if(bFlipInput)
         {
-            gameState.inputComponents[entity].inputCommand.Left = true;
+            gameState.inputComponents[entity].inputCommand.Back = true;
         }
         else
         {
-            gameState.inputComponents[entity].inputCommand.Right = true;
+            gameState.inputComponents[entity].inputCommand.Forward = true;
         }
     }
 
@@ -422,12 +422,12 @@ pub fn GameLoop() !void
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_A))
             {
 
-                gameState.inputComponents[0].inputCommand.Left = true;
+                gameState.inputComponents[0].inputCommand.Back = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_D))
             {
-                gameState.inputComponents[0].inputCommand.Right = true;
+                gameState.inputComponents[0].inputCommand.Forward = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_J))

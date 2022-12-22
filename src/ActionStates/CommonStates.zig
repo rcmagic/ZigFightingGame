@@ -29,11 +29,11 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
     {
         context.ActionFlagsComponent.jumpFlags = .None;
 
-        if(context.InputCommand.Right)
+        if(context.InputCommand.Forward)
         {
             context.ActionFlagsComponent.jumpFlags = .JumpForward;
         }
-        else if(context.InputCommand.Left)
+        else if(context.InputCommand.Back)
         {
             context.ActionFlagsComponent.jumpFlags = .JumpBack;
         }
@@ -70,12 +70,12 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) void
     {
         return;
     }
-    else if(context.InputCommand.Right)
+    else if(context.InputCommand.Forward)
     {
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingForward;
     }
-    else if(context.InputCommand.Left)
+    else if(context.InputCommand.Back)
     {
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingBackward;
@@ -156,7 +156,7 @@ pub const WalkingForward = struct
         {
             return; // Bail out of this state when a transition has been detected
         }
-        else if(context.InputCommand.Left)
+        else if(context.InputCommand.Back)
         {
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.WalkingBackward;
@@ -164,7 +164,7 @@ pub const WalkingForward = struct
         }
 
 
-        if(!context.InputCommand.Right)
+        if(!context.InputCommand.Forward)
         {
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.Standing;
@@ -200,7 +200,7 @@ pub const WalkingBackward = struct
         {
             return; // Bail out of this state when a transition has been detected
         }
-        else if(context.InputCommand.Right)
+        else if(context.InputCommand.Forward)
         {
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.WalkingForward;
@@ -211,7 +211,7 @@ pub const WalkingBackward = struct
         const WalkingBackSpeed = -2000;
         context.PhysicsComponent.SetForwardSpeed(WalkingBackSpeed);
 
-        if(!context.InputCommand.Left)
+        if(!context.InputCommand.Back)
         {
             context.bTransition = true;
             context.NextState = StateMachine.CombatStateID.Standing;
