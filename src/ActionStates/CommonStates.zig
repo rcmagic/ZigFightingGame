@@ -144,8 +144,9 @@ pub const WalkingForward = struct
     {
         _ = context;
 
-        //  Move the character right when the player presses right on the controller.
-        context.PhysicsComponent.velocity.x = 2000;        
+
+        const WalkingForwardSpeed = 2000;
+        context.PhysicsComponent.SetForwardSpeed(WalkingForwardSpeed);
 
         if(CommonAttackTransitions(context))
         {
@@ -207,8 +208,8 @@ pub const WalkingBackward = struct
         }
 
 
-        //  Move the character right when the player presses right on the controller.
-        context.PhysicsComponent.velocity.x = -2000; 
+        const WalkingBackSpeed = -2000;
+        context.PhysicsComponent.SetForwardSpeed(WalkingBackSpeed);
 
         if(!context.InputCommand.Left)
         {
@@ -242,12 +243,14 @@ pub const Jump = struct
 
         context.PhysicsComponent.acceleration.y = -260;
 
-        context.PhysicsComponent.velocity.x = switch(context.ActionFlagsComponent.jumpFlags)
+        const ForwardSpeed : i32 = switch(context.ActionFlagsComponent.jumpFlags)
         {
             .None => 0,
             .JumpForward => 1000,
             .JumpBack => -1000,
         };
+
+        context.PhysicsComponent.SetForwardSpeed(ForwardSpeed);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void

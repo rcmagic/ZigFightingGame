@@ -5,7 +5,11 @@ pub const PhysicsComponent = struct {
     facingLeft: bool = false,
     facingOpponent: bool = false,
     velocity: math.IntVector2D = .{},
-    acceleration: math.IntVector2D = .{}
+    acceleration: math.IntVector2D = .{},
+
+    pub fn SetForwardSpeed(self: *PhysicsComponent, Speed: i32) void {
+        self.velocity.x = if(self.facingLeft) -Speed else Speed;
+    }
 };
 
 pub const TimelineComponent = struct {

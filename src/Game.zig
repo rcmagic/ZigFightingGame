@@ -269,6 +269,8 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         return;
     }
 
+    const bFlipInput = gameState.physicsComponents[entity].facingLeft;
+
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
     {
         gameState.inputComponents[entity].inputCommand.Up = true;
@@ -282,13 +284,28 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
     {
 
-        gameState.inputComponents[entity].inputCommand.Left = true;
+        if(bFlipInput)
+        {
+            gameState.inputComponents[entity].inputCommand.Right = true;
+        }
+        else
+        {
+            gameState.inputComponents[entity].inputCommand.Left = true;
+        }
     }
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
     {
-        gameState.inputComponents[entity].inputCommand.Right = true;
+        if(bFlipInput)
+        {
+            gameState.inputComponents[entity].inputCommand.Left = true;
+        }
+        else
+        {
+            gameState.inputComponents[entity].inputCommand.Right = true;
+        }
     }
+
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
     {
