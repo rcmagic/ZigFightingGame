@@ -60,47 +60,57 @@ fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
     return false;
 }
 
-fn CommonTransitions(context: *StateMachine.CombatStateContext) void
+fn CommonTransitions(context: *StateMachine.CombatStateContext) bool
 {
     if(CommonAttackTransitions(context))
     {
-        return;
+        return true;
     }
     else if(CommonJumpTransitions(context))
     {
-        return;
+        return true;
     }
     else if(context.InputCommand.Forward)
     {
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingForward;
+        return true;
     }
     else if(context.InputCommand.Back)
     {
         context.bTransition = true;
         context.NextState = StateMachine.CombatStateID.WalkingBackward;
+        return true;
     }
 
+    return false;
+
 }
 
-pub fn CommonReactionTransitions(context: *StateMachine.CombatStateContext) void
+pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
 {
-    CommonTransitions(context);
+    if(CommonTransitions(context))
+    {
+        return;
+    }
+
+    context.NextState = StateMachine.CombatStateID.Standing;
+    context.bTransition = true;
 }
 
-fn CommonIdleTransitions(context: *StateMachine.CombatStateContext) void
+fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool
 {
     if(context.ActionData) | actionData |
     {
         // Only check for idle action transitions on the final frame.
-        if(context.TimelineComponent.framesElapsed < actionData.Duration)
+        if(context.TimelineComponent.framesElapsed >= actionData.Duration)
         { 
-            return;
+            CommonToIdleTransitions(context);
+            return true;
         }
     }
 
-    CommonTransitions(context);
-
+    return false;
 }
 
 
@@ -120,8 +130,12 @@ pub const Standing = struct
         //  Stop character movement on standing.
         context.PhysicsComponent.velocity.x = 0;
 
-        CommonTransitions(context);
+        if(CommonTransitions(context))
+        {
+            return;
+        }
 
+        // automatically turn the character to face the opponent when they've changed sides
         common.FlipToFaceOpponent(context.PhysicsComponent);
     }
 
@@ -288,13 +302,17 @@ pub const Attack = struct
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
     {
-
-        if(HandleGroundCollision(context))
+        // Prioritize transitioning into an attack over landing
+        if(TriggerEndOfAttackTransition(context))
         {
             return;
         }
 
-        CommonIdleTransitions(context);
+        // Landing action will only happen if the character hasn't trigger other actions
+        if(HandleGroundCollision(context))
+        {
+            return;
+        }
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void

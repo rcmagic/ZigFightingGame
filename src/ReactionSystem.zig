@@ -30,7 +30,7 @@ pub const ReactionSystem = struct
                 if(component.hitStun <= 0)
                 {
                     var defenderState = &gameState.stateMachineComponents[entityIndex];
-                    CommonStates.CommonReactionTransitions(&defenderState.context);
+                    CommonStates.CommonToIdleTransitions(&defenderState.context);
                 }
             }
         }
