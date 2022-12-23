@@ -33,6 +33,16 @@ pub const ReactionSystem = struct
                     CommonStates.CommonToIdleTransitions(&defenderState.context);
                 }
             }
+            else if(component.guardStun > 0)
+            {
+                component.guardStun -= 1;
+
+                if(component.guardStun <= 0)
+                {
+                    var defenderState = &gameState.stateMachineComponents[entityIndex];
+                    CommonStates.CommonToIdleTransitions(&defenderState.context);
+                }
+            }
         }
 
         // Transition to reactions for all characters that were hit.
@@ -40,9 +50,38 @@ pub const ReactionSystem = struct
         {
             var defenderState = &gameState.stateMachineComponents[hitEvent.defenderID];
             defenderState.context.bTransition = true;
-            defenderState.context.NextState = StateMachine.CombatStateID.Reaction;
-                        
-            gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
+
+
+            const input = gameState.inputComponents[hitEvent.defenderID];
+
+            const defenderPhysics = gameState.physicsComponents[hitEvent.defenderID];
+            const attackerPhysics = gameState.physicsComponents[hitEvent.attackerID];
+
+            const AttackerOnLeftSide = attackerPhysics.position.x < defenderPhysics.position.x;
+
+            const isInputLeft = (defenderPhysics.facingLeft and input.inputCommand.Forward) or
+                            ((!defenderPhysics.facingLeft) and input.inputCommand.Back);
+            
+            const isInputRight = (defenderPhysics.facingLeft and input.inputCommand.Back) or
+                             ((!defenderPhysics.facingLeft) and input.inputCommand.Forward);
+
+            
+            const WasGuarded = (AttackerOnLeftSide and isInputRight) or (!AttackerOnLeftSide and isInputLeft);
+
+
+
+            if(WasGuarded)
+            {
+                defenderState.context.NextState = StateMachine.CombatStateID.GuardReaction;
+                gameState.reactionComponents[hitEvent.defenderID].guardStun = hitEvent.guardStun;
+
+            }
+            else
+            {
+                defenderState.context.NextState = StateMachine.CombatStateID.Reaction;
+                gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
+            }        
+
             gameState.reactionComponents[hitEvent.defenderID].hitStop = hitEvent.hitStop;
             gameState.reactionComponents[hitEvent.defenderID].knockBack = hitEvent.knockBack;
 
@@ -50,6 +89,7 @@ pub const ReactionSystem = struct
 
             // Update non gameplay effecting statistics 
             gameState.statsComponents[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;
+            gameState.statsComponents[hitEvent.defenderID].totalGuardStun = hitEvent.guardStun;
 
         }
 

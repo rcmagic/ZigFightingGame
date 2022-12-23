@@ -85,8 +85,9 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
         }
     }
 
-    // Hit shake
-    if(gameState.reactionComponents[entity].hitStop > 0)
+    const reaction = gameState.reactionComponents[entity];
+    // Hit shake during hitstop of a character in hit or guard stun.
+    if((reaction.hitStop > 0) and ((reaction.hitStun > 0) or (reaction.guardStun > 0)))
     {
         const hitShakeDist = 4;
         const hitShake = -(hitShakeDist / 2) + hitShakeDist*@mod(gameState.reactionComponents[0].hitStop,2);
@@ -221,7 +222,7 @@ pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
     const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
     const XOffset : i32 = player*200+10;
     const YOffset : i32 = 80;
-    rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d\nframesElapsed: %d", player, reaction.hitStop, reaction.hitStun, framesElapsed), XOffset, YOffset, 16, rl.BLACK);
+    rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d\nguardStun: %d\nframesElapsed: %d", player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed), XOffset, YOffset, 16, rl.BLACK);
 }
 
 pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
@@ -252,6 +253,14 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     {
         totalFrames = gameState.statsComponents[entity].totalHitStun;
         activeFrame = totalFrames - hitStun;
+    }
+
+    // When there is guard stun use the guard stun from the last hit for drawing the timeline
+    const guardStun = gameState.reactionComponents[entity].guardStun;
+    if(guardStun > 0)
+    {
+        totalFrames = gameState.statsComponents[entity].totalGuardStun;
+        activeFrame = totalFrames - guardStun;
     }
 
     var index : i32 = 0;

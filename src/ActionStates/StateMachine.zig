@@ -12,6 +12,7 @@ pub const CombatStateID = enum(u32)
     Jump,
     Attack,
     Reaction,
+    GuardReaction,
     _
 };
 

@@ -41,7 +41,7 @@ fn PhysicsSystem(gameState: *GameState) !void
             component.velocity = component.velocity.Add(component.acceleration);
 
             // Apply knockback
-            if(reactionComponent.hitStun > 0 and reactionComponent.knockBack != 0)
+            if((reactionComponent.hitStun > 0 or reactionComponent.guardStun > 0) and reactionComponent.knockBack != 0)
             {        
                 // Knock the entity back depending on which direction they are facing    
                 if(component.facingLeft)

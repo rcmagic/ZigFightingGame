@@ -366,3 +366,25 @@ pub const Reaction = struct
         std.debug.print("Reaction.OnEnd()\n", .{});
     }
 };
+
+pub const GuardReaction = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("GuardReaction.OnStart()\n", .{});
+
+        common.FlipToFaceOpponent(context.PhysicsComponent);
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("GuardReaction.OnEnd()\n", .{});
+    }
+};

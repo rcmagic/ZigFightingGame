@@ -18,13 +18,15 @@ pub const TimelineComponent = struct {
 
 pub const ReactionComponent = struct {
     hitStun: i32 = 0,
+    guardStun: i32 = 0,
     hitStop: i32 = 0,
     knockBack: i32 = 0,
     attackHasHit: bool = false
 };
 
 pub const StatsComponent = struct {
-    totalHitStun: i32 = 0
+    totalHitStun: i32 = 0,
+    totalGuardStun: i32 = 0,
 };
 
 
