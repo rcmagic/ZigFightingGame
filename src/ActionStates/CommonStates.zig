@@ -94,7 +94,15 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
         return;
     }
 
-    context.NextState = StateMachine.CombatStateID.Standing;
+    if(context.PhysicsComponent.position.y > 0) 
+    {
+        context.NextState = StateMachine.CombatStateID.Jump;
+    }
+    else
+    {
+        context.NextState = StateMachine.CombatStateID.Standing;
+    }
+
     context.bTransition = true;
 }
 
