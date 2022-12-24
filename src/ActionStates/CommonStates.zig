@@ -6,11 +6,11 @@ const common = @import("../common.zig");
 // When the character collides with the ground, return to ground states.
 fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
 {
-    if(context.PhysicsComponent.velocity.y < 0 and context.PhysicsComponent.position.y <= 0)
+    if(context.physics_component.velocity.y < 0 and context.physics_component.position.y <= 0)
     {
-        context.PhysicsComponent.position.y = 0;
-        context.PhysicsComponent.velocity.y = 0;
-        context.PhysicsComponent.acceleration.y = 0;
+        context.physics_component.position.y = 0;
+        context.physics_component.velocity.y = 0;
+        context.physics_component.acceleration.y = 0;
 
         context.TransitionToState(.Standing);
 
@@ -89,7 +89,7 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
         return;
     }
 
-    if(context.PhysicsComponent.position.y > 0) 
+    if(context.physics_component.position.y > 0) 
     {
         context.TransitionToState(.Jump);
     }
@@ -131,7 +131,7 @@ pub const Standing = struct
         _ = context;
 
         //  Stop character movement on standing.
-        context.PhysicsComponent.velocity.x = 0;
+        context.physics_component.velocity.x = 0;
 
         if(CommonTransitions(context))
         {
@@ -139,7 +139,7 @@ pub const Standing = struct
         }
 
         // automatically turn the character to face the opponent when they've changed sides
-        common.FlipToFaceOpponent(context.PhysicsComponent);
+        common.FlipToFaceOpponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -163,7 +163,7 @@ pub const WalkingForward = struct
 
 
         const WalkingForwardSpeed = 2000;
-        context.PhysicsComponent.SetForwardSpeed(WalkingForwardSpeed);
+        context.physics_component.SetForwardSpeed(WalkingForwardSpeed);
 
         if(CommonAttackTransitions(context))
         {
@@ -185,7 +185,7 @@ pub const WalkingForward = struct
             context.TransitionToState(.Standing);
         }
 
-        common.FlipToFaceOpponent(context.PhysicsComponent);
+        common.FlipToFaceOpponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -223,14 +223,14 @@ pub const WalkingBackward = struct
 
 
         const WalkingBackSpeed = -2000;
-        context.PhysicsComponent.SetForwardSpeed(WalkingBackSpeed);
+        context.physics_component.SetForwardSpeed(WalkingBackSpeed);
 
         if(!context.input_command.back)
         {
              context.TransitionToState(.Standing);
         }
 
-        common.FlipToFaceOpponent(context.PhysicsComponent);
+        common.FlipToFaceOpponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -249,12 +249,12 @@ pub const Jump = struct
         std.debug.print("Jump.OnStart()\n", .{});
 
         // Only initialize jump velocity when on the ground.
-        if(context.PhysicsComponent.position.y <= 0)
+        if(context.physics_component.position.y <= 0)
         {
-            context.PhysicsComponent.velocity.y = 10000;
+            context.physics_component.velocity.y = 10000;
         }
 
-        context.PhysicsComponent.acceleration.y = -260;
+        context.physics_component.acceleration.y = -260;
 
         const ForwardSpeed : i32 = switch(context.ActionFlagsComponent.jumpFlags)
         {
@@ -263,7 +263,7 @@ pub const Jump = struct
             .JumpBack => -1000,
         };
 
-        context.PhysicsComponent.SetForwardSpeed(ForwardSpeed);
+        context.physics_component.SetForwardSpeed(ForwardSpeed);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
@@ -350,7 +350,7 @@ pub const Reaction = struct
         _ = context;
         std.debug.print("Reaction.OnStart()\n", .{});
 
-        common.FlipToFaceOpponent(context.PhysicsComponent);
+        common.FlipToFaceOpponent(context.physics_component);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
@@ -372,7 +372,7 @@ pub const GuardReaction = struct
         _ = context;
         std.debug.print("GuardReaction.OnStart()\n", .{});
 
-        common.FlipToFaceOpponent(context.PhysicsComponent);
+        common.FlipToFaceOpponent(context.physics_component);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void

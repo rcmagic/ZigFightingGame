@@ -123,8 +123,8 @@ pub const CollisionSystem = struct
             self.AttackSlices[entity] = self.AttackHitboxScratch[0..0];
             self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
             
-            const entityOffset = gameState.physicsComponents[entity].position;
-            const facingLeft = gameState.physicsComponents[entity].facingLeft;
+            const entityOffset = gameState.physics_components[entity].position;
+            const facingLeft = gameState.physics_components[entity].facingLeft;
 
             const component = &gameState.stateMachineComponents[entity];
             const timeline = &gameState.timelineComponents[entity];

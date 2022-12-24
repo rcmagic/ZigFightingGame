@@ -8,20 +8,18 @@ pub const PhysicsComponent = struct {
     acceleration: math.IntVector2D = .{},
 
     pub fn SetForwardSpeed(self: *PhysicsComponent, Speed: i32) void {
-        self.velocity.x = if(self.facingLeft) -Speed else Speed;
+        self.velocity.x = if (self.facingLeft) -Speed else Speed;
     }
 };
 
-pub const TimelineComponent = struct {
-    framesElapsed: i32 = 0
-};
+pub const TimelineComponent = struct { framesElapsed: i32 = 0 };
 
-pub const ReactionComponent = struct {
-    hitStun: i32 = 0,
-    guardStun: i32 = 0,
-    hitStop: i32 = 0,
-    knockBack: i32 = 0,
-    attackHasHit: bool = false
+pub const ReactionComponent = struct { 
+    hitStun: i32 = 0, 
+    guardStun: i32 = 0, 
+    hitStop: i32 = 0, 
+    knockBack: i32 = 0, 
+    attackHasHit: bool = false 
 };
 
 pub const StatsComponent = struct {
@@ -29,17 +27,12 @@ pub const StatsComponent = struct {
     totalGuardStun: i32 = 0,
 };
 
-
 const JumpFlags = enum(u32) {
     None,
     JumpForward,
     JumpBack,
 };
 
-
-
-
-pub const ActionFlagsComponent = struct {
-    jumpFlags: JumpFlags = JumpFlags.None
+pub const ActionFlagsComponent = struct { 
+    jumpFlags: JumpFlags = JumpFlags.None 
 };
-

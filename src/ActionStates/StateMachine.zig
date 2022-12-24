@@ -22,7 +22,7 @@ pub const CombatStateContext = struct
     bTransition: bool = false,                           // indicates that a state transition has been triggered
     NextState: CombatStateID = .Standing,    // indicates the next state to transition to.
     input_command: input.InputCommand = .{},
-    PhysicsComponent: *Component.PhysicsComponent = undefined,
+    physics_component: *Component.PhysicsComponent = undefined,
     TimelineComponent: *Component.TimelineComponent = undefined,
     ReactionComponent: *Component.ReactionComponent = undefined,
     ActionFlagsComponent: *Component.ActionFlagsComponent = undefined,
@@ -134,7 +134,7 @@ pub const CombatStateMachineProcessor = struct
                         else if(!context.bTransition)
                         {
                             // Go back to idle
-                            if(context.PhysicsComponent.position.y > 0)
+                            if(context.physics_component.position.y > 0)
                             {
                                 context.TransitionToState(.Jump);
                             }

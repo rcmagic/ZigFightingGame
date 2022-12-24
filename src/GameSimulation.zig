@@ -19,12 +19,12 @@ fn PhysicsSystem(gameState: *GameState) !void
     while (entityIndex < gameState.entityCount) 
     {
 
-        var component = &gameState.physicsComponents[entityIndex];
+        var component = &gameState.physics_components[entityIndex];
 
         // Check if the entity is facing its opponent
         {
             const opponent : usize = if(entityIndex == 0) 1 else 0;
-            const opponentX = gameState.physicsComponents[opponent].position.x;
+            const opponentX = gameState.physics_components[opponent].position.x;
 
             component.facingOpponent =
                 ( (opponentX < component.position.x) and component.facingLeft) or

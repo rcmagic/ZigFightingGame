@@ -34,7 +34,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 {
 
 
-    const position = gameState.physicsComponents[entity].position;
+    const position = gameState.physics_components[entity].position;
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
     const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
@@ -43,7 +43,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     var drawState = DrawState{.x = ScreenX, .y = ScreenY};
 
 
-    const facingLeft = gameState.physicsComponents[entity].facingLeft;
+    const facingLeft = gameState.physics_components[entity].facingLeft;
     // Drawing the sprite flipped when the entity is facing left.
     if(facingLeft)
     {
@@ -150,9 +150,9 @@ var debugDrawHitboxes : [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}}
 
 fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
 {
-    const position = gameState.physicsComponents[entity].position;
+    const position = gameState.physics_components[entity].position;
     const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
-    const facingLeft = gameState.physicsComponents[entity].facingLeft;
+    const facingLeft = gameState.physics_components[entity].facingLeft;
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
     const ScreenY = -math.WorldToScreen(position.y) + GroundOffset;
@@ -292,7 +292,7 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         inputCommand.*.down = true;
     }
 
-    const bFlipInput = gameState.physicsComponents[entity].facingLeft;
+    const bFlipInput = gameState.physics_components[entity].facingLeft;
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
     {
@@ -351,10 +351,10 @@ pub fn GameLoop() !void
 
 
     // Initialize our game objects
-    gameState.physicsComponents[0].position = .{.x = -200000, .y = 0 };
-    gameState.physicsComponents[1].position = .{.x = 200000, .y = 0 };
-    gameState.physicsComponents[0].facingLeft = false;
-    gameState.physicsComponents[1].facingLeft = true;
+    gameState.physics_components[0].position = .{.x = -200000, .y = 0 };
+    gameState.physics_components[1].position = .{.x = 200000, .y = 0 };
+    gameState.physics_components[0].facingLeft = false;
+    gameState.physics_components[1].facingLeft = true;
 
 
     // Flag for showing hitboxes

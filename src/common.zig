@@ -6,12 +6,12 @@ const Component = @import("Component.zig");
 
 
 // Conditionally flip the character to face the opponent if not already facing them
-pub fn FlipToFaceOpponent(physicsComponent: *Component.PhysicsComponent) void
+pub fn FlipToFaceOpponent(physics_component: *Component.PhysicsComponent) void
 {
-    if(!physicsComponent.facingOpponent)
+    if(!physics_component.facingOpponent)
     {
-        physicsComponent.facingLeft = !physicsComponent.facingLeft;
-        physicsComponent.facingOpponent = true;
+        physics_component.facingLeft = !physics_component.facingLeft;
+        physics_component.facingOpponent = true;
     }
 }
 

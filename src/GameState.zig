@@ -114,7 +114,7 @@ const MAX_ENTITIES = 10;
 pub const GameState = struct {
     frameCount: i32 = 0,
     entityCount: usize = 0,
-    physicsComponents: [MAX_ENTITIES]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** MAX_ENTITIES,
+    physics_components: [MAX_ENTITIES]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** MAX_ENTITIES,
     stateMachineComponents: [MAX_ENTITIES]StateMachineComponent = [_]StateMachineComponent{.{}} ** MAX_ENTITIES,
     timelineComponents: [MAX_ENTITIES]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** MAX_ENTITIES,
     reactionComponents: [MAX_ENTITIES]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** MAX_ENTITIES,
@@ -139,7 +139,7 @@ pub const GameState = struct {
     fn CreateAndInitOneCharacter(self: *GameState) void
     {
         // Setup referenced components used by the action state machine for a character.
-        self.stateMachineComponents[self.entityCount].context.PhysicsComponent = &self.physicsComponents[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.physics_component = &self.physics_components[self.entityCount];
         self.stateMachineComponents[self.entityCount].context.TimelineComponent = &self.timelineComponents[self.entityCount];
         self.stateMachineComponents[self.entityCount].context.ReactionComponent = &self.reactionComponents[self.entityCount];
         self.stateMachineComponents[self.entityCount].context.ActionFlagsComponent = &self.actionFlagsComponents[self.entityCount];
