@@ -87,13 +87,13 @@ var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .Name = "GuardRe
 // Register states for our character
 fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
 {
-    registery.RegisterCommonState(StateMachine.CombatStateID.Standing, &StandingCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.WalkingForward, &WalkingForwardCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.WalkingBackward, &WalkingBackwardCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.Jump, &JumpCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.Attack, &AttackCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.Reaction, &ReactionCallbacks);
-    registery.RegisterCommonState(StateMachine.CombatStateID.GuardReaction, &GuardReactionCallbacks);
+    registery.RegisterCommonState(.Standing, &StandingCallbacks);
+    registery.RegisterCommonState(.WalkingForward, &WalkingForwardCallbacks);
+    registery.RegisterCommonState(.WalkingBackward, &WalkingBackwardCallbacks);
+    registery.RegisterCommonState(.Jump, &JumpCallbacks);
+    registery.RegisterCommonState(.Attack, &AttackCallbacks);
+    registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
+    registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
 
 }
 

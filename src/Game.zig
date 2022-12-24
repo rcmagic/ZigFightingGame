@@ -101,9 +101,9 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 
         drawState.color = switch(CurrentState)
         {
-            CombatStateID.Standing, CombatStateID.WalkingForward, 
-            CombatStateID.WalkingBackward, CombatStateID.Jump => rl.YELLOW,
-            CombatStateID.Attack => rl.RED,
+            .Standing, .WalkingForward, 
+            .WalkingBackward, .Jump => rl.YELLOW,
+            .Attack => rl.RED,
             else => rl.WHITE
         };
 

@@ -91,11 +91,11 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
 
     if(context.PhysicsComponent.position.y > 0) 
     {
-        context.TransitionToState(StateMachine.CombatStateID.Jump);
+        context.TransitionToState(.Jump);
     }
     else
     {
-        context.TransitionToState(StateMachine.CombatStateID.Standing);
+        context.TransitionToState(.Standing);
     }
 
     context.bTransition = true;
