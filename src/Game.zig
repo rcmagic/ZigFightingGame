@@ -279,53 +279,53 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         return;
     }
 
-    var inputCommand = &gameState.inputComponents[entity].inputCommand;
+    var inputCommand = &gameState.inputComponents[entity].input_command;
 
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
     {
-        inputCommand.*.Up = true;
+        inputCommand.*.up = true;
     }
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
     {
-        inputCommand.*.Down = true;
+        inputCommand.*.down = true;
     }
 
     const bFlipInput = gameState.physicsComponents[entity].facingLeft;
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
     {
-        inputCommand.*.Left = true;
+        inputCommand.*.left = true;
 
         if(bFlipInput)
         {
-            inputCommand.*.Forward = true;
+            inputCommand.*.forward = true;
         }
         else
         {
-            inputCommand.*.Back = true;
+            inputCommand.*.back = true;
         }
     }
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
     {
-        inputCommand.*.Right = true;
+        inputCommand.*.right = true;
 
         if(bFlipInput)
         {
-            inputCommand.*.Back = true;
+            inputCommand.*.back = true;
         }
         else
         {
-            inputCommand.*.Forward = true;
+            inputCommand.*.forward = true;
         }
     }
 
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
     {
-        inputCommand.*.Attack = true;
+        inputCommand.*.attack = true;
     }
 }
 
@@ -381,8 +381,8 @@ pub fn GameLoop() !void
         var bAdvanceOnce = false;
 
         // Reset input to not held down before polling
-        gameState.inputComponents[0].inputCommand.Reset();
-        gameState.inputComponents[1].inputCommand.Reset();
+        gameState.inputComponents[0].input_command.reset();
+        gameState.inputComponents[1].input_command.reset();
 
         if(rl.IsWindowFocused())
         {
@@ -427,28 +427,28 @@ pub fn GameLoop() !void
         {
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_W))
             {
-                gameState.inputComponents[0].inputCommand.Up = true;
+                gameState.inputComponents[0].input_command.up = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_S))
             {
-                gameState.inputComponents[0].inputCommand.Down = true;
+                gameState.inputComponents[0].input_command.down = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_A))
             {
 
-                gameState.inputComponents[0].inputCommand.Back = true;
+                gameState.inputComponents[0].input_command.back = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_D))
             {
-                gameState.inputComponents[0].inputCommand.Forward = true;
+                gameState.inputComponents[0].input_command.forward = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_J))
             {
-                gameState.inputComponents[0].inputCommand.Attack = true;
+                gameState.inputComponents[0].input_command.attack = true;
             }
         }
 

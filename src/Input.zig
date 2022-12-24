@@ -1,16 +1,14 @@
-pub const InputCommand = struct 
-{
-    Up: bool = false,
-    Down: bool = false,
-    Left: bool = false,
-    Right: bool = false,
-    Back: bool = false,
-    Forward: bool = false,
-    Attack: bool = false,
+pub const InputCommand = struct {
+    up: bool = false,
+    down: bool = false,
+    left: bool = false,
+    right: bool = false,
+    back: bool = false,
+    forward: bool = false,
+    attack: bool = false,
 
     // Reset inputs back to their default values
-    pub fn Reset(self: *InputCommand) void 
-    { 
-        self.*  = InputCommand{};
+    pub fn reset(self: *InputCommand) void {
+        self.* = InputCommand{};
     }
 };

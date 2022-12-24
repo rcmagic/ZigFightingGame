@@ -50,13 +50,13 @@ pub const ReactionSystem = struct
         {
             var defenderState = &gameState.stateMachineComponents[hitEvent.defenderID];
 
-            const input = gameState.inputComponents[hitEvent.defenderID].inputCommand;
+            const input = gameState.inputComponents[hitEvent.defenderID].input_command;
 
             const defenderPhysics = gameState.physicsComponents[hitEvent.defenderID];
             const attackerPhysics = gameState.physicsComponents[hitEvent.attackerID];
 
             const AttackerOnLeftSide = attackerPhysics.position.x < defenderPhysics.position.x;            
-            const WasGuarded = (AttackerOnLeftSide and input.Right) or (!AttackerOnLeftSide and input.Left);
+            const WasGuarded = (AttackerOnLeftSide and input.right) or (!AttackerOnLeftSide and input.left);
 
 
             if(WasGuarded)

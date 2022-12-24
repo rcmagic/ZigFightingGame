@@ -3,7 +3,7 @@ const math = @import("utils/math.zig");
 const Component = @import("Component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
-const Input = @import("Input.zig");
+const input = @import("input.zig");
 const CharacterData = @import("CharacterData.zig");
 const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
@@ -89,8 +89,8 @@ fn ActionSystem(gameState: *GameState) void
 
 fn InputCommandSystem(gameState: *GameState) void 
 {
-    gameState.stateMachineComponents[0].context.InputCommand = gameState.inputComponents[0].inputCommand;
-    gameState.stateMachineComponents[1].context.InputCommand = gameState.inputComponents[1].inputCommand;
+    gameState.stateMachineComponents[0].context.input_command = gameState.inputComponents[0].input_command;
+    gameState.stateMachineComponents[1].context.input_command = gameState.inputComponents[1].input_command;
 }
 
 test "Test setting up game data" 

@@ -2,7 +2,7 @@ const std = @import("std");
 const Component = @import("Component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
-const Input = @import("Input.zig");
+const input = @import("input.zig");
 const CharacterData = @import("CharacterData.zig");
 const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
 const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
@@ -33,7 +33,7 @@ const StateMachineComponent = struct
 
 const InputComponent = struct 
 { 
-    inputCommand: Input.InputCommand = .{} 
+    input_command: input.InputCommand = .{} 
 };
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData

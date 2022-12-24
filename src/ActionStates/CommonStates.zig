@@ -24,15 +24,15 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
 
 fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
 {
-    if(context.InputCommand.Up)
+    if(context.input_command.up)
     {
         context.ActionFlagsComponent.jumpFlags = .None;
 
-        if(context.InputCommand.Forward)
+        if(context.input_command.forward)
         {
             context.ActionFlagsComponent.jumpFlags = .JumpForward;
         }
-        else if(context.InputCommand.Back)
+        else if(context.input_command.back)
         {
             context.ActionFlagsComponent.jumpFlags = .JumpBack;
         }
@@ -48,7 +48,7 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
 
 fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
 {
-    if(context.InputCommand.Attack)
+    if(context.input_command.attack)
     {
         context.TransitionToState(.Attack);
         return true;
@@ -67,12 +67,12 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) bool
     {
         return true;
     }
-    else if(context.InputCommand.Forward)
+    else if(context.input_command.forward)
     {
         context.TransitionToState(.WalkingForward);
         return true;
     }
-    else if(context.InputCommand.Back)
+    else if(context.input_command.back)
     {
         context.TransitionToState(.WalkingBackward);
         return true;
@@ -173,14 +173,14 @@ pub const WalkingForward = struct
         {
             return; // Bail out of this state when a transition has been detected
         }
-        else if(context.InputCommand.Back)
+        else if(context.input_command.back)
         {
             context.TransitionToState(.WalkingBackward);
             return;
         }
 
 
-        if(!context.InputCommand.Forward)
+        if(!context.input_command.forward)
         {
             context.TransitionToState(.Standing);
         }
@@ -215,7 +215,7 @@ pub const WalkingBackward = struct
         {
             return; // Bail out of this state when a transition has been detected
         }
-        else if(context.InputCommand.Forward)
+        else if(context.input_command.forward)
         {
             context.TransitionToState(.WalkingForward);
             return;
@@ -225,7 +225,7 @@ pub const WalkingBackward = struct
         const WalkingBackSpeed = -2000;
         context.PhysicsComponent.SetForwardSpeed(WalkingBackSpeed);
 
-        if(!context.InputCommand.Back)
+        if(!context.input_command.back)
         {
              context.TransitionToState(.Standing);
         }
@@ -275,7 +275,7 @@ pub const Jump = struct
             return;
         }
 
-        if(context.InputCommand.Attack) 
+        if(context.input_command.attack) 
         {
             context.TransitionToState(.Attack);
         }
