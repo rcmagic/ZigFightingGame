@@ -55,7 +55,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     // Get textured used to render the sprite
     if(gameState.gameData) | gameData |
     {
-        const stateMachine = &gameState.stateMachineComponents[entity].stateMachine;
+        const stateMachine = &gameState.state_machine_components[entity].stateMachine;
         
         const CurrentState = stateMachine.CurrentState;
 
@@ -97,7 +97,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 
     if(bDebugColorEnabled)
     {
-        const CurrentState = gameState.stateMachineComponents[entity].stateMachine.CurrentState;
+        const CurrentState = gameState.state_machine_components[entity].stateMachine.CurrentState;
 
         drawState.color = switch(CurrentState)
         {
@@ -165,7 +165,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
 
     if(gameState.gameData) | gameData |
     {
-        const stateMachine = &gameState.stateMachineComponents[entity].stateMachine;
+        const stateMachine = &gameState.state_machine_components[entity].stateMachine;
         const CurrentState = stateMachine.CurrentState;
 
         var actionName : []const u8 = "";
@@ -242,7 +242,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     var activeFrame : i32 = 0;
 
     // Pull duration from the current action for the timelin
-    if(gameState.stateMachineComponents[entity].context.ActionData) | actionData |
+    if(gameState.state_machine_components[entity].context.ActionData) | actionData |
     {
         totalFrames = actionData.Duration;
         activeFrame = gameState.timeline_components[entity].framesElapsed;
@@ -252,7 +252,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     const hitStun = gameState.reaction_components[entity].hitStun;
     if(hitStun > 0)
     {
-        totalFrames = gameState.statsComponents[entity].totalHitStun;
+        totalFrames = gameState.stats_components[entity].totalHitStun;
         activeFrame = totalFrames - hitStun;
     }
 
@@ -260,7 +260,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     const guardStun = gameState.reaction_components[entity].guardStun;
     if(guardStun > 0)
     {
-        totalFrames = gameState.statsComponents[entity].totalGuardStun;
+        totalFrames = gameState.stats_components[entity].totalGuardStun;
         activeFrame = totalFrames - guardStun;
     }
 

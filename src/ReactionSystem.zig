@@ -29,7 +29,7 @@ pub const ReactionSystem = struct
 
                 if(component.hitStun <= 0)
                 {
-                    var defenderState = &gameState.stateMachineComponents[entityIndex];
+                    var defenderState = &gameState.state_machine_components[entityIndex];
                     CommonStates.CommonToIdleTransitions(&defenderState.context);
                 }
             }
@@ -39,7 +39,7 @@ pub const ReactionSystem = struct
 
                 if(component.guardStun <= 0)
                 {
-                    var defenderState = &gameState.stateMachineComponents[entityIndex];
+                    var defenderState = &gameState.state_machine_components[entityIndex];
                     CommonStates.CommonToIdleTransitions(&defenderState.context);
                 }
             }
@@ -48,7 +48,7 @@ pub const ReactionSystem = struct
         // Transition to reactions for all characters that were hit.
         for(gameState.hitEvents.items) | hitEvent |
         {
-            var defenderState = &gameState.stateMachineComponents[hitEvent.defenderID];
+            var defenderState = &gameState.state_machine_components[hitEvent.defenderID];
 
             const input = gameState.inputComponents[hitEvent.defenderID].input_command;
 
@@ -76,8 +76,8 @@ pub const ReactionSystem = struct
             gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitStop;
 
             // Update non gameplay effecting statistics 
-            gameState.statsComponents[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;
-            gameState.statsComponents[hitEvent.defenderID].totalGuardStun = hitEvent.guardStun;
+            gameState.stats_components[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;
+            gameState.stats_components[hitEvent.defenderID].totalGuardStun = hitEvent.guardStun;
 
         }
 

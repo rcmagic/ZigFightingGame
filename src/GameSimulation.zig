@@ -75,7 +75,7 @@ fn ActionSystem(gameState: *GameState) void
 {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
-        const component = &gameState.stateMachineComponents[entityIndex];
+        const component = &gameState.state_machine_components[entityIndex];
         
         if( gameState.gameData) | gameData |
         {
@@ -89,8 +89,8 @@ fn ActionSystem(gameState: *GameState) void
 
 fn InputCommandSystem(gameState: *GameState) void 
 {
-    gameState.stateMachineComponents[0].context.input_command = gameState.inputComponents[0].input_command;
-    gameState.stateMachineComponents[1].context.input_command = gameState.inputComponents[1].input_command;
+    gameState.state_machine_components[0].context.input_command = gameState.inputComponents[0].input_command;
+    gameState.state_machine_components[1].context.input_command = gameState.inputComponents[1].input_command;
 }
 
 test "Test setting up game data" 

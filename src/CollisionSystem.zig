@@ -126,7 +126,7 @@ pub const CollisionSystem = struct
             const entityOffset = gameState.physics_components[entity].position;
             const facingLeft = gameState.physics_components[entity].facingLeft;
 
-            const component = &gameState.stateMachineComponents[entity];
+            const component = &gameState.state_machine_components[entity];
             const timeline = &gameState.timeline_components[entity];
             
             const CurrentState = component.stateMachine.CurrentState;
