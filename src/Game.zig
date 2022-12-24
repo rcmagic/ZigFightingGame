@@ -86,6 +86,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     }
 
     const reaction = gameState.reactionComponents[entity];
+    
     // Hit shake during hitstop of a character in hit or guard stun.
     if((reaction.hitStop > 0) and ((reaction.hitStun > 0) or (reaction.guardStun > 0)))
     {
@@ -292,6 +293,7 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
     {
+        gameState.inputComponents[entity].inputCommand.Left = true;
 
         if(bFlipInput)
         {
@@ -305,6 +307,8 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
     {
+        gameState.inputComponents[entity].inputCommand.Right = true;
+        
         if(bFlipInput)
         {
             gameState.inputComponents[entity].inputCommand.Back = true;

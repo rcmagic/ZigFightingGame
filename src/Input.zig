@@ -2,6 +2,8 @@ pub const InputCommand = struct
 {
     Up: bool = false,
     Down: bool = false,
+    Left: bool = false,
+    Right: bool = false,
     Back: bool = false,
     Forward: bool = false,
     Attack: bool = false,

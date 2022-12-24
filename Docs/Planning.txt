@@ -179,16 +179,16 @@
 
 2022/12/23
 - Make character return to idle after hit stun is over. [x]
-- Support guard action and guard stun.
+- Support guarding, a guard action and guard stun. [x]
+
+2022/12/*
+- Refactor Back/Forward input to be determined by a utility function.
 
 2022/9/*
-- Action timeline doesn't determined returning to idle, hit stun will.
 - Hit trades
 - Launch reaction
 - Launch physics
 - Avoid reloading textures with hot reload. Or make 2 reloads, with one forcing a texture reload.
-- Block reaction
-- Block stun
 - Implement hit properties in character data
 - Knockdowns
 

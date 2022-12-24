@@ -52,22 +52,13 @@ pub const ReactionSystem = struct
             defenderState.context.bTransition = true;
 
 
-            const input = gameState.inputComponents[hitEvent.defenderID];
+            const input = gameState.inputComponents[hitEvent.defenderID].inputCommand;
 
             const defenderPhysics = gameState.physicsComponents[hitEvent.defenderID];
             const attackerPhysics = gameState.physicsComponents[hitEvent.attackerID];
 
-            const AttackerOnLeftSide = attackerPhysics.position.x < defenderPhysics.position.x;
-
-            const isInputLeft = (defenderPhysics.facingLeft and input.inputCommand.Forward) or
-                            ((!defenderPhysics.facingLeft) and input.inputCommand.Back);
-            
-            const isInputRight = (defenderPhysics.facingLeft and input.inputCommand.Back) or
-                             ((!defenderPhysics.facingLeft) and input.inputCommand.Forward);
-
-            
-            const WasGuarded = (AttackerOnLeftSide and isInputRight) or (!AttackerOnLeftSide and isInputLeft);
-
+            const AttackerOnLeftSide = attackerPhysics.position.x < defenderPhysics.position.x;            
+            const WasGuarded = (AttackerOnLeftSide and input.Right) or (!AttackerOnLeftSide and input.Left);
 
 
             if(WasGuarded)
