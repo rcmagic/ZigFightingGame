@@ -279,50 +279,53 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         return;
     }
 
-    const bFlipInput = gameState.physicsComponents[entity].facingLeft;
+    var inputCommand = &gameState.inputComponents[entity].inputCommand;
+
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
     {
-        gameState.inputComponents[entity].inputCommand.Up = true;
+        inputCommand.*.Up = true;
     }
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN))
     {
-        gameState.inputComponents[entity].inputCommand.Down = true;
+        inputCommand.*.Down = true;
     }
+
+    const bFlipInput = gameState.physicsComponents[entity].facingLeft;
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT))
     {
-        gameState.inputComponents[entity].inputCommand.Left = true;
+        inputCommand.*.Left = true;
 
         if(bFlipInput)
         {
-            gameState.inputComponents[entity].inputCommand.Forward = true;
+            inputCommand.*.Forward = true;
         }
         else
         {
-            gameState.inputComponents[entity].inputCommand.Back = true;
+            inputCommand.*.Back = true;
         }
     }
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
     {
-        gameState.inputComponents[entity].inputCommand.Right = true;
-        
+        inputCommand.*.Right = true;
+
         if(bFlipInput)
         {
-            gameState.inputComponents[entity].inputCommand.Back = true;
+            inputCommand.*.Back = true;
         }
         else
         {
-            gameState.inputComponents[entity].inputCommand.Forward = true;
+            inputCommand.*.Forward = true;
         }
     }
 
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
     {
-        gameState.inputComponents[entity].inputCommand.Attack = true;
+        inputCommand.*.Attack = true;
     }
 }
 
