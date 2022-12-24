@@ -1,5 +1,5 @@
 const std = @import("std");
-const Component = @import("../Component.zig");
+const component = @import("../component.zig");
 const input = @import("../input.zig");
 const CharacterData = @import("../CharacterData.zig");
 // Identifies common character states.
@@ -22,10 +22,10 @@ pub const CombatStateContext = struct
     bTransition: bool = false,                           // indicates that a state transition has been triggered
     NextState: CombatStateID = .Standing,    // indicates the next state to transition to.
     input_command: input.InputCommand = .{},
-    physics_component: *Component.PhysicsComponent = undefined,
-    timeline_component: *Component.TimelineComponent = undefined,
-    reaction_component: *Component.ReactionComponent = undefined,
-    action_flags_component: *Component.ActionFlagsComponent = undefined,
+    physics_component: *component.PhysicsComponent = undefined,
+    timeline_component: *component.TimelineComponent = undefined,
+    reaction_component: *component.ReactionComponent = undefined,
+    action_flags_component: *component.ActionFlagsComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
 
     // Trigger a transition to a new state.

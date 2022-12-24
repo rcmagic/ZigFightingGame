@@ -1,6 +1,6 @@
 const std = @import("std");
 const StateMachine = @import("StateMachine.zig");
-const Component = @import("../Component.zig");
+const component = @import("../component.zig");
 const common = @import("../common.zig");
 
 // When the character collides with the ground, return to ground states.

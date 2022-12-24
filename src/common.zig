@@ -2,11 +2,11 @@ const std = @import("std");
 const assert = std.debug.assert;
 const math = @import("utils/math.zig");
 const CharacterData = @import("CharacterData.zig");
-const Component = @import("Component.zig");
+const component = @import("component.zig");
 
 
 // Conditionally flip the character to face the opponent if not already facing them
-pub fn FlipToFaceOpponent(physics_component: *Component.PhysicsComponent) void
+pub fn FlipToFaceOpponent(physics_component: *component.PhysicsComponent) void
 {
     if(!physics_component.facingOpponent)
     {

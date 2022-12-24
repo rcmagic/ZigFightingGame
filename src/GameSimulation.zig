@@ -1,6 +1,6 @@
 const std = @import("std");
 const math = @import("utils/math.zig");
-const Component = @import("Component.zig");
+const component = @import("component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const input = @import("input.zig");
@@ -19,16 +19,16 @@ fn PhysicsSystem(gameState: *GameState) !void
     while (entityIndex < gameState.entityCount) 
     {
 
-        var component = &gameState.physics_components[entityIndex];
+        var physics = &gameState.physics_components[entityIndex];
 
         // Check if the entity is facing its opponent
         {
             const opponent : usize = if(entityIndex == 0) 1 else 0;
             const opponentX = gameState.physics_components[opponent].position.x;
 
-            component.facingOpponent =
-                ( (opponentX < component.position.x) and component.facingLeft) or
-                ( (opponentX > component.position.x) and !component.facingLeft);
+            physics.facingOpponent =
+                ( (opponentX < physics.position.x) and physics.facingLeft) or
+                ( (opponentX > physics.position.x) and !physics.facingLeft);
 
         }
         const reactionComponent = &gameState.reaction_components[entityIndex];
@@ -37,20 +37,20 @@ fn PhysicsSystem(gameState: *GameState) !void
         {
 
             // move position based on the current velocity.
-            component.position = component.position.Add(component.velocity);
-            component.velocity = component.velocity.Add(component.acceleration);
+            physics.position = physics.position.Add(physics.velocity);
+            physics.velocity = physics.velocity.Add(physics.acceleration);
 
             // Apply knockback
             if((reactionComponent.hitStun > 0 or reactionComponent.guardStun > 0) and reactionComponent.knockBack != 0)
             {        
                 // Knock the entity back depending on which direction they are facing    
-                if(component.facingLeft)
+                if(physics.facingLeft)
                 {
-                    component.position.x += reactionComponent.knockBack;
+                    physics.position.x += reactionComponent.knockBack;
                 }
                 else 
                 {
-                    component.position.x -= reactionComponent.knockBack;
+                    physics.position.x -= reactionComponent.knockBack;
                 }
 
                 // Handle reducing knockback overtime
@@ -75,11 +75,11 @@ fn ActionSystem(gameState: *GameState) void
 {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
-        const component = &gameState.state_machine_components[entityIndex];
+        const state_machine = &gameState.state_machine_components[entityIndex];
         
         if( gameState.gameData) | gameData |
         {
-            component.stateMachine.UpdateStateMachine(&component.context, gameData.Characters.items[entityIndex], gameData.ActionMaps.items[entityIndex]);
+            state_machine.stateMachine.UpdateStateMachine(&state_machine.context, gameData.Characters.items[entityIndex], gameData.ActionMaps.items[entityIndex]);
         }
 
         entityIndex += 1;

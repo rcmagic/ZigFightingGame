@@ -1,6 +1,6 @@
 const std = @import("std");
 const CharacterData = @import("CharacterData.zig");
-const Component = @import("Component.zig");
+const component = @import("component.zig");
 const GameState = @import("GameState.zig").GameState;
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
@@ -17,27 +17,27 @@ pub const ReactionSystem = struct
     {
         _ = self;
 
-        for(gameState.reaction_components) | *component, entityIndex |
+        for(gameState.reaction_components) | *reaction, entityIndex |
         {
-            if(component.hitStop > 0)
+            if(reaction.hitStop > 0)
             {
-                component.hitStop -= 1;
+                reaction.hitStop -= 1;
             }
-            else if(component.hitStun > 0)
+            else if(reaction.hitStun > 0)
             {
-                component.hitStun -= 1;
+                reaction.hitStun -= 1;
 
-                if(component.hitStun <= 0)
+                if(reaction.hitStun <= 0)
                 {
                     var defenderState = &gameState.state_machine_components[entityIndex];
                     CommonStates.CommonToIdleTransitions(&defenderState.context);
                 }
             }
-            else if(component.guardStun > 0)
+            else if(reaction.guardStun > 0)
             {
-                component.guardStun -= 1;
+                reaction.guardStun -= 1;
 
-                if(component.guardStun <= 0)
+                if(reaction.guardStun <= 0)
                 {
                     var defenderState = &gameState.state_machine_components[entityIndex];
                     CommonStates.CommonToIdleTransitions(&defenderState.context);

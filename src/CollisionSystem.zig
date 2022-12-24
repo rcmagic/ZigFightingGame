@@ -1,7 +1,7 @@
 const std = @import("std");
 const math = @import("utils/math.zig");
 const CharacterData = @import("CharacterData.zig");
-const Component = @import("Component.zig");
+const component = @import("component.zig");
 const GameState = @import("GameState.zig").GameState;
 const common = @import("common.zig");
 
@@ -126,13 +126,13 @@ pub const CollisionSystem = struct
             const entityOffset = gameState.physics_components[entity].position;
             const facingLeft = gameState.physics_components[entity].facingLeft;
 
-            const component = &gameState.state_machine_components[entity];
+            const state_machine = &gameState.state_machine_components[entity];
             const timeline = &gameState.timeline_components[entity];
             
-            const CurrentState = component.stateMachine.CurrentState;
+            const CurrentState = state_machine.stateMachine.CurrentState;
 
             var actionName : []const u8 = "";
-            if(component.stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
+            if(state_machine.stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
             {
                 actionName = state.Name;
             }

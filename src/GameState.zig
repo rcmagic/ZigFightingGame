@@ -1,5 +1,5 @@
 const std = @import("std");
-const Component = @import("Component.zig");
+const component = @import("component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const input = @import("input.zig");
@@ -114,12 +114,12 @@ const MAX_ENTITIES = 10;
 pub const GameState = struct {
     frameCount: i32 = 0,
     entityCount: usize = 0,
-    physics_components: [MAX_ENTITIES]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** MAX_ENTITIES,
+    physics_components: [MAX_ENTITIES]component.PhysicsComponent = [_]component.PhysicsComponent{.{}} ** MAX_ENTITIES,
     state_machine_components: [MAX_ENTITIES]StateMachineComponent = [_]StateMachineComponent{.{}} ** MAX_ENTITIES,
-    timeline_components: [MAX_ENTITIES]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** MAX_ENTITIES,
-    reaction_components: [MAX_ENTITIES]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** MAX_ENTITIES,
-    action_flags_components: [MAX_ENTITIES]Component.ActionFlagsComponent = [_]Component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
-    stats_components: [MAX_ENTITIES]Component.StatsComponent = [_]Component.StatsComponent{.{}} ** MAX_ENTITIES,
+    timeline_components: [MAX_ENTITIES]component.TimelineComponent = [_]component.TimelineComponent{.{}} ** MAX_ENTITIES,
+    reaction_components: [MAX_ENTITIES]component.ReactionComponent = [_]component.ReactionComponent{.{}} ** MAX_ENTITIES,
+    action_flags_components: [MAX_ENTITIES]component.ActionFlagsComponent = [_]component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
+    stats_components: [MAX_ENTITIES]component.StatsComponent = [_]component.StatsComponent{.{}} ** MAX_ENTITIES,
 
     // "Global" components
     inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
