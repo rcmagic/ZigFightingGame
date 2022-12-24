@@ -20,7 +20,7 @@ pub const CombatStateID = enum(u32)
 pub const CombatStateContext = struct 
 { 
     bTransition: bool = false,                           // indicates that a state transition has been triggered
-    NextState: CombatStateID = CombatStateID.Standing,    // indicates the next state to transition to.
+    NextState: CombatStateID = .Standing,    // indicates the next state to transition to.
     InputCommand: Input.InputCommand = .{},
     PhysicsComponent: *Component.PhysicsComponent = undefined,
     TimelineComponent: *Component.TimelineComponent = undefined,
@@ -101,7 +101,7 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
 pub const CombatStateMachineProcessor = struct
 {
     Registery: CombatStateRegistery = .{},
-    CurrentState: CombatStateID = CombatStateID.Standing,
+    CurrentState: CombatStateID = .Standing,
 
 
     pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: CharacterData.CharacterProperties,
@@ -140,7 +140,7 @@ pub const CombatStateMachineProcessor = struct
                             }
                             else
                             {
-                                context.TransitionToState(.Jump);
+                                context.TransitionToState(.Standing);
                             }
                         }
                     }
@@ -162,7 +162,7 @@ test "Register a combat state."
 
     try std.testing.expect(Registery.CombatStates[0] == null);
 
-    Registery.RegisterCommonState(CombatStateID.Standing, &TestState);
+    Registery.RegisterCommonState(.Standing, &TestState);
 
     try std.testing.expect(Registery.CombatStates[0] != null);
 }
@@ -187,7 +187,7 @@ test "Test running a state update on a state machine processor."
     var Processor = CombatStateMachineProcessor{.Context = &context.base};
 
     var TestState = CombatStateCallbacks { .OnUpdate = TestOnUpdate };
-    Processor.Registery.RegisterCommonState(CombatStateID.Standing, &TestState);
+    Processor.Registery.RegisterCommonState(.Standing, &TestState);
 
     Processor.UpdateStateMachine();
 
@@ -223,8 +223,8 @@ test "Test transitioning the state machine from one state to another."
     var StandingCallbacks = CombatStateCallbacks { .OnUpdate = Dummy.StandingOnUpdate, .OnEnd = Dummy.StandingOnEnd };
     var JumpCallbacks = CombatStateCallbacks { .OnStart = Dummy.JumpOnStart };
     
-    Processor.Registery.RegisterCommonState(CombatStateID.Standing, &StandingCallbacks);
-    Processor.Registery.RegisterCommonState(CombatStateID.Jump, &JumpCallbacks);
+    Processor.Registery.RegisterCommonState(.Standing, &StandingCallbacks);
+    Processor.Registery.RegisterCommonState(.Jump, &JumpCallbacks);
     
     Processor.UpdateStateMachine();
 
@@ -232,7 +232,7 @@ test "Test transitioning the state machine from one state to another."
     try std.testing.expect(context.base.bTransition == false);
 
     // Test that the state machine correctly transitioned to the jump state
-    try std.testing.expectEqual(Processor.CurrentState, CombatStateID.Jump);
+    try std.testing.expectEqual(Processor.CurrentState, .Jump);
 
     // Test to see if OnEnd was called on the previous state.
     try std.testing.expect(context.TestVar == true);
