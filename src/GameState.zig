@@ -116,9 +116,9 @@ pub const GameState = struct {
     entityCount: usize = 0,
     physics_components: [MAX_ENTITIES]Component.PhysicsComponent = [_]Component.PhysicsComponent{.{}} ** MAX_ENTITIES,
     stateMachineComponents: [MAX_ENTITIES]StateMachineComponent = [_]StateMachineComponent{.{}} ** MAX_ENTITIES,
-    timelineComponents: [MAX_ENTITIES]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** MAX_ENTITIES,
-    reactionComponents: [MAX_ENTITIES]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** MAX_ENTITIES,
-    actionFlagsComponents: [MAX_ENTITIES]Component.ActionFlagsComponent = [_]Component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
+    timeline_components: [MAX_ENTITIES]Component.TimelineComponent = [_]Component.TimelineComponent{.{}} ** MAX_ENTITIES,
+    reaction_components: [MAX_ENTITIES]Component.ReactionComponent = [_]Component.ReactionComponent{.{}} ** MAX_ENTITIES,
+    action_flags_components: [MAX_ENTITIES]Component.ActionFlagsComponent = [_]Component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
     statsComponents: [MAX_ENTITIES]Component.StatsComponent = [_]Component.StatsComponent{.{}} ** MAX_ENTITIES,
 
     // "Global" components
@@ -140,9 +140,9 @@ pub const GameState = struct {
     {
         // Setup referenced components used by the action state machine for a character.
         self.stateMachineComponents[self.entityCount].context.physics_component = &self.physics_components[self.entityCount];
-        self.stateMachineComponents[self.entityCount].context.TimelineComponent = &self.timelineComponents[self.entityCount];
-        self.stateMachineComponents[self.entityCount].context.ReactionComponent = &self.reactionComponents[self.entityCount];
-        self.stateMachineComponents[self.entityCount].context.ActionFlagsComponent = &self.actionFlagsComponents[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.timeline_component = &self.timeline_components[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.reaction_component = &self.reaction_components[self.entityCount];
+        self.stateMachineComponents[self.entityCount].context.action_flags_component = &self.action_flags_components[self.entityCount];
 
         // Register states
         RegisterActionStates(&self.stateMachineComponents[self.entityCount].stateMachine.Registery);

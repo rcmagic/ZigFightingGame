@@ -26,15 +26,15 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
 {
     if(context.input_command.up)
     {
-        context.ActionFlagsComponent.jumpFlags = .None;
+        context.action_flags_component.jumpFlags = .None;
 
         if(context.input_command.forward)
         {
-            context.ActionFlagsComponent.jumpFlags = .JumpForward;
+            context.action_flags_component.jumpFlags = .JumpForward;
         }
         else if(context.input_command.back)
         {
-            context.ActionFlagsComponent.jumpFlags = .JumpBack;
+            context.action_flags_component.jumpFlags = .JumpBack;
         }
 
         context.TransitionToState(.Jump);
@@ -106,7 +106,7 @@ fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool
     if(context.ActionData) | actionData |
     {
         // Only check for idle action transitions on the final frame.
-        if(context.TimelineComponent.framesElapsed >= actionData.Duration)
+        if(context.timeline_component.framesElapsed >= actionData.Duration)
         { 
             CommonToIdleTransitions(context);
             return true;
@@ -256,7 +256,7 @@ pub const Jump = struct
 
         context.physics_component.acceleration.y = -260;
 
-        const ForwardSpeed : i32 = switch(context.ActionFlagsComponent.jumpFlags)
+        const ForwardSpeed : i32 = switch(context.action_flags_component.jumpFlags)
         {
             .None => 0,
             .JumpForward => 1000,

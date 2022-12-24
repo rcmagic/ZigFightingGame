@@ -17,7 +17,7 @@ pub const ReactionSystem = struct
     {
         _ = self;
 
-        for(gameState.reactionComponents) | *component, entityIndex |
+        for(gameState.reaction_components) | *component, entityIndex |
         {
             if(component.hitStop > 0)
             {
@@ -62,18 +62,18 @@ pub const ReactionSystem = struct
             if(WasGuarded)
             {
                 defenderState.context.TransitionToState(.GuardReaction);
-                gameState.reactionComponents[hitEvent.defenderID].guardStun = hitEvent.guardStun;
+                gameState.reaction_components[hitEvent.defenderID].guardStun = hitEvent.guardStun;
             }
             else
             {
                 defenderState.context.TransitionToState(.Reaction);
-                gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
+                gameState.reaction_components[hitEvent.defenderID].hitStun = hitEvent.hitStun;
             }        
 
-            gameState.reactionComponents[hitEvent.defenderID].hitStop = hitEvent.hitStop;
-            gameState.reactionComponents[hitEvent.defenderID].knockBack = hitEvent.knockBack;
+            gameState.reaction_components[hitEvent.defenderID].hitStop = hitEvent.hitStop;
+            gameState.reaction_components[hitEvent.defenderID].knockBack = hitEvent.knockBack;
 
-            gameState.reactionComponents[hitEvent.attackerID].hitStop = hitEvent.hitStop;
+            gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitStop;
 
             // Update non gameplay effecting statistics 
             gameState.statsComponents[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;

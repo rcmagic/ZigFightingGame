@@ -74,7 +74,7 @@ pub const CollisionSystem = struct
 
             
             // Don't let an action hit more than once
-            if(gameState.reactionComponents[attackerIndex].attackHasHit)
+            if(gameState.reaction_components[attackerIndex].attackHasHit)
             {
                 continue;
             }
@@ -96,7 +96,7 @@ pub const CollisionSystem = struct
                         if(DoHitboxesOverlap(attackBox, vulnerableBox))
                         {
                             // Make sure the attack won't hit more than once.
-                            gameState.reactionComponents[attackerIndex].attackHasHit = true;
+                            gameState.reaction_components[attackerIndex].attackHasHit = true;
 
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
@@ -127,7 +127,7 @@ pub const CollisionSystem = struct
             const facingLeft = gameState.physics_components[entity].facingLeft;
 
             const component = &gameState.stateMachineComponents[entity];
-            const timeline = &gameState.timelineComponents[entity];
+            const timeline = &gameState.timeline_components[entity];
             
             const CurrentState = component.stateMachine.CurrentState;
 

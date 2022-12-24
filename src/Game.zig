@@ -67,7 +67,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 
         if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         {                
-            const imageRange = actionData.GetActiveImage(gameState.timelineComponents[entity].framesElapsed);
+            const imageRange = actionData.GetActiveImage(gameState.timeline_components[entity].framesElapsed);
 
             // Get the sprite texture
             if(gameData.FindSequenceTextures(entity, imageRange.Sequence)) | sequence |
@@ -85,13 +85,13 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
         }
     }
 
-    const reaction = gameState.reactionComponents[entity];
+    const reaction = gameState.reaction_components[entity];
     
     // Hit shake during hitstop of a character in hit or guard stun.
     if((reaction.hitStop > 0) and ((reaction.hitStun > 0) or (reaction.guardStun > 0)))
     {
         const hitShakeDist = 4;
-        const hitShake = -(hitShakeDist / 2) + hitShakeDist*@mod(gameState.reactionComponents[0].hitStop,2);
+        const hitShake = -(hitShakeDist / 2) + hitShakeDist*@mod(gameState.reaction_components[0].hitStop,2);
         drawState.x += hitShake;
     }
 
@@ -109,7 +109,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
 
 
         // Color the character when they are hit.
-        if(gameState.reactionComponents[entity].hitStun > 0)
+        if(gameState.reaction_components[entity].hitStun > 0)
         {
             drawState.color = rl.BLUE;
         }
@@ -151,7 +151,7 @@ var debugDrawHitboxes : [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}}
 fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
 {
     const position = gameState.physics_components[entity].position;
-    const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
+    const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const facingLeft = gameState.physics_components[entity].facingLeft;
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
@@ -218,9 +218,9 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
 
 pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
 {
-    const reaction = gameState.reactionComponents[entity];
+    const reaction = gameState.reaction_components[entity];
     const player : i32 = @intCast(i32, entity);
-    const framesElapsed = gameState.timelineComponents[entity].framesElapsed;
+    const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const XOffset : i32 = player*200+10;
     const YOffset : i32 = 80;
     rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d\nguardStun: %d\nframesElapsed: %d", player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed), XOffset, YOffset, 16, rl.BLACK);
@@ -245,11 +245,11 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     if(gameState.stateMachineComponents[entity].context.ActionData) | actionData |
     {
         totalFrames = actionData.Duration;
-        activeFrame = gameState.timelineComponents[entity].framesElapsed;
+        activeFrame = gameState.timeline_components[entity].framesElapsed;
     }
 
     // When there is hitstun use the hitstun from the last hit for drawing the timeline
-    const hitStun = gameState.reactionComponents[entity].hitStun;
+    const hitStun = gameState.reaction_components[entity].hitStun;
     if(hitStun > 0)
     {
         totalFrames = gameState.statsComponents[entity].totalHitStun;
@@ -257,7 +257,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     }
 
     // When there is guard stun use the guard stun from the last hit for drawing the timeline
-    const guardStun = gameState.reactionComponents[entity].guardStun;
+    const guardStun = gameState.reaction_components[entity].guardStun;
     if(guardStun > 0)
     {
         totalFrames = gameState.statsComponents[entity].totalGuardStun;

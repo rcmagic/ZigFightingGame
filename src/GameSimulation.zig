@@ -31,7 +31,7 @@ fn PhysicsSystem(gameState: *GameState) !void
                 ( (opponentX > component.position.x) and !component.facingLeft);
 
         }
-        const reactionComponent = &gameState.reactionComponents[entityIndex];
+        const reactionComponent = &gameState.reaction_components[entityIndex];
         // Only update physics when there is no hitstop
         if(reactionComponent.hitStop <= 0)
         {

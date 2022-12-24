@@ -23,9 +23,9 @@ pub const CombatStateContext = struct
     NextState: CombatStateID = .Standing,    // indicates the next state to transition to.
     input_command: input.InputCommand = .{},
     physics_component: *Component.PhysicsComponent = undefined,
-    TimelineComponent: *Component.TimelineComponent = undefined,
-    ReactionComponent: *Component.ReactionComponent = undefined,
-    ActionFlagsComponent: *Component.ActionFlagsComponent = undefined,
+    timeline_component: *Component.TimelineComponent = undefined,
+    reaction_component: *Component.ReactionComponent = undefined,
+    action_flags_component: *Component.ActionFlagsComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
 
     // Trigger a transition to a new state.
@@ -89,10 +89,10 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
             }
 
             // Reset the timeline when a transition has occurred. 
-            context.TimelineComponent.framesElapsed = 0;
+            context.timeline_component.framesElapsed = 0;
 
             // Make it possible for the new action to hit an opponent
-            context.ReactionComponent.attackHasHit = false;
+            context.reaction_component.attackHasHit = false;
         } 
     }
 }
@@ -110,9 +110,9 @@ pub const CombatStateMachineProcessor = struct
         if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
         {
             // Advance the timeline when there is no hitstop
-            if(context.ReactionComponent.hitStop <= 0)     
+            if(context.reaction_component.hitStop <= 0)     
             {      
-                context.TimelineComponent.framesElapsed += 1; 
+                context.timeline_component.framesElapsed += 1; 
             }
 
             // Run the update function on the current action
@@ -123,12 +123,12 @@ pub const CombatStateMachineProcessor = struct
             {
                 if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
                 {   
-                    if(context.TimelineComponent.framesElapsed >= actionData.Duration)
+                    if(context.timeline_component.framesElapsed >= actionData.Duration)
                     {
                         // Reset the timeline for actions that loop
                         if(actionData.IsLooping)
                         {
-                            context.TimelineComponent.framesElapsed = 0;                        
+                            context.timeline_component.framesElapsed = 0;                        
                         }
                         // Otherwise return to idle
                         else if(!context.bTransition)
