@@ -27,6 +27,13 @@ pub const CombatStateContext = struct
     ReactionComponent: *Component.ReactionComponent = undefined,
     ActionFlagsComponent: *Component.ActionFlagsComponent = undefined,
     ActionData: ?*CharacterData.ActionProperties = null,
+
+    // Trigger a transition to a new state.
+    pub fn TransitionToState(self: *CombatStateContext, StateID: CombatStateID) void
+    {
+        self.bTransition = true;
+        self.NextState = StateID;
+    }
 };
 
 // Provides an interface for combat states to respond to various events
@@ -129,13 +136,12 @@ pub const CombatStateMachineProcessor = struct
                             // Go back to idle
                             if(context.PhysicsComponent.position.y > 0)
                             {
-                                context.NextState = CombatStateID.Jump;
+                                context.TransitionToState(.Jump);
                             }
                             else
                             {
-                                context.NextState = CombatStateID.Standing;
+                                context.TransitionToState(.Jump);
                             }
-                            context.bTransition = true;
                         }
                     }
                 }
@@ -195,8 +201,7 @@ test "Test transitioning the state machine from one state to another."
         // Test transitioning from one common state to another
         fn StandingOnUpdate(context: *CombatStateContext) void
         {
-            context.bTransition = true;
-            context.NextState = CombatStateID.Jump;
+            context.TransitionToState(.Jump);
         }
 
         fn StandingOnEnd(context: *CombatStateContext) void

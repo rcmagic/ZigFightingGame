@@ -49,8 +49,6 @@ pub const ReactionSystem = struct
         for(gameState.hitEvents.items) | hitEvent |
         {
             var defenderState = &gameState.stateMachineComponents[hitEvent.defenderID];
-            defenderState.context.bTransition = true;
-
 
             const input = gameState.inputComponents[hitEvent.defenderID].inputCommand;
 
@@ -63,13 +61,12 @@ pub const ReactionSystem = struct
 
             if(WasGuarded)
             {
-                defenderState.context.NextState = StateMachine.CombatStateID.GuardReaction;
+                defenderState.context.TransitionToState(.GuardReaction);
                 gameState.reactionComponents[hitEvent.defenderID].guardStun = hitEvent.guardStun;
-
             }
             else
             {
-                defenderState.context.NextState = StateMachine.CombatStateID.Reaction;
+                defenderState.context.TransitionToState(.Reaction);
                 gameState.reactionComponents[hitEvent.defenderID].hitStun = hitEvent.hitStun;
             }        
 

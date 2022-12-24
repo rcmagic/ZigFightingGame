@@ -12,8 +12,7 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
         context.PhysicsComponent.velocity.y = 0;
         context.PhysicsComponent.acceleration.y = 0;
 
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.Standing;
+        context.TransitionToState(.Standing);
 
         return true;
     }
@@ -38,8 +37,7 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
             context.ActionFlagsComponent.jumpFlags = .JumpBack;
         }
 
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.Jump;   
+        context.TransitionToState(.Jump);
         
         return true;
     }
@@ -52,8 +50,7 @@ fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
 {
     if(context.InputCommand.Attack)
     {
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.Attack;
+        context.TransitionToState(.Attack);
         return true;
     }
 
@@ -72,14 +69,12 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) bool
     }
     else if(context.InputCommand.Forward)
     {
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.WalkingForward;
+        context.TransitionToState(.WalkingForward);
         return true;
     }
     else if(context.InputCommand.Back)
     {
-        context.bTransition = true;
-        context.NextState = StateMachine.CombatStateID.WalkingBackward;
+        context.TransitionToState(.WalkingBackward);
         return true;
     }
 
@@ -96,11 +91,11 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
 
     if(context.PhysicsComponent.position.y > 0) 
     {
-        context.NextState = StateMachine.CombatStateID.Jump;
+        context.TransitionToState(StateMachine.CombatStateID.Jump);
     }
     else
     {
-        context.NextState = StateMachine.CombatStateID.Standing;
+        context.TransitionToState(StateMachine.CombatStateID.Standing);
     }
 
     context.bTransition = true;
@@ -180,16 +175,14 @@ pub const WalkingForward = struct
         }
         else if(context.InputCommand.Back)
         {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.WalkingBackward;
+            context.TransitionToState(.WalkingBackward);
             return;
         }
 
 
         if(!context.InputCommand.Forward)
         {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.Standing;
+            context.TransitionToState(.Standing);
         }
 
         common.FlipToFaceOpponent(context.PhysicsComponent);
@@ -224,8 +217,7 @@ pub const WalkingBackward = struct
         }
         else if(context.InputCommand.Forward)
         {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.WalkingForward;
+            context.TransitionToState(.WalkingForward);
             return;
         }
 
@@ -235,8 +227,7 @@ pub const WalkingBackward = struct
 
         if(!context.InputCommand.Back)
         {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.Standing;
+             context.TransitionToState(.Standing);
         }
 
         common.FlipToFaceOpponent(context.PhysicsComponent);
@@ -286,8 +277,7 @@ pub const Jump = struct
 
         if(context.InputCommand.Attack) 
         {
-            context.bTransition = true;
-            context.NextState = StateMachine.CombatStateID.Attack;
+            context.TransitionToState(.Attack);
         }
     }
 
