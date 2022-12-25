@@ -21,9 +21,9 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
     {                
-        if(hitboxGroup.IsActiveOnFrame(framesElapsed))
+        if(hitboxGroup.isActiveOnFrame(framesElapsed))
         {
-            for(hitboxGroup.Hitboxes.items) | hitbox |
+            for(hitboxGroup.hitboxes.items) | hitbox |
             {
                 const translateBox = if(flipHitbox) common.TranslateHitboxFlipped(hitbox, offset) else common.TranslateHitbox(hitbox, offset);                            
 
@@ -134,7 +134,7 @@ pub const CollisionSystem = struct
             var actionName : []const u8 = "";
             if(state_machine.stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
             {
-                actionName = state.Name;
+                actionName = state.name;
             }
 
             if(gameState.gameData) | gameData |
@@ -151,7 +151,7 @@ pub const CollisionSystem = struct
                     // Gather attack boxes    
                     {
                         // Here we insert the translated hitboxes for the action into AttackHitboxScratch
-                        const atkCount = GetTranslatedActiveHitboxes(actionData.AttackHitboxGroups.items, entityOffset, facingLeft,
+                        const atkCount = GetTranslatedActiveHitboxes(actionData.attack_hitbox_groups.items, entityOffset, facingLeft,
                                             self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
@@ -170,7 +170,7 @@ pub const CollisionSystem = struct
                     // Gather vulnerable boxes
                     {
                         // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
-                        const vulCount = GetTranslatedActiveHitboxes(actionData.VulnerableHitboxGroups.items, entityOffset, facingLeft,
+                        const vulCount = GetTranslatedActiveHitboxes(actionData.vulnerable_hitbox_groups.items, entityOffset, facingLeft,
                                  self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
 
 
@@ -213,8 +213,8 @@ test "Testing getting translated hitboxes"
     try HitboxGroupList.append(HitboxGroupData);
     try HitboxGroupList.append(HitboxGroupData);
 
-    try HitboxGroupList.items[0].Hitboxes.append(.{});
-    try HitboxGroupList.items[0].Hitboxes.append(.{});
+    try HitboxGroupList.items[0].hitboxes.append(.{});
+    try HitboxGroupList.items[0].hitboxes.append(.{});
     
     var hitboxScratch: [10]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 10;
 

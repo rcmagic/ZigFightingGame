@@ -119,11 +119,11 @@ test "Test adding an action to a character"
     var Character = try CharacterData.CharacterProperties.init(Allocator);
     try gameData.Characters.append(Character);
 
-    var Action = try CharacterData.ActionProperties.init(Allocator);
+    var Action = try CharacterData.actionsProperties.init(Allocator);
 
-    try gameData.Characters.items[0].Actions.append(Action);
+    try gameData.Characters.items[0].actions.append(Action);
 
-    try std.testing.expect(gameData.Characters.items[0].Actions.items.len == 1);
+    try std.testing.expect(gameData.Characters.items[0].actions.items.len == 1);
 }
 
 test "Test adding an action with hitboxes to a character" 
@@ -135,20 +135,20 @@ test "Test adding an action with hitboxes to a character"
     var Character = try CharacterData.CharacterProperties.init(Allocator);
     try gameData.Characters.append(Character);
 
-    var Action = try CharacterData.ActionProperties.init(Allocator);
+    var Action = try CharacterData.actionsProperties.init(Allocator);
 
-    try gameData.Characters.items[0].Actions.append(Action);
+    try gameData.Characters.items[0].actions.append(Action);
 
     var HitboxGroup = try CharacterData.HitboxGroup.init(Allocator);
 
-    try gameData.Characters.items[0].Actions.items[0].VulnerableHitboxGroups.append(HitboxGroup);
+    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.append(HitboxGroup);
 
-    try std.testing.expect(gameData.Characters.items[0].Actions.items[0].VulnerableHitboxGroups.items.len == 1);
+    try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items.len == 1);
 
-    try gameData.Characters.items[0].Actions.items[0].VulnerableHitboxGroups.items[0].Hitboxes.append(CharacterData.Hitbox{});
-    try gameData.Characters.items[0].Actions.items[0].VulnerableHitboxGroups.items[0].Hitboxes.append(CharacterData.Hitbox{});
+    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(CharacterData.Hitbox{});
+    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(CharacterData.Hitbox{});
 
-    try std.testing.expect(gameData.Characters.items[0].Actions.items[0].VulnerableHitboxGroups.items[0].Hitboxes.items.len == 2);
+    try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.items.len == 2);
 }
 
 

@@ -1,12 +1,12 @@
 {
-    "MaxHealth": 10000,
-    "Actions": [
+    "max_health": 10000,
+    "actions": [
         {
-            "Duration": 0,
-            "VulnerableHitboxGroups": [
+            "duration": 0,
+            "vulnerable_hitbox_groups": [
                 {
-                    "StartFrame": 0,
-                    "Duration": 1,
+                    "start_frame": 0,
+                    "duration": 1,
                     "Hitboxes": [
                         {
                             "top": 0,
@@ -17,12 +17,12 @@
                     ]
                 }
             ],
-            "AttackHitboxGroups": []
+            "attack_hitbox_groups": []
         },
         {
-            "Duration": 0,
-            "VulnerableHitboxGroups": [],
-            "AttackHitboxGroups": []
+            "duration": 0,
+            "vulnerable_hitbox_groups": [],
+            "attack_hitbox_groups": []
         }
     ]
 }

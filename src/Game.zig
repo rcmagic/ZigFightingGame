@@ -62,7 +62,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
         var actionName : []const u8 = "";
         if(stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
         {
-            actionName = state.Name;
+            actionName = state.name;
         }
 
         if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
@@ -70,15 +70,15 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
             const imageRange = actionData.GetActiveImage(gameState.timeline_components[entity].framesElapsed);
 
             // Get the sprite texture
-            if(gameData.FindSequenceTextures(entity, imageRange.Sequence)) | sequence |
+            if(gameData.FindSequenceTextures(entity, imageRange.sequence)) | sequence |
             {
-                drawState.texture = sequence.textures.items[@intCast(usize,imageRange.Index)];
+                drawState.texture = sequence.textures.items[@intCast(usize,imageRange.index)];
             }
 
             // Get the sprite offset
-            if(gameData.Characters.items[entity].FindSequence(gameData.ImageSequenceMap.items[entity], imageRange.Sequence)) | sequence |
+            if(gameData.Characters.items[entity].FindSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) | sequence |
             {
-                const image = sequence.Images.items[@intCast(usize,imageRange.Index)];
+                const image = sequence.images.items[@intCast(usize,imageRange.index)];
                 drawState.x += if(facingLeft) -image.x else image.x;
                 drawState.y += image.y;
             }
@@ -132,9 +132,9 @@ fn GetActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, hitboxes: 
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
     {                
-        if(hitboxGroup.IsActiveOnFrame(framesElapsed))
+        if(hitboxGroup.isActiveOnFrame(framesElapsed))
         {
-            for(hitboxGroup.Hitboxes.items) | hitbox |
+            for(hitboxGroup.hitboxes.items) | hitbox |
             {
                 hitboxes[count] = hitbox;
                 count += 1;
@@ -171,13 +171,13 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
         var actionName : []const u8 = "";
         if(stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
         {
-            actionName = state.Name;
+            actionName = state.name;
         }
 
         if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         { 
 
-            const vulCount = GetActiveHitboxes(actionData.VulnerableHitboxGroups.items,
+            const vulCount = GetActiveHitboxes(actionData.vulnerable_hitbox_groups.items,
                                     debugDrawHitboxes[0..], framesElapsed);
 
             if(vulCount > 0)
@@ -195,7 +195,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             }
 
 
-            const atkCount = GetActiveHitboxes(actionData.AttackHitboxGroups.items,
+            const atkCount = GetActiveHitboxes(actionData.attack_hitbox_groups.items,
                         debugDrawHitboxes[0..], framesElapsed);
 
             if(atkCount > 0)
@@ -244,7 +244,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     // Pull duration from the current action for the timelin
     if(gameState.state_machine_components[entity].context.ActionData) | actionData |
     {
-        totalFrames = actionData.Duration;
+        totalFrames = actionData.duration;
         activeFrame = gameState.timeline_components[entity].framesElapsed;
     }
 
@@ -480,7 +480,7 @@ pub fn GameLoop() !void
 
         // if(gameState.gameData) | gameData |
         // {
-        //     const hitbox = gameData.HitboxGroup.Hitboxes.items[0]; 
+        //     const hitbox = gameData.HitboxGroup.hitboxes.items[0]; 
         //    rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);    
         // }
 

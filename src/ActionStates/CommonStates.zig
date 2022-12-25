@@ -106,7 +106,7 @@ fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool
     if(context.ActionData) | actionData |
     {
         // Only check for idle action transitions on the final frame.
-        if(context.timeline_component.framesElapsed >= actionData.Duration)
+        if(context.timeline_component.framesElapsed >= actionData.duration)
         { 
             CommonToIdleTransitions(context);
             return true;

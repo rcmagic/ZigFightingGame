@@ -39,7 +39,7 @@ pub const CombatStateContext = struct
 // Provides an interface for combat states to respond to various events
 pub const CombatStateCallbacks = struct
 {
-    Name: []const u8 = "",
+    name: []const u8 = "",
     OnStart: ?fn(context: *CombatStateContext) void = null,         // Called when starting an action
     OnUpdate: ?fn(context: *CombatStateContext) void = null,        // Called every frame
     OnEnd: ?fn(context: *CombatStateContext) void = null            // Called when finishing an action
@@ -85,7 +85,7 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
 
             if(stateMachine.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
             {
-                context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.Name);
+                context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.name);
             }
 
             // Reset the timeline when a transition has occurred. 
@@ -121,12 +121,12 @@ pub const CombatStateMachineProcessor = struct
             // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
             {
-                if(CharacterData.FindAction(characterData, actionmap, CurrentState.Name)) | actionData |
+                if(CharacterData.FindAction(characterData, actionmap, CurrentState.name)) | actionData |
                 {   
-                    if(context.timeline_component.framesElapsed >= actionData.Duration)
+                    if(context.timeline_component.framesElapsed >= actionData.duration)
                     {
                         // Reset the timeline for actions that loop
-                        if(actionData.IsLooping)
+                        if(actionData.isLooping)
                         {
                             context.timeline_component.framesElapsed = 0;                        
                         }
