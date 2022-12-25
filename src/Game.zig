@@ -65,18 +65,18 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
             actionName = state.name;
         }
 
-        if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         {                
-            const imageRange = actionData.GetActiveImage(gameState.timeline_components[entity].framesElapsed);
+            const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
             // Get the sprite texture
-            if(gameData.FindSequenceTextures(entity, imageRange.sequence)) | sequence |
+            if(gameData.findSequenceTextures(entity, imageRange.sequence)) | sequence |
             {
                 drawState.texture = sequence.textures.items[@intCast(usize,imageRange.index)];
             }
 
             // Get the sprite offset
-            if(gameData.Characters.items[entity].FindSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) | sequence |
+            if(gameData.Characters.items[entity].findSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) | sequence |
             {
                 const image = sequence.images.items[@intCast(usize,imageRange.index)];
                 drawState.x += if(facingLeft) -image.x else image.x;
@@ -174,7 +174,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             actionName = state.name;
         }
 
-        if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         { 
 
             const vulCount = GetActiveHitboxes(actionData.vulnerable_hitbox_groups.items,
@@ -367,7 +367,7 @@ pub fn GameLoop() !void
 
     if(gameState.gameData) | gameData |
     {
-        if(gameData.FindSequenceTextures(0, "stand")) | sequence |
+        if(gameData.findSequenceTextures(0, "stand")) | sequence |
         {
             texture = sequence.textures.items[0];
         }

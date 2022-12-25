@@ -14,7 +14,7 @@ pub const GameData = struct {
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
 
 
-    pub fn FindSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*CharacterData.SequenceTexRef
+    pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*CharacterData.SequenceTexRef
     {
         if(self.ImageSequenceMap.items[characterIndex].get(SequenceName)) | index |
         {
@@ -45,28 +45,28 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
         .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator)        
     };
 
-    var data1 = try CharacterData.LoadAsset("assets/test_chara_1.json", allocator);
-    var data2 = try CharacterData.LoadAsset("assets/test_chara_1.json", allocator);
+    var data1 = try CharacterData.loadAsset("assets/test_chara_1.json", allocator);
+    var data2 = try CharacterData.loadAsset("assets/test_chara_1.json", allocator);
 
     if(data1) | loadedData |
     {
         try gameData.Characters.append(loadedData);
-        try gameData.image_sequences.append(try CharacterData.LoadSequenceImages(loadedData, allocator));
+        try gameData.image_sequences.append(try CharacterData.loadSequenceImages(loadedData, allocator));
 
-        try gameData.ActionMaps.append(try CharacterData.GenerateActionNameMap(loadedData, allocator));
+        try gameData.ActionMaps.append(try CharacterData.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try CharacterData.GenerateImageSequenceMap(loadedData, allocator));
+        try gameData.ImageSequenceMap.append(try CharacterData.generateImageSequenceMap(loadedData, allocator));
         
     }
 
     if(data2) | loadedData |
     {
         try gameData.Characters.append(loadedData);
-        try gameData.image_sequences.append(try CharacterData.LoadSequenceImages(loadedData, allocator));
+        try gameData.image_sequences.append(try CharacterData.loadSequenceImages(loadedData, allocator));
 
-        try gameData.ActionMaps.append(try CharacterData.GenerateActionNameMap(loadedData, allocator));
+        try gameData.ActionMaps.append(try CharacterData.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try CharacterData.GenerateImageSequenceMap(loadedData, allocator));
+        try gameData.ImageSequenceMap.append(try CharacterData.generateImageSequenceMap(loadedData, allocator));
         
     }
 

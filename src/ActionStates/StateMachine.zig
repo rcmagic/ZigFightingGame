@@ -85,7 +85,7 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
 
             if(stateMachine.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
             {
-                context.ActionData = CharacterData.FindAction(characterData, actionmap, NextState.name);
+                context.ActionData = CharacterData.findAction(characterData, actionmap, NextState.name);
             }
 
             // Reset the timeline when a transition has occurred. 
@@ -121,7 +121,7 @@ pub const CombatStateMachineProcessor = struct
             // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
             {
-                if(CharacterData.FindAction(characterData, actionmap, CurrentState.name)) | actionData |
+                if(CharacterData.findAction(characterData, actionmap, CurrentState.name)) | actionData |
                 {   
                     if(context.timeline_component.framesElapsed >= actionData.duration)
                     {

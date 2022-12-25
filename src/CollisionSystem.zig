@@ -145,7 +145,7 @@ pub const CollisionSystem = struct
                 }
 
                 // Get all the hitboxes for the current action.
-                if(CharacterData.FindAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+                if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
                 {
                                     
                     // Gather attack boxes    
