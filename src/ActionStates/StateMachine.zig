@@ -1,7 +1,7 @@
 const std = @import("std");
 const component = @import("../component.zig");
 const input = @import("../input.zig");
-const CharacterData = @import("../CharacterData.zig");
+const character_data = @import("../character_data.zig");
 // Identifies common character states.
 pub const CombatStateID = enum(u32) 
 {
@@ -26,7 +26,7 @@ pub const CombatStateContext = struct
     timeline_component: *component.TimelineComponent = undefined,
     reaction_component: *component.ReactionComponent = undefined,
     action_flags_component: *component.ActionFlagsComponent = undefined,
-    ActionData: ?*CharacterData.ActionProperties = null,
+    ActionData: ?*character_data.ActionProperties = null,
 
     // Trigger a transition to a new state.
     pub fn TransitionToState(self: *CombatStateContext, StateID: CombatStateID) void
@@ -60,7 +60,7 @@ pub const CombatStateRegistery = struct
     }
 };
 
-pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: CharacterData.CharacterProperties,
+pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: character_data.CharacterProperties,
                                 actionmap: std.StringHashMap(usize)) void
 {
     if(stateMachine.Registery.CombatStates[@enumToInt(stateMachine.CurrentState)]) | State |
@@ -85,7 +85,7 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
 
             if(stateMachine.Registery.CombatStates[@enumToInt(context.NextState)]) | NextState |
             {
-                context.ActionData = CharacterData.findAction(characterData, actionmap, NextState.name);
+                context.ActionData = character_data.findAction(characterData, actionmap, NextState.name);
             }
 
             // Reset the timeline when a transition has occurred. 
@@ -104,7 +104,7 @@ pub const CombatStateMachineProcessor = struct
     CurrentState: CombatStateID = .Standing,
 
 
-    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: CharacterData.CharacterProperties,
+    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: character_data.CharacterProperties,
                                 actionmap: std.StringHashMap(usize)) void
     { 
         if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | State |
@@ -121,7 +121,7 @@ pub const CombatStateMachineProcessor = struct
             // Handle returning to idle or looping at the end of an action.
             if(self.Registery.CombatStates[@enumToInt(self.CurrentState)]) | CurrentState |
             {
-                if(CharacterData.findAction(characterData, actionmap, CurrentState.name)) | actionData |
+                if(character_data.findAction(characterData, actionmap, CurrentState.name)) | actionData |
                 {   
                     if(context.timeline_component.framesElapsed >= actionData.duration)
                     {

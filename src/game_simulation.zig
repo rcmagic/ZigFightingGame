@@ -4,15 +4,15 @@ const component = @import("component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const input = @import("input.zig");
-const CharacterData = @import("CharacterData.zig");
-const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
-const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
+const character_data = @import("character_data.zig");
+const collision_system = @import("collision_system.zig").CollisionSystem;
+const reaction_system = @import("reaction_system.zig").reaction_system;
 const GameState = @import("GameState.zig").GameState;
 
 
 
 // Handles moving all entities which have a physics component
-fn PhysicsSystem(gameState: *GameState) !void 
+fn physicsSystem(gameState: *GameState) !void 
 {
 
     var entityIndex: usize = 0;
@@ -71,7 +71,7 @@ fn PhysicsSystem(gameState: *GameState) !void
     }
 }
 
-fn ActionSystem(gameState: *GameState) void 
+fn actionSystem(gameState: *GameState) void 
 {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
@@ -87,7 +87,7 @@ fn ActionSystem(gameState: *GameState) void
 }
 
 
-fn InputCommandSystem(gameState: *GameState) void 
+fn inputCommandSystem(gameState: *GameState) void 
 {
     gameState.state_machine_components[0].context.input_command = gameState.inputComponents[0].input_command;
     gameState.state_machine_components[1].context.input_command = gameState.inputComponents[1].input_command;
@@ -99,8 +99,8 @@ test "Test setting up game data"
     var Allocator = ArenaAllocator.allocator();
     var gameData = GameState.InitializeGameData(Allocator);
 
-    var Character1 = try CharacterData.CharacterProperties.init(Allocator);
-    var Character2 = try CharacterData.CharacterProperties.init(Allocator);
+    var Character1 = try character_data.CharacterProperties.init(Allocator);
+    var Character2 = try character_data.CharacterProperties.init(Allocator);
 
     // Add a test character
     try gameData.Characters.append(Character1);
@@ -116,10 +116,10 @@ test "Test adding an action to a character"
     var Allocator = ArenaAllocator.allocator();
     var gameData = GameState.InitializeGameData(Allocator);
 
-    var Character = try CharacterData.CharacterProperties.init(Allocator);
+    var Character = try character_data.CharacterProperties.init(Allocator);
     try gameData.Characters.append(Character);
 
-    var Action = try CharacterData.actionsProperties.init(Allocator);
+    var Action = try character_data.actionsProperties.init(Allocator);
 
     try gameData.Characters.items[0].actions.append(Action);
 
@@ -132,32 +132,32 @@ test "Test adding an action with hitboxes to a character"
     var Allocator = ArenaAllocator.allocator();
     var gameData = GameState.InitializeGameData(Allocator);
 
-    var Character = try CharacterData.CharacterProperties.init(Allocator);
+    var Character = try character_data.CharacterProperties.init(Allocator);
     try gameData.Characters.append(Character);
 
-    var Action = try CharacterData.actionsProperties.init(Allocator);
+    var Action = try character_data.actionsProperties.init(Allocator);
 
     try gameData.Characters.items[0].actions.append(Action);
 
-    var HitboxGroup = try CharacterData.HitboxGroup.init(Allocator);
+    var HitboxGroup = try character_data.HitboxGroup.init(Allocator);
 
     try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.append(HitboxGroup);
 
     try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items.len == 1);
 
-    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(CharacterData.Hitbox{});
-    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(CharacterData.Hitbox{});
+    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(character_data.Hitbox{});
+    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(character_data.Hitbox{});
 
     try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.items.len == 2);
 }
 
 
 
-pub fn UpdateGame(gameState: *GameState) !void {
-    InputCommandSystem(gameState);
-    try PhysicsSystem(gameState);
-    try gameState.collisionSystem.Execute(gameState);
-    try gameState.reactionSystem.Execute(gameState);
-    ActionSystem(gameState);
+pub fn updateGame(gameState: *GameState) !void {
+    inputCommandSystem(gameState);
+    try physicsSystem(gameState);
+    try gameState.collisionSystem.execute(gameState);
+    try gameState.reactionSystem.execute(gameState);
+    actionSystem(gameState);
     gameState.frameCount += 1;
 }

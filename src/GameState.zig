@@ -3,18 +3,18 @@ const component = @import("component.zig");
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const input = @import("input.zig");
-const CharacterData = @import("CharacterData.zig");
-const CollisionSystem = @import("CollisionSystem.zig").CollisionSystem;
-const ReactionSystem = @import("ReactionSystem.zig").ReactionSystem;
+const character_data = @import("character_data.zig");
+const collision_system = @import("collision_system.zig").CollisionSystem;
+const reaction_system = @import("reaction_system.zig").reaction_system;
 
 pub const GameData = struct {
-    Characters: std.ArrayList(CharacterData.CharacterProperties),     
+    Characters: std.ArrayList(character_data.CharacterProperties),     
     ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
-    image_sequences: std.ArrayList(std.ArrayList(CharacterData.SequenceTexRef)),
+    image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
 
 
-    pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*CharacterData.SequenceTexRef
+    pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef
     {
         if(self.ImageSequenceMap.items[characterIndex].get(SequenceName)) | index |
         {
@@ -39,34 +39,34 @@ const InputComponent = struct
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 {
     var gameData = GameData { 
-        .Characters = std.ArrayList(CharacterData.CharacterProperties).init(allocator),
+        .Characters = std.ArrayList(character_data.CharacterProperties).init(allocator),
         .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
-        .image_sequences = std.ArrayList(std.ArrayList(CharacterData.SequenceTexRef)).init(allocator),
+        .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
         .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator)        
     };
 
-    var data1 = try CharacterData.loadAsset("assets/test_chara_1.json", allocator);
-    var data2 = try CharacterData.loadAsset("assets/test_chara_1.json", allocator);
+    var data1 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
+    var data2 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
 
     if(data1) | loadedData |
     {
         try gameData.Characters.append(loadedData);
-        try gameData.image_sequences.append(try CharacterData.loadSequenceImages(loadedData, allocator));
+        try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
 
-        try gameData.ActionMaps.append(try CharacterData.generateActionNameMap(loadedData, allocator));
+        try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try CharacterData.generateImageSequenceMap(loadedData, allocator));
+        try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
         
     }
 
     if(data2) | loadedData |
     {
         try gameData.Characters.append(loadedData);
-        try gameData.image_sequences.append(try CharacterData.loadSequenceImages(loadedData, allocator));
+        try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
 
-        try gameData.ActionMaps.append(try CharacterData.generateActionNameMap(loadedData, allocator));
+        try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try CharacterData.generateImageSequenceMap(loadedData, allocator));
+        try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
         
     }
 
@@ -128,9 +128,9 @@ pub const GameState = struct {
     hitEvents: std.ArrayList(HitEvent),
 
     // Systems
-    collisionSystem: CollisionSystem,
+    collisionSystem: collision_system,
 
-    reactionSystem: ReactionSystem,
+    reactionSystem: reaction_system,
 
     gameData: ?GameData = null,
 
@@ -164,9 +164,9 @@ pub const GameState = struct {
         self.* = GameState {
                 
             // Initialize Systems
-            .collisionSystem = try CollisionSystem.init(allocator),
+            .collisionSystem = try collision_system.init(allocator),
 
-            .reactionSystem = try ReactionSystem.init(allocator),
+            .reactionSystem = try reaction_system.init(allocator),
 
             // Initialize the hit event
             // TODO: Make the number of max hit events a configurable property?

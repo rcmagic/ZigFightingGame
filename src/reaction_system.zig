@@ -1,19 +1,19 @@
 const std = @import("std");
-const CharacterData = @import("CharacterData.zig");
+const character_data = @import("character_data.zig");
 const component = @import("component.zig");
 const GameState = @import("GameState.zig").GameState;
 const StateMachine = @import("ActionStates/StateMachine.zig");
 const CommonStates = @import("ActionStates/CommonStates.zig");
 const common = @import("common.zig");
 
-pub const ReactionSystem = struct 
+pub const reaction_system = struct 
 {
-    pub fn init(allocator: std.mem.Allocator) !ReactionSystem
+    pub fn init(allocator: std.mem.Allocator) !reaction_system
     {   _ = allocator;
-        return ReactionSystem{};
+        return reaction_system{};
     }
 
-    pub fn Execute(self: *ReactionSystem, gameState: *GameState) !void
+    pub fn execute(self: *reaction_system, gameState: *GameState) !void
     {
         _ = self;
 

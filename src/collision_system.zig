@@ -1,13 +1,13 @@
 const std = @import("std");
 const math = @import("utils/math.zig");
-const CharacterData = @import("CharacterData.zig");
+const character_data = @import("character_data.zig");
 const component = @import("component.zig");
 const GameState = @import("GameState.zig").GameState;
 const common = @import("common.zig");
 
 
 // Check to see if two hitboxes overlap 
-fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
+fn do_hitboxes_overlap(a: character_data.Hitbox, b: character_data.Hitbox) bool
 {
     const IsNotOverlapping = (a.left > b.right) 
                             or (b.left > a.right) 
@@ -16,7 +16,7 @@ fn DoHitboxesOverlap(a: CharacterData.Hitbox, b: CharacterData.Hitbox) bool
     return !IsNotOverlapping;                      
 }
 
-fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, offset: math.IntVector2D, flipHitbox: bool, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
+fn get_translated_active_hitboxes(hitboxGroups: []const character_data.HitboxGroup, offset: math.IntVector2D, flipHitbox: bool, hitboxes: []character_data.Hitbox, framesElapsed: i32) usize
 {
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
@@ -25,7 +25,7 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
         {
             for(hitboxGroup.hitboxes.items) | hitbox |
             {
-                const translateBox = if(flipHitbox) common.TranslateHitboxFlipped(hitbox, offset) else common.TranslateHitbox(hitbox, offset);                            
+                const translateBox = if(flipHitbox) common.translate_hitbox_flipped(hitbox, offset) else common.translate_hitbox(hitbox, offset);                            
 
                 hitboxes[count] = translateBox;
                 count += 1;
@@ -36,22 +36,15 @@ fn GetTranslatedActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, 
     return count;
 }
 
-const ScratchHitboxSet = struct
-{
-    hitboxStore: [10]CharacterData.Hitbox =  [_]CharacterData.Hitbox{.{}} ** 10,
-    hitboxCount: usize = 0,
-};
-
-
 
 pub const CollisionSystem = struct 
 {
     // Working memory to pass between the collision system stages
-    VulnerableHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
-    AttackHitboxScratch: [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100,
+    VulnerableHitboxScratch: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100,
+    AttackHitboxScratch: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100,
 
-    VulnerableSlices : [10][]const CharacterData.Hitbox = undefined, 
-    AttackSlices : [10][]const CharacterData.Hitbox = undefined,
+    VulnerableSlices : [10][]const character_data.Hitbox = undefined, 
+    AttackSlices : [10][]const character_data.Hitbox = undefined,
 
 
     pub fn init(allocator: std.mem.Allocator) !CollisionSystem
@@ -59,7 +52,7 @@ pub const CollisionSystem = struct
         return CollisionSystem{};
     }
 
-    pub fn CollisionPhase(self: *CollisionSystem, gameState: *GameState) !void
+    pub fn collision_phase(self: *CollisionSystem, gameState: *GameState) !void
     {
 
         // Clear all hit events
@@ -93,7 +86,7 @@ pub const CollisionSystem = struct
                     
                     for(OneEntityVulnerableBoxes) | vulnerableBox |
                     {
-                        if(DoHitboxesOverlap(attackBox, vulnerableBox))
+                        if(do_hitboxes_overlap(attackBox, vulnerableBox))
                         {
                             // Make sure the attack won't hit more than once.
                             gameState.reaction_components[attackerIndex].attackHasHit = true;
@@ -108,7 +101,7 @@ pub const CollisionSystem = struct
         }
     }
 
-    pub fn Execute(self: *CollisionSystem, gameState: *GameState) !void
+    pub fn execute(self: *CollisionSystem, gameState: *GameState) !void
     {
         
         var VulnerableScratchCount : usize = 0;
@@ -145,13 +138,13 @@ pub const CollisionSystem = struct
                 }
 
                 // Get all the hitboxes for the current action.
-                if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+                if(character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
                 {
                                     
                     // Gather attack boxes    
                     {
                         // Here we insert the translated hitboxes for the action into AttackHitboxScratch
-                        const atkCount = GetTranslatedActiveHitboxes(actionData.attack_hitbox_groups.items, entityOffset, facingLeft,
+                        const atkCount = get_translated_active_hitboxes(actionData.attack_hitbox_groups.items, entityOffset, facingLeft,
                                             self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
@@ -170,7 +163,7 @@ pub const CollisionSystem = struct
                     // Gather vulnerable boxes
                     {
                         // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
-                        const vulCount = GetTranslatedActiveHitboxes(actionData.vulnerable_hitbox_groups.items, entityOffset, facingLeft,
+                        const vulCount = get_translated_active_hitboxes(actionData.vulnerable_hitbox_groups.items, entityOffset, facingLeft,
                                  self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
 
 
@@ -190,7 +183,7 @@ pub const CollisionSystem = struct
             }
         }
 
-        try self.CollisionPhase(gameState);
+        try self.collision_phase(gameState);
     }
 };
 
@@ -207,18 +200,18 @@ test "Testing getting translated hitboxes"
     var Allocator = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer Allocator.deinit();
 
-    var HitboxGroupList = std.ArrayList(CharacterData.HitboxGroup).init(Allocator.allocator());
+    var HitboxGroupList = std.ArrayList(character_data.HitboxGroup).init(Allocator.allocator());
 
-    var HitboxGroupData = try CharacterData.HitboxGroup.init(Allocator.allocator());
+    var HitboxGroupData = try character_data.HitboxGroup.init(Allocator.allocator());
     try HitboxGroupList.append(HitboxGroupData);
     try HitboxGroupList.append(HitboxGroupData);
 
     try HitboxGroupList.items[0].hitboxes.append(.{});
     try HitboxGroupList.items[0].hitboxes.append(.{});
     
-    var hitboxScratch: [10]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 10;
+    var hitboxScratch: [10]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 10;
 
-    const count = GetTranslatedActiveHitboxes(HitboxGroupList.items, math.IntVector2D{}, hitboxScratch[0..], 0);
+    const count = get_translated_active_hitboxes(HitboxGroupList.items, math.IntVector2D{}, hitboxScratch[0..], 0);
 
     try std.testing.expect(count == 2);
 }
@@ -236,7 +229,7 @@ test "Testing getting translated hitboxes"
 
 //     if(gameState.gameData) | *gameData |
 //     {
-//         var Character = try CharacterData.CharacterProperties.init(ArenaAllocator.allocator());
+//         var Character = try character_data.CharacterProperties.init(ArenaAllocator.allocator());
 //         // Add a test character
 //         try gameData.Characters.append(Character);
 //     }
@@ -244,5 +237,5 @@ test "Testing getting translated hitboxes"
 //     // try std.testing.expect(collisionSystem.AttackerEntityBoxes.items.len == 2);
 //     // try std.testing.expect(collisionSystem.DefenderEntityBoxes.items.len == 2);
 
-//     try collisionSystem.Execute(&gameState);
+//     try collisionSystem.execute(&gameState);
 // }

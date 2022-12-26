@@ -1,9 +1,9 @@
 const std = @import("std");
 const rl = @import("raylib");
 const math = @import("utils/math.zig");
-const GameSimulation = @import("GameSimulation.zig");
+const game_simulation = @import("game_simulation.zig");
 const GameState = @import("GameState.zig").GameState;
-const CharacterData = @import("CharacterData.zig");
+const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const common = @import("common.zig");
 
@@ -30,7 +30,7 @@ var bDebugColorEnabled = false;
 
 
 // Prepare state struct which describes how to draw a character
-fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
+fn prepareDrawState(gameState: GameState, entity: usize) DrawState
 {
 
 
@@ -65,7 +65,7 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
             actionName = state.name;
         }
 
-        if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        if(character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         {                
             const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
@@ -118,8 +118,8 @@ fn PrepareDrawState(gameState: GameState, entity: usize) DrawState
     return drawState;
 }
 
-// Render a single DrawState. Uses the results from PrepareDrawState() and renders one Character.
-fn RenderDrawState(state: DrawState) void
+// Render a single DrawState. Uses the results from prepareDrawState() and renders one Character.
+fn renderDrawState(state: DrawState) void
 {
     //rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
     rl.DrawTextureRec(state.texture, rl.Rectangle{.x=0, .y=0, .width=@intToFloat(f32, state.texture.width)*state.xScale, .height=@intToFloat(f32, state.texture.height)*state.yScale}, 
@@ -127,7 +127,7 @@ fn RenderDrawState(state: DrawState) void
                         if(state.flipped) (state.x - state.texture.width) else state.x),.y= @intToFloat(f32, state.y)}, state.color);
 }
 
-fn GetActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, hitboxes: []CharacterData.Hitbox, framesElapsed: i32) usize
+fn getActiveHitboxes(hitboxGroups: []const character_data.HitboxGroup, hitboxes: []character_data.Hitbox, framesElapsed: i32) usize
 {
     var count: usize = 0;
     for(hitboxGroups) | hitboxGroup |
@@ -146,9 +146,9 @@ fn GetActiveHitboxes(hitboxGroups: []const CharacterData.HitboxGroup, hitboxes: 
 }
 
 // Hitboxes to draw.
-var debugDrawHitboxes : [100]CharacterData.Hitbox = [_]CharacterData.Hitbox{.{}} ** 100;
+var debugDrawHitboxes : [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100;
 
-fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
+fn drawCharacterHitboxes(gameState: GameState, entity: usize) void
 {
     const position = gameState.physics_components[entity].position;
     const framesElapsed = gameState.timeline_components[entity].framesElapsed;
@@ -174,10 +174,10 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             actionName = state.name;
         }
 
-        if(CharacterData.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
+        if(character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         { 
 
-            const vulCount = GetActiveHitboxes(actionData.vulnerable_hitbox_groups.items,
+            const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items,
                                     debugDrawHitboxes[0..], framesElapsed);
 
             if(vulCount > 0)
@@ -185,7 +185,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
                 var temp = debugDrawHitboxes[0..vulCount];
                 for(temp) | hitboxTmp|
                 {
-                    const hitbox = if(facingLeft) common.TranslateHitboxFlipped(hitboxTmp,.{}) else common.TranslateHitbox(hitboxTmp,.{});
+                    const hitbox = if(facingLeft) common.translate_hitbox_flipped(hitboxTmp,.{}) else common.translate_hitbox(hitboxTmp,.{});
                     const left = ScreenX + math.WorldToScreen(hitbox.left);
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
                     const width = math.WorldToScreen(hitbox.right - hitbox.left);
@@ -195,7 +195,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
             }
 
 
-            const atkCount = GetActiveHitboxes(actionData.attack_hitbox_groups.items,
+            const atkCount = getActiveHitboxes(actionData.attack_hitbox_groups.items,
                         debugDrawHitboxes[0..], framesElapsed);
 
             if(atkCount > 0)
@@ -203,7 +203,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
                 var temp = debugDrawHitboxes[0..atkCount];
                 for(temp) | hitboxTmp|
                 {
-                    const hitbox = if(facingLeft) common.TranslateHitboxFlipped(hitboxTmp,.{}) else common.TranslateHitbox(hitboxTmp,.{});
+                    const hitbox = if(facingLeft) common.translate_hitbox_flipped(hitboxTmp,.{}) else common.translate_hitbox(hitboxTmp,.{});
 
                     const left = ScreenX + math.WorldToScreen(hitbox.left);
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
@@ -216,7 +216,7 @@ fn DrawCharacterHitboxes(gameState: GameState, entity: usize) void
     }
 }
 
-pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
+pub fn drawCharacterDebugInfo(gameState: GameState, entity: usize) void
 {
     const reaction = gameState.reaction_components[entity];
     const player : i32 = @intCast(i32, entity);
@@ -226,7 +226,7 @@ pub fn DrawCharacterDebugInfo(gameState: GameState, entity: usize) void
     rl.DrawText(rl.FormatText("player: %d\nhitStop: %d\nhitStun: %d\nguardStun: %d\nframesElapsed: %d", player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed), XOffset, YOffset, 16, rl.BLACK);
 }
 
-pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
+pub fn debugDrawTimeline(gameState: GameState, entity: usize) void
 {
     _ = gameState;
     _ = entity;
@@ -272,7 +272,7 @@ pub fn DebugDrawTimeline(gameState: GameState, entity: usize) void
     }
 }
 
-pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void
+pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void
 {
     if(!rl.IsGamepadAvailable(controller))
     {
@@ -329,7 +329,7 @@ pub fn PollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
     }
 }
 
-pub fn GameLoop() !void
+pub fn gameLoop() !void
 {
     // The ArenaAllocator lets use free all the persistent store memory at once.
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -419,8 +419,8 @@ pub fn GameLoop() !void
 
         if(rl.IsWindowFocused() )
         {
-            PollGamepadInput(&gameState, 0, 0);
-            PollGamepadInput(&gameState, 1, 1);
+            pollGamepadInput(&gameState, 0, 0);
+            pollGamepadInput(&gameState, 1, 1);
         }
 
         if(rl.IsWindowFocused())
@@ -456,7 +456,7 @@ pub fn GameLoop() !void
         // Game Simulation
         if(!bPauseGame or bAdvanceOnce)
         {
-            try GameSimulation.UpdateGame(&gameState);
+            try game_simulation.updateGame(&gameState);
 
             // Count the number of game frames that have been simulated. 
             GameFrameCount += 1;
@@ -467,15 +467,15 @@ pub fn GameLoop() !void
 
         rl.ClearBackground(rl.WHITE);
 
-        RenderDrawState(PrepareDrawState(gameState, 0));
-        RenderDrawState(PrepareDrawState(gameState, 1));
+        renderDrawState(prepareDrawState(gameState, 0));
+        renderDrawState(prepareDrawState(gameState, 1));
 
 
         // Draw hitboxes when enabled.
         if(bDebugShowHitboxes)
         {
-            DrawCharacterHitboxes(gameState, 0);
-            DrawCharacterHitboxes(gameState, 1);
+            drawCharacterHitboxes(gameState, 0);
+            drawCharacterHitboxes(gameState, 1);
         }
 
         // if(gameState.gameData) | gameData |
@@ -487,11 +487,11 @@ pub fn GameLoop() !void
         // Debug information
         rl.DrawText(rl.FormatText("Game Frame: %d", GameFrameCount), 10, 10, 16, rl.DARKGRAY);
 
-        DrawCharacterDebugInfo(gameState, 0);
-        DrawCharacterDebugInfo(gameState, 1);
+        drawCharacterDebugInfo(gameState, 0);
+        drawCharacterDebugInfo(gameState, 1);
 
-        DebugDrawTimeline(gameState, 0);
-        DebugDrawTimeline(gameState, 1);
+        debugDrawTimeline(gameState, 0);
+        debugDrawTimeline(gameState, 1);
 
         if(bPauseGame)
         {

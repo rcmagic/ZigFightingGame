@@ -1,6 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
-const Game = @import("Game.zig");
+const game = @import("game.zig");
 
 
 pub fn main() anyerror!void {
@@ -16,7 +16,7 @@ pub fn main() anyerror!void {
     //--------------------------------------------------------------------------------------
 
     // Run the game
-    try Game.GameLoop();
+    try game.gameLoop();
 
     // De-Initialization
     //--------------------------------------------------------------------------------------

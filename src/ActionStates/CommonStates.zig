@@ -139,7 +139,7 @@ pub const Standing = struct
         }
 
         // automatically turn the character to face the opponent when they've changed sides
-        common.FlipToFaceOpponent(context.physics_component);
+        common.flip_to_face_opponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -185,7 +185,7 @@ pub const WalkingForward = struct
             context.TransitionToState(.Standing);
         }
 
-        common.FlipToFaceOpponent(context.physics_component);
+        common.flip_to_face_opponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -230,7 +230,7 @@ pub const WalkingBackward = struct
              context.TransitionToState(.Standing);
         }
 
-        common.FlipToFaceOpponent(context.physics_component);
+        common.flip_to_face_opponent(context.physics_component);
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
@@ -350,7 +350,7 @@ pub const Reaction = struct
         _ = context;
         std.debug.print("Reaction.OnStart()\n", .{});
 
-        common.FlipToFaceOpponent(context.physics_component);
+        common.flip_to_face_opponent(context.physics_component);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
@@ -372,7 +372,7 @@ pub const GuardReaction = struct
         _ = context;
         std.debug.print("GuardReaction.OnStart()\n", .{});
 
-        common.FlipToFaceOpponent(context.physics_component);
+        common.flip_to_face_opponent(context.physics_component);
     }
 
     pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
