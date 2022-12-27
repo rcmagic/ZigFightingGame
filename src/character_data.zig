@@ -46,6 +46,7 @@ pub const ActionProperties = struct {
     isLooping: bool = false,
     vulnerable_hitbox_groups: std.ArrayList(HitboxGroup),
     attack_hitbox_groups: std.ArrayList(HitboxGroup),
+    push_hitbox_groups: std.ArrayList(HitboxGroup),
 
     animation_timeline: std.ArrayList(ImageRange),
 
@@ -57,11 +58,17 @@ pub const ActionProperties = struct {
             .duration = value.duration,
             .vulnerable_hitbox_groups = value.vulnerable_hitbox_groups.items,
             .attack_hitbox_groups = value.attack_hitbox_groups.items,
+            .push_hitbox_groups = value.push_hitbox_groups.items,
         }, options, out_stream);
     }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
-        return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
+        return ActionProperties{ 
+            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
+            .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
+            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .animation_timeline = std.ArrayList(ImageRange).init(allocator) 
+        };
     }
 
     pub fn getActiveImage(self: ActionProperties, frame: i32) ImageRange {
@@ -151,6 +158,7 @@ pub const ImageSequence = struct {
 
 pub const CharacterProperties = struct {
     max_health: i32 = 10000,
+    default_pushbox: Hitbox = .{},
     actions: std.ArrayList(ActionProperties),
 
     image_sequences: std.ArrayList(ImageSequence),

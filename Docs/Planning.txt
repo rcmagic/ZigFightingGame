@@ -181,6 +181,9 @@
 - Make character return to idle after hit stun is over. [x]
 - Support guarding, a guard action and guard stun. [x]
 
+2022/12/27
+- Implement push boxes and push collision.
+
 2022/12/*
 - Refactor Back/Forward input to be determined by a utility function.
 

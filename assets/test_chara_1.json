@@ -36,6 +36,13 @@
         }
     ],
     "max_health": 10000,
+    "default_pushbox": 
+        {
+            "top": 100000,
+            "left": -25000,
+            "bottom": 0,
+            "right": 25000
+        },
     "actions": [
         {
             "name": "Standing",

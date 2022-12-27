@@ -42,10 +42,11 @@ pub const CollisionSystem = struct
     // Working memory to pass between the collision system stages
     VulnerableHitboxScratch: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100,
     AttackHitboxScratch: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100,
+    PushHitboxScratch: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100,
 
     VulnerableSlices : [10][]const character_data.Hitbox = undefined, 
     AttackSlices : [10][]const character_data.Hitbox = undefined,
-
+    PushSlices : [10][]const character_data.Hitbox = undefined,
 
     pub fn init(allocator: std.mem.Allocator) !CollisionSystem
     {   _ = allocator;
@@ -99,6 +100,68 @@ pub const CollisionSystem = struct
                 }
             }
         }
+        
+
+        ////////////// PUSH COLLISIONS ///////////////////
+
+        // The amount of overlap of two push boxes along the X-axis
+        var overlap_distance_x : i32 = 0;
+
+        const active_push_slices = self.PushSlices[0..gameState.entityCount];
+        // Loop through all the push boxes for each entity and check against every other entity
+        for( active_push_slices ) | OneEntityAttackBoxes, attackerIndex |
+        {                        
+
+            for(OneEntityAttackBoxes) | attackBox |
+            {                 
+                // Loop through all the active defending entities's vulnerable boxes.
+                for(active_push_slices) | OneEntityVulnerableBoxes, defenderIndex |
+                {
+                    // Don't check an attacker against itself.
+                    if(attackerIndex == defenderIndex) 
+                    {
+                        continue;
+                    }
+                    
+    
+                    for(OneEntityVulnerableBoxes) | vulnerableBox |
+                    {
+                        if(do_hitboxes_overlap(attackBox, vulnerableBox))
+                        {
+                            // Calculate the amount of overlap
+                            var leftSide = @maximum(attackBox.left, vulnerableBox.left);
+                            var rightSide = @minimum(attackBox.right, vulnerableBox.right);
+
+                            overlap_distance_x = rightSide - leftSide;
+
+                            // Generate Hit event.
+                            std.debug.print("Push boxes overlap {}!!\n", .{overlap_distance_x});
+                        }
+                    }
+                }
+            }
+        }
+
+
+        {
+            const overlap_half =  @divTrunc(overlap_distance_x, 2);
+
+            var positionA = &gameState.physics_components[0].position;
+            var positionB = &gameState.physics_components[1].position;
+
+            // Push entities apart
+            if(positionA.x < positionB.x)
+            {
+                positionA.x -= overlap_half;
+                positionB.x += overlap_half;
+            }
+            else 
+            {
+                positionA.x += overlap_half;
+                positionB.x -= overlap_half;
+            }
+        }
+
     }
 
     pub fn execute(self: *CollisionSystem, gameState: *GameState) !void
@@ -106,6 +169,7 @@ pub const CollisionSystem = struct
         
         var VulnerableScratchCount : usize = 0;
         var AttackScratchCount : usize = 0;
+        var PushScratchCount : usize = 0;
 
         // Preprocessing step. Generate hitboxes used to check collision.
         var entity: usize = 0;
@@ -115,6 +179,7 @@ pub const CollisionSystem = struct
             // Before building the scratch hitbox data, we clear it out each frame.                   
             self.AttackSlices[entity] = self.AttackHitboxScratch[0..0];
             self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
+            self.PushSlices[entity] = self.PushHitboxScratch[0..0];
             
             const entityOffset = gameState.physics_components[entity].position;
             const facingLeft = gameState.physics_components[entity].facingLeft;
@@ -178,6 +243,31 @@ pub const CollisionSystem = struct
                         }
 
                         VulnerableScratchCount += vulCount;
+                    }
+
+                    // Gather push boxes
+                    {
+                        // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
+                        var pushCount = get_translated_active_hitboxes(actionData.push_hitbox_groups.items, entityOffset, facingLeft,
+                                 self.PushHitboxScratch[PushScratchCount..], timeline.framesElapsed);
+
+                                
+                        // If there is no push hitbox overrides, use the default pus hitbox for the character.
+                        if(pushCount <= 0)
+                        {
+                            pushCount = 1;
+                            // Get the slice of push hitboxes still available after processing previous push boxes.
+                            var scratchHitboxes = self.PushHitboxScratch[PushScratchCount..];
+                            const hitbox = gameData.Characters.items[entity].default_pushbox;
+                            const translatedBox = if(facingLeft) common.translate_hitbox_flipped(hitbox, entityOffset) 
+                                                        else common.translate_hitbox(hitbox, entityOffset);                            
+
+                            scratchHitboxes[0] = translatedBox;
+                        }
+
+                        // Store the slice for this entity that points to a range on the hitbox scratch array
+                        self.PushSlices[entity] = self.PushHitboxScratch[ PushScratchCount .. (PushScratchCount + pushCount) ];
+                        PushScratchCount += pushCount;
                     }
                 }
             }

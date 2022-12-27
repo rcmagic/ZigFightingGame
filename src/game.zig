@@ -174,6 +174,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void
             actionName = state.name;
         }
 
+
         if(character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) | actionData |
         { 
 
@@ -211,6 +212,18 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void
                     const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
                     rl.DrawRectangleLines(left, top, width, height, rl.RED); 
                 }
+            }
+            // Draw Default Hitbox
+            {
+                const data = gameData.Characters.items[entity];
+
+                const hitbox = if(facingLeft) common.translate_hitbox_flipped(data.default_pushbox,.{}) else common.translate_hitbox(data.default_pushbox,.{});
+
+                const left = ScreenX + math.WorldToScreen(hitbox.left);
+                const top = ScreenY - math.WorldToScreen(hitbox.top);
+                const width = math.WorldToScreen(hitbox.right - hitbox.left);
+                const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
+                rl.DrawRectangleLines(left, top, width, height, rl.GREEN); 
             }
         }
     }
