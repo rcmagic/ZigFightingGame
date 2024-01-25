@@ -156,8 +156,8 @@ test "Test adding an action with hitboxes to a character"
 pub fn updateGame(gameState: *GameState) !void {
     inputCommandSystem(gameState);
     try physicsSystem(gameState);
+    actionSystem(gameState);
     try gameState.collisionSystem.execute(gameState);
     try gameState.reactionSystem.execute(gameState);
-    actionSystem(gameState);
     gameState.frameCount += 1;
 }
