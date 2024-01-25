@@ -12,6 +12,7 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
         context.physics_component.velocity.y = 0;
         context.physics_component.acceleration.y = 0;
 
+        common.flip_to_face_opponent(context.physics_component);
         context.TransitionToState(.Standing);
 
         return true;
