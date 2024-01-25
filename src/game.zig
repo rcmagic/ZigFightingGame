@@ -448,15 +448,30 @@ pub fn gameLoop() !void
                 gameState.inputComponents[0].input_command.down = true;
             }
 
+            const bFlipInput = gameState.physics_components[0].facingLeft;
+
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_A))
             {
-
-                gameState.inputComponents[0].input_command.back = true;
+                if(bFlipInput)
+                {
+                    gameState.inputComponents[0].input_command.forward = true;
+                }
+                else
+                {
+                    gameState.inputComponents[0].input_command.back = true;
+                }
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_D))
             {
-                gameState.inputComponents[0].input_command.forward = true;
+                if(bFlipInput)
+                {
+                    gameState.inputComponents[0].input_command.back = true;
+                }
+                else
+                {
+                    gameState.inputComponents[0].input_command.forward = true;
+                }
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_J))
