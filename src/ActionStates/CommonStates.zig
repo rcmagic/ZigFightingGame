@@ -162,7 +162,7 @@ pub const WalkingForward = struct
         _ = context;
 
 
-        const WalkingForwardSpeed = 2000;
+        const WalkingForwardSpeed = 3000;
         context.physics_component.SetForwardSpeed(WalkingForwardSpeed);
 
         if(CommonAttackTransitions(context))
@@ -251,15 +251,15 @@ pub const Jump = struct
         // Only initialize jump velocity when on the ground.
         if(context.physics_component.position.y <= 0)
         {
-            context.physics_component.velocity.y = 10000;
+            context.physics_component.velocity.y = 20000;
         }
 
-        context.physics_component.acceleration.y = -260;
+        context.physics_component.acceleration.y = -800;
 
         const ForwardSpeed : i32 = switch(context.action_flags_component.jumpFlags)
         {
             .None => 0,
-            .JumpForward => 1000,
+            .JumpForward => 2500,
             .JumpBack => -1000,
         };
 
