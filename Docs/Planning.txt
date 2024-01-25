@@ -184,8 +184,23 @@
 2022/12/27
 - Implement push boxes and push collision.
 
+
+2024/1/25
+- Adjusted the jump to feel less floaty.
+- Fixed an issue where keyboard left/right inputs were not updated to use the player character's facing direction
+- Fixed a bug where action transitions could occur on the same frame as a collision, characters would not continue showing the same attack frame during hitstop.
+- Fixed an issue where characters would not flip to face their opponent on landing.
+
+2024/*/*
+- Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
+
+
+
+================== BACKLOG ==================
+
 2022/12/*
 - Refactor Back/Forward input to be determined by a utility function.
+
 
 2022/9/*
 - Hit trades
@@ -213,7 +228,7 @@
 - Lock-step synchronization 
 - Rollbacks
 
-2022/*/*
+2024/*/*
 - Making the asset loading code use streaming reads instead of loading into a fixed sized buffer.
 - Save/Load attack data from/to individual files
 - In game hitbox editing.
