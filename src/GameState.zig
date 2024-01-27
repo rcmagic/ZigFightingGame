@@ -31,11 +31,6 @@ const StateMachineComponent = struct
     stateMachine: StateMachine.CombatStateMachineProcessor = .{}    
 };
 
-const InputComponent = struct 
-{ 
-    input_command: input.InputCommand = .{} 
-};
-
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
 {
     var gameData = GameData { 
@@ -114,15 +109,13 @@ const MAX_ENTITIES = 10;
 pub const GameState = struct {
     frameCount: i32 = 0,
     entityCount: usize = 0,
+    input_components: [MAX_ENTITIES]component.InputComponent = [_]component.InputComponent{.{}} ** MAX_ENTITIES,
     physics_components: [MAX_ENTITIES]component.PhysicsComponent = [_]component.PhysicsComponent{.{}} ** MAX_ENTITIES,
     state_machine_components: [MAX_ENTITIES]StateMachineComponent = [_]StateMachineComponent{.{}} ** MAX_ENTITIES,
     timeline_components: [MAX_ENTITIES]component.TimelineComponent = [_]component.TimelineComponent{.{}} ** MAX_ENTITIES,
     reaction_components: [MAX_ENTITIES]component.ReactionComponent = [_]component.ReactionComponent{.{}} ** MAX_ENTITIES,
     action_flags_components: [MAX_ENTITIES]component.ActionFlagsComponent = [_]component.ActionFlagsComponent{.{}} ** MAX_ENTITIES,
     stats_components: [MAX_ENTITIES]component.StatsComponent = [_]component.StatsComponent{.{}} ** MAX_ENTITIES,
-
-    // "Global" components
-    inputComponents: [2]InputComponent = [_]InputComponent{.{}} ** 2,
 
     // Transient Events
     hitEvents: std.ArrayList(HitEvent),
@@ -139,6 +132,7 @@ pub const GameState = struct {
     fn CreateAndInitOneCharacter(self: *GameState) void
     {
         // Setup referenced components used by the action state machine for a character.
+        self.state_machine_components[self.entityCount].context.input_component = &self.input_components[self.entityCount];
         self.state_machine_components[self.entityCount].context.physics_component = &self.physics_components[self.entityCount];
         self.state_machine_components[self.entityCount].context.timeline_component = &self.timeline_components[self.entityCount];
         self.state_machine_components[self.entityCount].context.reaction_component = &self.reaction_components[self.entityCount];

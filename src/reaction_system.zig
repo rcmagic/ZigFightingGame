@@ -50,7 +50,7 @@ pub const reaction_system = struct
         {
             var defenderState = &gameState.state_machine_components[hitEvent.defenderID];
 
-            const input = gameState.inputComponents[hitEvent.defenderID].input_command;
+            const input = gameState.input_components[hitEvent.defenderID].input_command;
 
             const defenderPhysics = gameState.physics_components[hitEvent.defenderID];
             const attackerPhysics = gameState.physics_components[hitEvent.attackerID];

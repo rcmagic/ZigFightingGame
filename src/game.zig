@@ -6,6 +6,7 @@ const GameState = @import("GameState.zig").GameState;
 const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const common = @import("common.zig");
+const input = @import("input.zig");
 
 
 var texture : rl.Texture2D = undefined;
@@ -292,7 +293,7 @@ pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         return;
     }
 
-    var inputCommand = &gameState.inputComponents[entity].input_command;
+    var inputCommand = &gameState.input_components[entity].input_command;
 
 
     if(rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP))
@@ -394,8 +395,8 @@ pub fn gameLoop() !void
         var bAdvanceOnce = false;
 
         // Reset input to not held down before polling
-        gameState.inputComponents[0].input_command.reset();
-        gameState.inputComponents[1].input_command.reset();
+        gameState.input_components[0].input_command.reset();
+        gameState.input_components[1].input_command.reset();
 
         if(rl.IsWindowFocused())
         {
@@ -440,12 +441,12 @@ pub fn gameLoop() !void
         {
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_W))
             {
-                gameState.inputComponents[0].input_command.up = true;
+                gameState.input_components[0].input_command.up = true;
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_S))
             {
-                gameState.inputComponents[0].input_command.down = true;
+                gameState.input_components[0].input_command.down = true;
             }
 
             const bFlipInput = gameState.physics_components[0].facingLeft;
@@ -454,11 +455,11 @@ pub fn gameLoop() !void
             {
                 if(bFlipInput)
                 {
-                    gameState.inputComponents[0].input_command.forward = true;
+                    gameState.input_components[0].input_command.forward = true;
                 }
                 else
                 {
-                    gameState.inputComponents[0].input_command.back = true;
+                    gameState.input_components[0].input_command.back = true;
                 }
             }
 
@@ -466,18 +467,20 @@ pub fn gameLoop() !void
             {
                 if(bFlipInput)
                 {
-                    gameState.inputComponents[0].input_command.back = true;
+                    gameState.input_components[0].input_command.back = true;
                 }
                 else
                 {
-                    gameState.inputComponents[0].input_command.forward = true;
+                    gameState.input_components[0].input_command.forward = true;
                 }
             }
 
             if(rl.IsKeyDown(rl.KeyboardKey.KEY_J))
             {
-                gameState.inputComponents[0].input_command.attack = true;
+                gameState.input_components[0].input_command.attack = true;
             }
+
+            try gameState.input_components[0].UpdateInput(gameState.input_components[0].input_command);
         }
 
             

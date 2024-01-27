@@ -89,8 +89,8 @@ fn actionSystem(gameState: *GameState) void
 
 fn inputCommandSystem(gameState: *GameState) void 
 {
-    gameState.state_machine_components[0].context.input_command = gameState.inputComponents[0].input_command;
-    gameState.state_machine_components[1].context.input_command = gameState.inputComponents[1].input_command;
+    gameState.state_machine_components[0].context.input_command = gameState.input_components[0].input_command;
+    gameState.state_machine_components[1].context.input_command = gameState.input_components[1].input_command;
 }
 
 test "Test setting up game data" 

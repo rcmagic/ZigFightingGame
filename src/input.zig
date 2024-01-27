@@ -1,3 +1,14 @@
+
+pub const InputNames = enum(u32) {
+    Up,
+    Down,
+    Left,
+    Right,
+    Back,
+    Forward,
+    Attack
+};
+
 pub const InputCommand = struct {
     up: bool = false,
     down: bool = false,

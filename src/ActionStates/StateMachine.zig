@@ -22,6 +22,7 @@ pub const CombatStateContext = struct
     bTransition: bool = false,                           // indicates that a state transition has been triggered
     NextState: CombatStateID = .Standing,    // indicates the next state to transition to.
     input_command: input.InputCommand = .{},
+    input_component: *component.InputComponent = undefined,
     physics_component: *component.PhysicsComponent = undefined,
     timeline_component: *component.TimelineComponent = undefined,
     reaction_component: *component.ReactionComponent = undefined,

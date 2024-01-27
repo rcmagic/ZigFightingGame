@@ -2,6 +2,7 @@ const std = @import("std");
 const StateMachine = @import("StateMachine.zig");
 const component = @import("../component.zig");
 const common = @import("../common.zig");
+const input = @import("../input.zig");
 
 // When the character collides with the ground, return to ground states.
 fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool
@@ -49,7 +50,7 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
 
 fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
 {
-    if(context.input_command.attack)
+    if(context.input_component.WasInputPressed(input.InputNames.Attack))
     {
         context.TransitionToState(.Attack);
         return true;
