@@ -1,0 +1,34 @@
+2024/1/30 Special Move Motion Detection
+=== Topics ===
+- Review
+- Detecting Motion inputs
+    - Concept 
+    - Examples (QCF, QCB, DP, Charge)
+    - Solution
+    - Implementation 
+        - Extending the buffer
+        - Motion data structure and encoding 
+        - Updating action data to support motion conditions.
+        - Motion detection
+        - Limiting motion detection to when needed.
+    - Potential Improvements
+        - Detecting inline as needed
+        - Detecting all motions each frame and recording last detected time
+        - Relaxing motion input requirements
+        - Kara canceling (Avoid delaying)
+
+
+
+↓↘→ Punch = Hadouken (Fireball) 
+→↓↘ Punch = Shoryuken (Dragon Punch)
+
+Numpad 
+789    　↖↑↗
+456   　←　N　→
+123　　　↙↓↘
+
+
+↓↘→　  2,3,6    QCF     (Quarter Circle Forward)
+↓↙←　　2,1,4    QCB     (Quarter Cricle Back)
+→↓↘    6,2,3    DP      (Dragon Punch)
+←↓↙　　4,2,1    RDP     (Reverse Dragon Punch)

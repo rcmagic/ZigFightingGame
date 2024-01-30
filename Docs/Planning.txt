@@ -191,9 +191,19 @@
 - Fixed a bug where action transitions could occur on the same frame as a collision, characters would not continue showing the same attack frame during hitstop.
 - Fixed an issue where characters would not flip to face their opponent on landing.
 
+
+2024/1/27
+- Input history buffer
+- Implement first non-button holding input commands (positive edge button presses).
+- Special attack input motion detection.
+
+2024/1/30
+- Supported special move motion inputs.
+
 2024/*/*
 - Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
 
+- Implement special attacks
 
 
 ================== BACKLOG ==================
