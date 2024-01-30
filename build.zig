@@ -16,8 +16,11 @@ pub fn build(b: *std.build.Builder) void {
     const system_lib = b.option(bool, "system-raylib", "link to preinstalled raylib libraries") orelse false;
 
     const exe = b.addExecutable("hello-wold", "src/main.zig");
-    exe.setTarget(target);
+    exe.setTarget(target); 
     exe.setBuildMode(mode);
+    
+    // Link against libC
+    exe.linkLibC();
 
     // Link raylib
     raylib.link(exe, system_lib);
