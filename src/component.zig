@@ -3,7 +3,7 @@ const std = @import("std");
 const input = @import("input.zig");
 
 
-const INPUT_BUFFER_SIZE = 2;
+const INPUT_BUFFER_SIZE = 60;
 pub const InputComponent = struct 
 { 
     input_command: input.InputCommand = .{},
@@ -29,18 +29,53 @@ pub const InputComponent = struct
 
     pub fn WasInputPressed(self: InputComponent, inputName: input.InputNames ) bool
     {
+        var currentInput = self.GetCurrentInputCommand();
+        var lastInput = self.GetLastInputCommand();
         const Pressed : bool = switch(inputName)
         {
-            .Up => false,
-            .Down => false,
-            .Left => false,
-            .Right => false,
-            .Back => false,
-            .Forward => false, 
-            .Attack => self.GetCurrentInputCommand().attack and !self.GetLastInputCommand().attack,
+            .Up => currentInput.up and !lastInput.up,
+            .Down => currentInput.down and !lastInput.down,
+            .Left => currentInput.left and !lastInput.left,
+            .Right => currentInput.right and !lastInput.right,
+            .Back => currentInput.back and !lastInput.back,
+            .Forward => currentInput.forward and !lastInput.forward,
+            .Attack => currentInput.attack and !lastInput.attack,
         };
 
         return Pressed;
+    }
+
+    pub fn WasMotionExecuted(self: InputComponent, motionName: input.MotionNames, timeLimit: usize ) bool
+    {
+        var adjustLimit : usize = timeLimit;
+
+        if(adjustLimit > (self.input_buffer.len + self.buffer_index))
+        {
+            adjustLimit = self.input_buffer.len + self.buffer_index;
+        }
+
+        var BufferStart : usize = (self.input_buffer.len + self.buffer_index - adjustLimit) % self.input_buffer.len;
+
+        var CurrentMotionIndex : usize = 0;
+
+        const MotionList = input.MotionInputs[@enumToInt(motionName)];
+
+        _ = BufferStart;
+        for(self.input_buffer) | input_command |
+        {
+            std.debug.print("Checking Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
+            if(input.CheckNumpadDirection(input_command, MotionList[CurrentMotionIndex] ))
+            {
+                std.debug.print("Detected Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
+                CurrentMotionIndex = CurrentMotionIndex + 1;
+
+                if(CurrentMotionIndex >= MotionList.len)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };
 

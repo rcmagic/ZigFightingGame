@@ -11,6 +11,7 @@ pub const CombatStateID = enum(u32)
     WalkingBackward,
     Jump,
     Attack,
+    Special,
     Reaction,
     GuardReaction,
     _

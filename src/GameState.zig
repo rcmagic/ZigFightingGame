@@ -76,6 +76,7 @@ var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "Walkin
 var WalkingBackwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "WalkingBackward", .OnUpdate = CommonStates.WalkingBackward.OnUpdate, .OnStart = CommonStates.WalkingBackward.OnStart, .OnEnd = CommonStates.WalkingBackward.OnEnd };
 var JumpCallbacks = StateMachine.CombatStateCallbacks{ .name = "Jump", .OnUpdate = CommonStates.Jump.OnUpdate, .OnStart = CommonStates.Jump.OnStart, .OnEnd = CommonStates.Jump.OnEnd };
 var AttackCallbacks = StateMachine.CombatStateCallbacks{ .name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
+var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special",  .OnUpdate = CommonStates.Special.OnUpdate, .OnStart = CommonStates.Special.OnStart, .OnEnd = CommonStates.Special.OnEnd };
 var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction",  .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
 var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction",  .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
 
@@ -87,6 +88,7 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
     registery.RegisterCommonState(.WalkingBackward, &WalkingBackwardCallbacks);
     registery.RegisterCommonState(.Jump, &JumpCallbacks);
     registery.RegisterCommonState(.Attack, &AttackCallbacks);
+    registery.RegisterCommonState(.Special, &SpecialCallbacks);
     registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
     registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
 

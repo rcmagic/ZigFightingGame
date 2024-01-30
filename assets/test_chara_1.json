@@ -33,6 +33,27 @@
                     "y": -63
                 }
             ]
+        },
+        {
+            "name": "special",
+            "images": 
+            [
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "x": -108,
+                    "y": -131
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/special_attack_00.png",
+                    "x": -103,
+                    "y": -146
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "x": -32,
+                    "y": -63
+                }
+            ]
         }
     ],
     "max_health": 10000,
@@ -173,6 +194,43 @@
                 {"sequence": "attack", "index": 0, "start": 0, "duration": 4 },
                 {"sequence": "attack", "index": 1, "start": 4, "duration": 10 },
                 {"sequence": "attack", "index": 2, "start": 14, "duration": 20 }
+            ]
+        },
+        {
+            "name": "Special",
+            "duration": 20,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "attack_hitbox_groups": [
+                {
+                    "start_frame": 8,
+                    "duration": 2,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": 0,
+                            "bottom": 0,
+                            "right": 120000
+                        }
+                    ]
+                }
+            ],
+            "animation_timeline": [
+                {"sequence": "special", "index": 0, "start": 0, "duration": 4 },
+                {"sequence": "special", "index": 1, "start": 4, "duration": 10 },
+                {"sequence": "special", "index": 2, "start": 14, "duration": 20 }
             ]
         },
         {

@@ -50,11 +50,19 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool
 
 fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
 {
+    if(context.input_component.WasInputPressed(input.InputNames.Attack) and
+        context.input_component.WasMotionExecuted(input.MotionNames.QCF, 30))
+    {
+         context.TransitionToState(.Special);
+         return true;
+    }
+
     if(context.input_component.WasInputPressed(input.InputNames.Attack))
     {
         context.TransitionToState(.Attack);
         return true;
     }
+
 
     return false;
 }
@@ -319,6 +327,36 @@ pub const Attack = struct
     {
         _ = context;
         std.debug.print("Attack.OnEnd()\n", .{});
+    }
+};
+
+pub const Special = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("Special.OnStart()\n", .{});
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        // Prioritize transitioning into an attack over landing
+        if(TriggerEndOfAttackTransition(context))
+        {
+            return;
+        }
+
+        // Landing action will only happen if the character hasn't trigger other actions
+        if(HandleGroundCollision(context))
+        {
+            return;
+        }
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("Special.OnEnd()\n", .{});
     }
 };
 
