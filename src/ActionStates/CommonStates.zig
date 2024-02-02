@@ -94,10 +94,6 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) bool
 
 pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
 {
-    if(CommonTransitions(context))
-    {
-        return;
-    }
 
     if(context.physics_component.position.y > 0) 
     {
@@ -105,6 +101,10 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
     }
     else
     {
+        if(CommonTransitions(context))
+        {
+            return;
+        }
         context.TransitionToState(.Standing);
     }
 
@@ -115,8 +115,12 @@ fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool
 {
     if(context.ActionData) | actionData |
     {
+        if(context.physics_component.position.y > 0)
+        {
+
+        }
         // Only check for idle action transitions on the final frame.
-        if(context.timeline_component.framesElapsed >= actionData.duration)
+        else if(context.timeline_component.framesElapsed >= actionData.duration)
         { 
             CommonToIdleTransitions(context);
             return true;
