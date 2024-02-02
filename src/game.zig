@@ -479,14 +479,14 @@ pub fn gameLoop() !void
             {
                 gameState.input_components[0].input_command.attack = true;
             }
-
-            try gameState.input_components[0].UpdateInput(gameState.input_components[0].input_command);
         }
 
             
         // Game Simulation
         if(!bPauseGame or bAdvanceOnce)
         {
+            try gameState.input_components[0].UpdateInput(gameState.input_components[0].input_command);
+
             try game_simulation.updateGame(&gameState);
 
             // Count the number of game frames that have been simulated. 
