@@ -67,6 +67,11 @@ fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
     return false;
 }
 
+fn CommonJumpAttackTransitions(context: *StateMachine.CombatStateContext) bool
+{
+    return CommonAttackTransitions(context);
+}
+
 fn CommonTransitions(context: *StateMachine.CombatStateContext) bool
 {
     if(CommonAttackTransitions(context))
@@ -97,6 +102,11 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
 
     if(context.physics_component.position.y > 0) 
     {
+        if(CommonJumpAttackTransitions(context))
+        {
+            return;
+        }
+
         context.TransitionToState(.Jump);
     }
     else
@@ -108,6 +118,7 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void
         context.TransitionToState(.Standing);
     }
 
+    // @todo. I don't think we need this, but need to check why this is here 2024/2/2
     context.bTransition = true;
 }
 
@@ -115,12 +126,8 @@ fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool
 {
     if(context.ActionData) | actionData |
     {
-        if(context.physics_component.position.y > 0)
-        {
-
-        }
         // Only check for idle action transitions on the final frame.
-        else if(context.timeline_component.framesElapsed >= actionData.duration)
+        if(context.timeline_component.framesElapsed >= actionData.duration)
         { 
             CommonToIdleTransitions(context);
             return true;
@@ -289,10 +296,11 @@ pub const Jump = struct
             return;
         }
 
-        if(context.input_command.attack) 
+        if(CommonAttackTransitions(context))
         {
-            context.TransitionToState(.Attack);
+            return;
         }
+
     }
 
     pub fn OnEnd(context: *StateMachine.CombatStateContext) void
