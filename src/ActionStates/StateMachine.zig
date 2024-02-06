@@ -95,6 +95,9 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
 
             // Make it possible for the new action to hit an opponent
             context.reaction_component.attackHasHit = false;
+
+            // Disable special canceling on state transition
+            context.reaction_component.attackHasHitForSpecialCancel = false;
         } 
     }
 }

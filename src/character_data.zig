@@ -44,6 +44,8 @@ pub const ImageRange = struct {
 pub const ActionProperties = struct {
     duration: i32 = 0,
     isLooping: bool = false,
+    isSpecial: bool = false,
+
     vulnerable_hitbox_groups: std.ArrayList(HitboxGroup),
     attack_hitbox_groups: std.ArrayList(HitboxGroup),
     push_hitbox_groups: std.ArrayList(HitboxGroup),

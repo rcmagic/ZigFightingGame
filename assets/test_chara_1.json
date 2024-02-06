@@ -198,6 +198,7 @@
         },
         {
             "name": "Special",
+            "isSpecial": true,
             "duration": 20,
             "vulnerable_hitbox_groups": [
                 {

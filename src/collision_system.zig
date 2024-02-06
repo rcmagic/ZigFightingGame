@@ -92,6 +92,9 @@ pub const CollisionSystem = struct
                             // Make sure the attack won't hit more than once.
                             gameState.reaction_components[attackerIndex].attackHasHit = true;
 
+                            // Allow special canceling when an attack has hit
+                            gameState.reaction_components[attackerIndex].attackHasHitForSpecialCancel = true;
+
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
                             try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 25, .guardStun = 15, .hitStop = 10, .knockBack = 10000 });

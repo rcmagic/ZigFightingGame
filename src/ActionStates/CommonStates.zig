@@ -67,6 +67,37 @@ fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool
     return false;
 }
 
+fn SpecialCancelTransitions(context: *StateMachine.CombatStateContext) bool
+{
+    // Don't cancel during hitstop
+    if(context.reaction_component.hitStop > 0)
+    {
+        return false;
+    }
+
+    // Can't special cancel when an attack hasn't hit.
+    if(!context.reaction_component.attackHasHitForSpecialCancel)
+    {
+        return false;
+    }
+
+    // if(context.input_component.WasInputPressedBuffered(input.InputNames.Attack, 30) and
+    //     context.input_component.WasMotionExecuted(input.MotionNames.QCF, 30))
+    // {
+    //      context.TransitionToState(.Special);
+    //      return true;
+    // }
+
+    if(context.input_component.WasInputPressedBuffered(input.InputNames.Attack, 15))
+    {
+         context.TransitionToState(.Special);
+         return true;
+    }
+
+    return false;
+}
+
+
 fn CommonJumpAttackTransitions(context: *StateMachine.CombatStateContext) bool
 {
     return CommonAttackTransitions(context);
@@ -330,6 +361,11 @@ pub const Attack = struct
 
         // Landing action will only happen if the character hasn't trigger other actions
         if(HandleGroundCollision(context))
+        {
+            return;
+        }
+
+        if(SpecialCancelTransitions(context))
         {
             return;
         }

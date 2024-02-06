@@ -26,6 +26,44 @@ pub const InputComponent = struct
         return self.input_buffer[ (self.input_buffer.len + self.buffer_index-1) % self.input_buffer.len];
     }
 
+    
+
+    pub fn WasInputPressedOnFrame(self: InputComponent, inputName: input.InputNames, frame: usize ) bool
+    {
+        var bufferIndex : usize = frame % self.input_buffer.len;
+        var lastBufferIndex : usize = (self.input_buffer.len + frame - 1) % self.input_buffer.len;
+
+        var currentInput = self.input_buffer[bufferIndex];
+        var lastInput = self.input_buffer[lastBufferIndex];
+
+
+        const Pressed : bool = switch(inputName)
+        {
+            .Up => currentInput.up and !lastInput.up,
+            .Down => currentInput.down and !lastInput.down,
+            .Left => currentInput.left and !lastInput.left,
+            .Right => currentInput.right and !lastInput.right,
+            .Back => currentInput.back and !lastInput.back,
+            .Forward => currentInput.forward and !lastInput.forward,
+            .Attack => currentInput.attack and !lastInput.attack,
+        };
+
+        return Pressed;
+    }
+
+    pub fn WasInputPressedBuffered(self: InputComponent, inputName: input.InputNames, duration: usize ) bool
+    {
+        var i: usize = 0;
+        while (i < duration) : (i += 1) 
+        {
+            if(self.WasInputPressedOnFrame(inputName, self.input_buffer.len + self.buffer_index - i))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     pub fn WasInputPressed(self: InputComponent, inputName: input.InputNames ) bool
     {
@@ -63,7 +101,6 @@ pub const InputComponent = struct
         _ = BufferStart;
         for(self.input_buffer) | input_command |
         {
-            std.debug.print("Checking Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
             if(input.CheckNumpadDirection(input_command, MotionList[CurrentMotionIndex] ))
             {
                 std.debug.print("Detected Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
@@ -98,7 +135,8 @@ pub const ReactionComponent = struct {
     guardStun: i32 = 0, 
     hitStop: i32 = 0, 
     knockBack: i32 = 0, 
-    attackHasHit: bool = false 
+    attackHasHit: bool = false,
+    attackHasHitForSpecialCancel: bool = false 
 };
 
 pub const StatsComponent = struct {
@@ -113,5 +151,5 @@ const JumpFlags = enum(u32) {
 };
 
 pub const ActionFlagsComponent = struct { 
-    jumpFlags: JumpFlags = JumpFlags.None 
+    jumpFlags: JumpFlags = JumpFlags.None,
 };
