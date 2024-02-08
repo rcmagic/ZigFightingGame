@@ -453,6 +453,39 @@ pub const Reaction = struct
     }
 };
 
+
+pub const LaunchReaction = struct 
+{
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("LaunchReaction.OnStart()\n", .{});
+
+        common.flip_to_face_opponent(context.physics_component);
+
+        // Only initialize jump velocity when on the ground.
+        context.physics_component.velocity.y = context.reaction_component.launchVelocityY;
+        
+        context.physics_component.acceleration.y = -800;
+
+        context.physics_component.SetForwardSpeed(-context.reaction_component.airKnockback);
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void
+    {
+        if(HandleGroundCollision(context))
+        {
+            return;
+        }
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void
+    {
+        _ = context;
+        std.debug.print("LaunchReaction.OnEnd()\n", .{});
+    }
+};
+
 pub const GuardReaction = struct 
 {
     pub fn OnStart(context: *StateMachine.CombatStateContext) void

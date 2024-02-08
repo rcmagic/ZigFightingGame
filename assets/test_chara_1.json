@@ -258,6 +258,30 @@
             ]
         },
         {
+            "name": "LaunchReaction",
+            "duration": 10000,
+            "isLooping": true, 
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "attack_hitbox_groups": [
+            ],
+            "animation_timeline": [
+                {"sequence": "stand", "index": 0, "start": 0, "duration": 100 }
+            ]
+        },
+        {
             "name": "GuardReaction",
             "duration": 100,
             "vulnerable_hitbox_groups": [

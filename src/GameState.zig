@@ -78,6 +78,7 @@ var JumpCallbacks = StateMachine.CombatStateCallbacks{ .name = "Jump", .OnUpdate
 var AttackCallbacks = StateMachine.CombatStateCallbacks{ .name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
 var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special",  .OnUpdate = CommonStates.Special.OnUpdate, .OnStart = CommonStates.Special.OnStart, .OnEnd = CommonStates.Special.OnEnd };
 var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction",  .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
+var LaunchReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "LaunchReaction",  .OnUpdate = CommonStates.LaunchReaction.OnUpdate, .OnStart = CommonStates.LaunchReaction.OnStart, .OnEnd = CommonStates.LaunchReaction.OnEnd };
 var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction",  .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
 
 // Register states for our character
@@ -90,6 +91,7 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
     registery.RegisterCommonState(.Attack, &AttackCallbacks);
     registery.RegisterCommonState(.Special, &SpecialCallbacks);
     registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
+    registery.RegisterCommonState(.LaunchReaction, &LaunchReactionCallbacks);
     registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
 
 }
@@ -103,6 +105,9 @@ pub const HitEvent = struct {
     guardStun: i32,
     hitStop: i32,
     knockBack: i32,
+    isLaunch: bool,
+    airKnockback: i32,
+    launchVelocityY: i32
 };
 
 

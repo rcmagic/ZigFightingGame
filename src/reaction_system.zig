@@ -66,12 +66,24 @@ pub const reaction_system = struct
             }
             else
             {
-                defenderState.context.TransitionToState(.Reaction);
+                if(hitEvent.isLaunch)
+                {
+                    gameState.reaction_components[hitEvent.defenderID].airKnockback = hitEvent.airKnockback;
+                    gameState.reaction_components[hitEvent.defenderID].launchVelocityY = hitEvent.launchVelocityY;
+                    defenderState.context.TransitionToState(.LaunchReaction);
+                }
+                else
+                {
+                    // Only ground knockback physics for grounded attacks.
+                    gameState.reaction_components[hitEvent.defenderID].knockBack = hitEvent.knockBack;
+                    defenderState.context.TransitionToState(.Reaction);
+                }
+
                 gameState.reaction_components[hitEvent.defenderID].hitStun = hitEvent.hitStun;
             }        
 
             gameState.reaction_components[hitEvent.defenderID].hitStop = hitEvent.hitStop;
-            gameState.reaction_components[hitEvent.defenderID].knockBack = hitEvent.knockBack;
+
 
             gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitStop;
 
