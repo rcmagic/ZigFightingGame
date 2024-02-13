@@ -190,6 +190,33 @@
                     ]
                 }
             ],
+            "attack_property" : 
+                {
+                    "hitbox_groups": [
+                        {
+                            "start_frame": 8,
+                            "duration": 2,
+                            "hitboxes": [
+                                {
+                                    "top": 100000,
+                                    "left": 0,
+                                    "bottom": 0,
+                                    "right": 120000
+                                }
+                            ]
+                        }
+                    ],
+                    "hit_property": {
+                        "hitStun": 1000,
+                        "guardStun": 15,
+                        "hitStop": 10,
+                        "knockBack": 10000,
+                        "isLaunch": true,
+                        "airKnockback": 2000,
+                        "launchVelocityY": 20000
+                    }
+                }
+            ,
             "animation_timeline": [
                 {"sequence": "attack", "index": 0, "start": 0, "duration": 4 },
                 {"sequence": "attack", "index": 1, "start": 4, "duration": 10 },

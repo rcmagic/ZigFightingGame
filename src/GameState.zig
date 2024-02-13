@@ -99,15 +99,9 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
 
 
 pub const HitEvent = struct {
+    hitProperty: character_data.HitProperty,
     attackerID: usize,
     defenderID: usize,
-    hitStun: i32,
-    guardStun: i32,
-    hitStop: i32,
-    knockBack: i32,
-    isLaunch: bool,
-    airKnockback: i32,
-    launchVelocityY: i32
 };
 
 

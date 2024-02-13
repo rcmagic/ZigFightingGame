@@ -62,34 +62,34 @@ pub const reaction_system = struct
             if(WasGuarded)
             {
                 defenderState.context.TransitionToState(.GuardReaction);
-                gameState.reaction_components[hitEvent.defenderID].guardStun = hitEvent.guardStun;
+                gameState.reaction_components[hitEvent.defenderID].guardStun = hitEvent.hitProperty.guardStun;
             }
             else
             {
-                if(hitEvent.isLaunch)
+                if(hitEvent.hitProperty.isLaunch)
                 {
-                    gameState.reaction_components[hitEvent.defenderID].airKnockback = hitEvent.airKnockback;
-                    gameState.reaction_components[hitEvent.defenderID].launchVelocityY = hitEvent.launchVelocityY;
+                    gameState.reaction_components[hitEvent.defenderID].airKnockback = hitEvent.hitProperty.airKnockback;
+                    gameState.reaction_components[hitEvent.defenderID].launchVelocityY = hitEvent.hitProperty.launchVelocityY;
                     defenderState.context.TransitionToState(.LaunchReaction);
                 }
                 else
                 {
                     // Only ground knockback physics for grounded attacks.
-                    gameState.reaction_components[hitEvent.defenderID].knockBack = hitEvent.knockBack;
+                    gameState.reaction_components[hitEvent.defenderID].knockBack = hitEvent.hitProperty.knockBack;
                     defenderState.context.TransitionToState(.Reaction);
                 }
 
-                gameState.reaction_components[hitEvent.defenderID].hitStun = hitEvent.hitStun;
+                gameState.reaction_components[hitEvent.defenderID].hitStun = hitEvent.hitProperty.hitStun;
             }        
 
-            gameState.reaction_components[hitEvent.defenderID].hitStop = hitEvent.hitStop;
+            gameState.reaction_components[hitEvent.defenderID].hitStop = hitEvent.hitProperty.hitStop;
 
 
-            gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitStop;
+            gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitProperty.hitStop;
 
             // Update non gameplay effecting statistics 
-            gameState.stats_components[hitEvent.defenderID].totalHitStun = hitEvent.hitStun;
-            gameState.stats_components[hitEvent.defenderID].totalGuardStun = hitEvent.guardStun;
+            gameState.stats_components[hitEvent.defenderID].totalHitStun = hitEvent.hitProperty.hitStun;
+            gameState.stats_components[hitEvent.defenderID].totalGuardStun = hitEvent.hitProperty.guardStun;
 
         }
 

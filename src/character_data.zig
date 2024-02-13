@@ -30,6 +30,31 @@ pub const HitboxGroup = struct {
     }
 };
 
+pub const HitProperty = struct 
+{
+    attackerID: usize = 0,
+    defenderID: usize = 0,
+    hitStun: i32 = 0,
+    guardStun: i32 = 0,
+    hitStop: i32 = 0,
+    knockBack: i32 = 0,
+    isLaunch: bool = false,
+    airKnockback: i32 = 0,
+    launchVelocityY: i32 = 0,
+};
+
+pub const AttackProperty = struct {
+    hitbox_groups: std.ArrayList(HitboxGroup),
+    hit_property: HitProperty,
+
+    pub fn init(allocator: std.mem.Allocator) !AttackProperty {
+        return AttackProperty{
+            .hit_property = .{},
+            .hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+        };
+    }
+};
+
 pub const ImageRange = struct {
     sequence: []const u8 = "",
     index: i32 = 0,
@@ -50,6 +75,8 @@ pub const ActionProperties = struct {
     attack_hitbox_groups: std.ArrayList(HitboxGroup),
     push_hitbox_groups: std.ArrayList(HitboxGroup),
 
+    attack_property: AttackProperty,
+
     animation_timeline: std.ArrayList(ImageRange),
 
     name: []const u8 = "",
@@ -69,7 +96,8 @@ pub const ActionProperties = struct {
             .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
             .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
             .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
-            .animation_timeline = std.ArrayList(ImageRange).init(allocator) 
+            .attack_property = try AttackProperty.init(allocator),
+            .animation_timeline = std.ArrayList(ImageRange).init(allocator)
         };
     }
 

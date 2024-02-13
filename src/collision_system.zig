@@ -97,9 +97,27 @@ pub const CollisionSystem = struct
 
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
-                            try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 1000, .guardStun = 15, .hitStop = 10, .knockBack = 10000, 
-                            .isLaunch = true, .airKnockback = 2000,  .launchVelocityY = 20000,
-                             });
+                            // try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 1000, .guardStun = 15, .hitStop = 10, .knockBack = 10000, 
+                            // .isLaunch = true, .airKnockback = 2000,  .launchVelocityY = 20000,
+                            //  });
+
+                            if(gameState.gameData) | gameData |
+                            {
+                                var CurrentState = gameState.state_machine_components[attackerIndex].stateMachine.CurrentState;
+                                var actionName : []const u8 = "";
+
+                                if(gameState.state_machine_components[attackerIndex].stateMachine.Registery.CombatStates[@enumToInt(CurrentState)]) |state|
+                                {
+                                    actionName = state.name;
+                                }
+
+                                if(character_data.findAction(gameData.Characters.items[attackerIndex], gameData.ActionMaps.items[attackerIndex], actionName)) | actionData |
+                                {
+                                    try gameState.hitEvents.append(.{.hitProperty = actionData.attack_property.hit_property,
+                                        .attackerID = attackerIndex, .defenderID = defenderIndex
+                                    });
+                                }
+                            }
                         }
                     }
                 }
@@ -214,7 +232,7 @@ pub const CollisionSystem = struct
                     // Gather attack boxes    
                     {
                         // Here we insert the translated hitboxes for the action into AttackHitboxScratch
-                        const atkCount = get_translated_active_hitboxes(actionData.attack_hitbox_groups.items, entityOffset, facingLeft,
+                        const atkCount = get_translated_active_hitboxes(actionData.attack_property.hitbox_groups.items, entityOffset, facingLeft,
                                             self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
                         // Store the slice for this entity that points to a range on the hitbox scratch array
