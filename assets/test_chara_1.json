@@ -207,11 +207,11 @@
                         }
                     ],
                     "hit_property": {
-                        "hitStun": 1000,
+                        "hitStun": 12,
                         "guardStun": 15,
                         "hitStop": 10,
                         "knockBack": 10000,
-                        "isLaunch": true,
+                        "isLaunch": false,
                         "airKnockback": 2000,
                         "launchVelocityY": 20000
                     }
@@ -241,20 +241,33 @@
                     ]
                 }
             ],
-            "attack_hitbox_groups": [
+            "attack_property" : 
                 {
-                    "start_frame": 8,
-                    "duration": 2,
-                    "hitboxes": [
+                    "hitbox_groups": [
                         {
-                            "top": 100000,
-                            "left": 0,
-                            "bottom": 0,
-                            "right": 120000
+                            "start_frame": 8,
+                            "duration": 2,
+                            "hitboxes": [
+                                {
+                                    "top": 100000,
+                                    "left": 0,
+                                    "bottom": 0,
+                                    "right": 120000
+                                }
+                            ]
                         }
-                    ]
+                    ],
+                    "hit_property": {
+                        "hitStun": 200,
+                        "guardStun": 5,
+                        "hitStop": 35,
+                        "knockBack": 10000,
+                        "isLaunch": true,
+                        "airKnockback": 2000,
+                        "launchVelocityY": 30000
+                    }
                 }
-            ],
+            ,
             "animation_timeline": [
                 {"sequence": "special", "index": 0, "start": 0, "duration": 4 },
                 {"sequence": "special", "index": 1, "start": 4, "duration": 10 },
