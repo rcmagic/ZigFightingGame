@@ -32,3 +32,20 @@ Numpad
 ↓↙←　　2,1,4    QCB     (Quarter Cricle Back)
 →↓↘    6,2,3    DP      (Dragon Punch)
 ←↓↙　　4,2,1    RDP     (Reverse Dragon Punch)
+
+
+2024/2/8 Launch Attacks, Launch Reactions and Juggling
+- Launching Attacks (Launch Property)
+    * Hit Y-Velocity 
+    * Default launch gravity
+    * Air knockback (X-Velocity)
+- Launch Reaction
+    * Turn off friction for air hits 
+- Juggling (Air Combos)
+
+
+2024/2/13
+- Add hit properties to json data
+- Hook up hit properties in the collision system
+- Hook up hit properties in the reaction system
+- Hook up hit properties in reaction states

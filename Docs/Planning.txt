@@ -200,10 +200,20 @@
 2024/1/30
 - Supported special move motion inputs.
 
-2024/*/*
-- Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
 
-- Implement special attacks
+2024/2/5
+- Support a "Special" action type
+- Support canceling on hit
+- Supported buffered positive edge inputs
+
+
+2024/*/*
+- Support per-character cancels
+- Support a per-action cancels
+- Support a launch reaction and launch hit property
+- Support juggle hit properties
+- Support an air hit reaction. 
+- Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
 
 
 ================== BACKLOG ==================
