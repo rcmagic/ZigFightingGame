@@ -8,82 +8,62 @@ const collision_system = @import("collision_system.zig").CollisionSystem;
 const reaction_system = @import("reaction_system.zig").reaction_system;
 
 pub const GameData = struct {
-    Characters: std.ArrayList(character_data.CharacterProperties),     
-    ActionMaps: std.ArrayList(std.StringHashMap(usize)), 
+    Characters: std.ArrayList(character_data.CharacterProperties),
+    ActionMaps: std.ArrayList(std.StringHashMap(usize)),
     image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
 
-
-    pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef
-    {
-        if(self.ImageSequenceMap.items[characterIndex].get(SequenceName)) | index |
-        {
-            return &self.image_sequences.items[characterIndex].items[index];            
+    pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef {
+        if (self.ImageSequenceMap.items[characterIndex].get(SequenceName)) |index| {
+            return &self.image_sequences.items[characterIndex].items[index];
         }
         return null;
     }
 };
 
+const StateMachineComponent = struct { context: StateMachine.CombatStateContext = .{}, stateMachine: StateMachine.CombatStateMachineProcessor = .{} };
 
-const StateMachineComponent = struct 
-{ 
-    context: StateMachine.CombatStateContext = .{},
-    stateMachine: StateMachine.CombatStateMachineProcessor = .{}    
-};
+pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
+    var gameData = GameData{ .Characters = std.ArrayList(character_data.CharacterProperties).init(allocator), .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator), .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator), .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator) };
 
-pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData
-{
-    var gameData = GameData { 
-        .Characters = std.ArrayList(character_data.CharacterProperties).init(allocator),
-        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
-        .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
-        .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator)        
-    };
+    const data1 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
+    const data2 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
 
-    var data1 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
-    var data2 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
-
-    if(data1) | loadedData |
-    {
+    if (data1) |loadedData| {
         try gameData.Characters.append(loadedData);
         try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
 
         try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
         try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
-        
     }
 
-    if(data2) | loadedData |
-    {
+    if (data2) |loadedData| {
         try gameData.Characters.append(loadedData);
         try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
 
         try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
         // Create a hash map that lets us reference textures with a sequence name and index
         try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
-        
     }
 
     return gameData;
 }
 
-
 // For now our only test state is a global constant. Need to move this to somewhere where character
 // specific data is stored.
-var StandingCallbacks = StateMachine.CombatStateCallbacks{ .name = "Standing",  .OnUpdate = CommonStates.Standing.OnUpdate, .OnStart = CommonStates.Standing.OnStart, .OnEnd = CommonStates.Standing.OnEnd };
+var StandingCallbacks = StateMachine.CombatStateCallbacks{ .name = "Standing", .OnUpdate = CommonStates.Standing.OnUpdate, .OnStart = CommonStates.Standing.OnStart, .OnEnd = CommonStates.Standing.OnEnd };
 var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "WalkingForward", .OnUpdate = CommonStates.WalkingForward.OnUpdate, .OnStart = CommonStates.WalkingForward.OnStart, .OnEnd = CommonStates.WalkingForward.OnEnd };
 var WalkingBackwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "WalkingBackward", .OnUpdate = CommonStates.WalkingBackward.OnUpdate, .OnStart = CommonStates.WalkingBackward.OnStart, .OnEnd = CommonStates.WalkingBackward.OnEnd };
 var JumpCallbacks = StateMachine.CombatStateCallbacks{ .name = "Jump", .OnUpdate = CommonStates.Jump.OnUpdate, .OnStart = CommonStates.Jump.OnStart, .OnEnd = CommonStates.Jump.OnEnd };
-var AttackCallbacks = StateMachine.CombatStateCallbacks{ .name = "Attack",  .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
-var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special",  .OnUpdate = CommonStates.Special.OnUpdate, .OnStart = CommonStates.Special.OnStart, .OnEnd = CommonStates.Special.OnEnd };
-var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction",  .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
-var LaunchReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "LaunchReaction",  .OnUpdate = CommonStates.LaunchReaction.OnUpdate, .OnStart = CommonStates.LaunchReaction.OnStart, .OnEnd = CommonStates.LaunchReaction.OnEnd };
-var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction",  .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
+var AttackCallbacks = StateMachine.CombatStateCallbacks{ .name = "Attack", .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
+var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special", .OnUpdate = CommonStates.Special.OnUpdate, .OnStart = CommonStates.Special.OnStart, .OnEnd = CommonStates.Special.OnEnd };
+var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction", .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
+var LaunchReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "LaunchReaction", .OnUpdate = CommonStates.LaunchReaction.OnUpdate, .OnStart = CommonStates.LaunchReaction.OnStart, .OnEnd = CommonStates.LaunchReaction.OnEnd };
+var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction", .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
 
 // Register states for our character
-fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
-{
+fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void {
     registery.RegisterCommonState(.Standing, &StandingCallbacks);
     registery.RegisterCommonState(.WalkingForward, &WalkingForwardCallbacks);
     registery.RegisterCommonState(.WalkingBackward, &WalkingBackwardCallbacks);
@@ -93,17 +73,13 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void
     registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
     registery.RegisterCommonState(.LaunchReaction, &LaunchReactionCallbacks);
     registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
-
 }
-
-
 
 pub const HitEvent = struct {
     hitProperty: character_data.HitProperty,
     attackerID: usize,
     defenderID: usize,
 };
-
 
 const MAX_ENTITIES = 10;
 
@@ -128,10 +104,8 @@ pub const GameState = struct {
 
     gameData: ?GameData = null,
 
-
     // Boilerplate for setting up the components and state machine for one character.
-    fn CreateAndInitOneCharacter(self: *GameState) void
-    {
+    fn CreateAndInitOneCharacter(self: *GameState) void {
         // Setup referenced components used by the action state machine for a character.
         self.state_machine_components[self.entityCount].context.input_component = &self.input_components[self.entityCount];
         self.state_machine_components[self.entityCount].context.physics_component = &self.physics_components[self.entityCount];
@@ -145,19 +119,15 @@ pub const GameState = struct {
         self.entityCount += 1;
     }
 
-
     // Load data from assets that will not be changed during runtime
-    pub fn LoadPersistentGameAssets(self: *GameState, allocator: std.mem.Allocator) !void
-    {
+    pub fn LoadPersistentGameAssets(self: *GameState, allocator: std.mem.Allocator) !void {
         self.gameData = try InitializeGameData(allocator);
     }
 
-    // Load data that may change during runtime. 
-    pub fn init(self: *GameState, allocator: std.mem.Allocator) !void 
-    {
-        
-        self.* = GameState {
-                
+    // Load data that may change during runtime.
+    pub fn init(self: *GameState, allocator: std.mem.Allocator) !void {
+        self.* = GameState{
+
             // Initialize Systems
             .collisionSystem = try collision_system.init(allocator),
 
@@ -165,7 +135,7 @@ pub const GameState = struct {
 
             // Initialize the hit event
             // TODO: Make the number of max hit events a configurable property?
-            .hitEvents = try std.ArrayList(HitEvent).initCapacity(allocator, 10)
+            .hitEvents = try std.ArrayList(HitEvent).initCapacity(allocator, 10),
         };
 
         // For now we are only creating two characters to work with.

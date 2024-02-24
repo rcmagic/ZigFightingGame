@@ -30,8 +30,7 @@ pub const HitboxGroup = struct {
     }
 };
 
-pub const HitProperty = struct 
-{
+pub const HitProperty = struct {
     attackerID: usize = 0,
     defenderID: usize = 0,
     hitStun: i32 = 0,
@@ -92,13 +91,7 @@ pub const ActionProperties = struct {
     }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
-        return ActionProperties{ 
-            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
-            .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), 
-            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
-            .attack_property = try AttackProperty.init(allocator),
-            .animation_timeline = std.ArrayList(ImageRange).init(allocator)
-        };
+        return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_property = try AttackProperty.init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
     }
 
     pub fn getActiveImage(self: ActionProperties, frame: i32) ImageRange {
@@ -121,7 +114,7 @@ pub fn findAction(character: CharacterProperties, map: std.StringHashMap(usize),
 
 pub fn generateActionNameMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize) {
     var ActionNameMap = std.StringHashMap(usize).init(allocator);
-    for (character.actions.items) |action, index| {
+    for (character.actions.items, 0..) |action, index| {
         try ActionNameMap.putNoClobber(action.name, index);
     }
 
@@ -141,7 +134,7 @@ pub const SequenceTexRef = struct {
 pub fn generateImageSequenceMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize) {
     var SequenceNameMap = std.StringHashMap(usize).init(allocator);
 
-    for (character.image_sequences.items) |sequence, index| {
+    for (character.image_sequences.items, 0..) |sequence, index| {
         try SequenceNameMap.putNoClobber(sequence.name, index);
     }
 
@@ -160,9 +153,9 @@ pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.All
             // Need a better way to handle conversion from non-null terminated strings to c strings.
             const source = try allocator.alloc(u8, image.source.len + 1);
             defer allocator.free(source);
-            std.mem.copy(u8, source, image.source);
+            std.mem.copyForwards(u8, source, image.source);
             source[source.len - 1] = 0;
-            try sequenceTexRef.textures.append(rl.LoadTexture(@ptrCast([*c]const u8, source)));
+            try sequenceTexRef.textures.append(rl.LoadTexture(@ptrCast(source)));
         }
     }
 
@@ -216,32 +209,33 @@ pub const CharacterProperties = struct {
 };
 
 pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties {
-    const file = try std.fs.cwd().openFile(path, .{ .read = true });
+    const file = try std.fs.cwd().openFile(path, .{});
     defer (file.close());
 
     var buffer: [16 * 2048]u8 = undefined;
     const bytesRead = try file.readAll(&buffer);
     const message = buffer[0..bytesRead];
 
-    var p = std.json.Parser.init(allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(message);
-    defer tree.deinit();
+    // var p = std.json.Parser.init(allocator, false);
+    // defer p.deinit();
+    // var tree = try p.parse(message);
+    // defer tree.deinit();
 
-    var thing = try parseJsonValue(CharacterProperties, tree.root, allocator);
+    const parsed = try std.json.parseFromSlice(std.json.Value, allocator, message, .{});
+    defer parsed.deinit();
+    const root = parsed.value;
+
+    const thing = try parseJsonValue(CharacterProperties, root, allocator);
     return thing;
 }
 
-fn isArrayList(comptime T: type) bool {
-    switch (@typeInfo(T)) {
-        .Struct => {
-            return @hasField(T, "items");
-        },
-        else => {},
-    }
+// fn itemType(comptime T: type) ?type {
+//     if (@TypeOf(T) == .Pointer) {
+//         return @field(T, "child");
+//     }
 
-    return false;
-}
+//     return null;
+// }
 
 fn itemType(comptime T: type) ?type {
     switch (@typeInfo(T)) {
@@ -253,18 +247,18 @@ fn itemType(comptime T: type) ?type {
 fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
         .Int => {
-            return @intCast(T, tree.Integer);
+            return @intCast(tree.integer);
         },
         .Bool => {
-            return tree.Bool;
+            return tree.bool;
         },
         // Currenly only support slices
         .Pointer => |ptrInfo| {
             switch (ptrInfo.size) {
                 .Slice => {
-                    const output = try allocator.alloc(u8, tree.String.len);
+                    const output = try allocator.alloc(u8, tree.string.len);
                     errdefer allocator.free(output);
-                    std.mem.copy(u8, output, tree.String);
+                    @memcpy(output, tree.string);
 
                     return output;
                 },
@@ -272,16 +266,20 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
             }
         },
         .Struct => |structInfo| {
-            comptime var is_array_list = isArrayList(T);
+            const is_array_list: bool = switch (@typeInfo(T)) {
+                .Struct => @hasField(T, "items"),
+                else => false,
+            };
 
             // ArrayLists are handled as a special case. We serialize ArrayList as JSON arrays
             // rather than objects.
             if (is_array_list) {
                 var instanceOfArrayList = T.init(allocator);
-                const item_type = itemType(@TypeOf(instanceOfArrayList.items));
+                const thing = instanceOfArrayList.items;
+                const item_type = itemType(@TypeOf(thing));
 
                 // Array lists are stored as JSON arrays.
-                for (tree.Array.items) |itemValue| {
+                for (tree.array.items) |itemValue| {
                     if (item_type) |itemTypeValidated| {
                         if (try parseJsonValue(itemTypeValidated, itemValue, allocator)) |item| {
                             try instanceOfArrayList.append(item);
@@ -300,9 +298,9 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 }
 
                 inline for (structInfo.fields) |field| {
-                    const valueOptional = tree.Object.get(field.name);
+                    const valueOptional = tree.object.get(field.name);
                     if (valueOptional) |value| {
-                        const thing = parseJsonValue(field.field_type, value, allocator) catch unreachable;
+                        const thing = parseJsonValue(field.type, value, allocator) catch unreachable;
                         if (thing) |item| {
                             @field(instanceOfStruct, field.name) = item;
                         }
@@ -345,11 +343,11 @@ test "Testing resizable array." {
 
 test "Test writing character data to a json file" {
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    var Allocator = ArenaAllocator.allocator();
+    const Allocator = ArenaAllocator.allocator();
 
     var Character = try CharacterProperties.init(Allocator);
 
-    var Action = try ActionProperties.init(Allocator);
+    const Action = try ActionProperties.init(Allocator);
 
     try Character.actions.append(Action);
     try Character.actions.append(Action);
@@ -473,7 +471,7 @@ test "Deserialize a struct with an ArrayList" {
 
 test "Test CharacterProperties action name map lookup" {
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    var Allocator = ArenaAllocator.allocator();
+    const Allocator = ArenaAllocator.allocator();
 
     var Character = try CharacterProperties.init(Allocator);
 

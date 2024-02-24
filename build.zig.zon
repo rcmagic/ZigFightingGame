@@ -1,0 +1,17 @@
+.{
+    .name = "raylib-imgui-example",
+    .version = "1.0.0",
+    .paths = .{"src", "vendor"},
+    .dependencies = .{
+        .raylib_zig = .{
+            // .url = "https://github.com/ryupold/raylib.zig/archive/<commit>.tar.gz",
+            .url = "https://github.com/kapricorn-media/raylib.zig/archive/44360a577aec4916e32337f9a900cd407aca4e13.tar.gz",
+            .hash = "1220a0d451554e001d2327c20a233e7c7b59db69515391dfe0bb0a1127634c0afa8f",
+        },
+        .rlimgui = .{
+            .url = "https://github.com/raylib-extras/rlImGui/archive/d765c1ef3d37cf939f88aaa272a59a2713d654c9.tar.gz",
+            .hash = "1220e68e8862832a7c08aa2bbaa8ffb7b7f9c492f8e518d595162ff0c01155f542c3",
+        },
+        .zgui = .{ .path = "vendor/zgui" },
+    },
+}
