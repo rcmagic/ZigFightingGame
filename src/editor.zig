@@ -56,18 +56,42 @@ fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, alloca
     }
 }
 
+fn RemoveItem(list: anytype, index: usize) void {
+    const deleted = list.orderedRemove(index);
+    list.allocator.destroy(&deleted);
+}
+
 fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator) !void {
     switch (@typeInfo(@TypeOf(property.*))) {
         .Struct => |structInfo| {
             if (@hasField(@TypeOf(property.*), "items")) {
+                z.pushPtrId(property);
+                defer z.popId();
                 z.separatorText(name);
+                var deleteIndex: i32 = -1;
+                z.sameLine(.{});
+
+                if (z.smallButton("+")) {
+                    _ = try property.addOne();
+                }
+
                 for (property.items, 0..) |*item, index| {
-                    z.pushPtrId(property);
+                    z.pushPtrId(item);
                     defer z.popId();
                     z.indent(.{ .indent_w = 8 });
                     defer z.unindent(.{ .indent_w = 8 });
+
+                    if (z.smallButton("x")) {
+                        deleteIndex = @intCast(index);
+                    }
+
+                    z.sameLine(.{});
                     const label = z.formatZ("{}", .{index});
                     try CompTimePropertyEdit(item, label, allocator);
+                }
+
+                if (deleteIndex >= 0) {
+                    RemoveItem(property, @intCast(deleteIndex));
                 }
             } else {
                 z.pushPtrId(property);
