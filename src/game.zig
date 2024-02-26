@@ -162,7 +162,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
                 }
             }
 
-            const atkCount = getActiveHitboxes(actionData.attack_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
+            const atkCount = getActiveHitboxes(actionData.attack_property.hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
             if (atkCount > 0) {
                 const temp = debugDrawHitboxes[0..atkCount];

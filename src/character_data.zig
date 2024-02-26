@@ -99,7 +99,6 @@ pub const ActionProperties = struct {
     isSpecial: bool = false,
 
     vulnerable_hitbox_groups: std.ArrayList(HitboxGroup),
-    attack_hitbox_groups: std.ArrayList(HitboxGroup),
     push_hitbox_groups: std.ArrayList(HitboxGroup),
 
     attack_property: AttackProperty,
@@ -113,13 +112,12 @@ pub const ActionProperties = struct {
         try std.json.stringify(.{
             .duration = value.duration,
             .vulnerable_hitbox_groups = value.vulnerable_hitbox_groups.items,
-            .attack_hitbox_groups = value.attack_hitbox_groups.items,
             .push_hitbox_groups = value.push_hitbox_groups.items,
         }, options, out_stream);
     }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
-        return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_property = try AttackProperty.init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
+        return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_property = try AttackProperty.init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
     }
 
     pub fn getActiveImage(self: ActionProperties, frame: i32) ImageRange {
