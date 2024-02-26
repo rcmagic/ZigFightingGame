@@ -61,8 +61,6 @@ pub const HitboxGroup = struct {
 };
 
 pub const HitProperty = struct {
-    attackerID: usize = 0,
-    defenderID: usize = 0,
     hitStun: i32 = 0,
     guardStun: i32 = 0,
     hitStop: i32 = 0,

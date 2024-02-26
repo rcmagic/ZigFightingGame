@@ -76,9 +76,6 @@ pub const CollisionSystem = struct {
 
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
-                            // try gameState.hitEvents.append(.{.attackerID = attackerIndex, .defenderID = defenderIndex, .hitStun = 1000, .guardStun = 15, .hitStop = 10, .knockBack = 10000,
-                            // .isLaunch = true, .airKnockback = 2000,  .launchVelocityY = 20000,
-                            //  });
 
                             if (gameState.gameData) |gameData| {
                                 const CurrentState = gameState.state_machine_components[attackerIndex].stateMachine.CurrentState;
