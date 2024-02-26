@@ -5,7 +5,7 @@
             "name": "Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/zig-out/bin/hello-wold.exe",
+            "program": "${workspaceFolder}/zig-out/bin/zfg.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",            
