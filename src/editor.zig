@@ -17,54 +17,65 @@ fn CoordinateEdit(name: [:0]const u8, coordinate: *i32) void {
     _ = z.dragInt(name, .{ .v = coordinate, .speed = 100 });
 }
 
-fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, allocator: std.mem.Allocator) void {
-    _ = allocator;
-    z.separatorText(@typeName(@TypeOf(hitbox.*)));
+fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, allocator: std.mem.Allocator) void {
+    if (z.collapsingHeader(name, .{ .default_open = false })) {
+        _ = allocator;
+        //z.separatorText(@typeName(@TypeOf(hitbox.*)));
 
-    var x = hitbox.left;
-    CoordinateEdit("x", &x);
-    var y = hitbox.top;
-    CoordinateEdit("y", &y);
-    hitbox.SetLocation(x, y);
+        var x = hitbox.left;
+        CoordinateEdit("x", &x);
+        var y = hitbox.top;
+        CoordinateEdit("y", &y);
+        hitbox.SetLocation(x, y);
 
-    var width = hitbox.Width();
-    CoordinateEdit("width", &width);
-    hitbox.SetWidth(width);
+        var width = hitbox.Width();
+        CoordinateEdit("width", &width);
+        hitbox.SetWidth(width);
 
-    var height = hitbox.Height();
-    CoordinateEdit("height", &height);
-    hitbox.SetHeight(height);
+        var height = hitbox.Height();
+        CoordinateEdit("height", &height);
+        hitbox.SetHeight(height);
 
-    switch (@typeInfo(@TypeOf(hitbox.*))) {
-        .Struct => |structInfo| {
-            inline for (structInfo.fields) |field| {
-                switch (@typeInfo(field.type)) {
-                    .Int => {
-                        CoordinateEdit(field.name, &@field(hitbox, field.name));
-                    },
-                    else => {
-                        z.separatorText(field.name);
-                    },
+        switch (@typeInfo(@TypeOf(hitbox.*))) {
+            .Struct => |structInfo| {
+                inline for (structInfo.fields) |field| {
+                    switch (@typeInfo(field.type)) {
+                        .Int => {
+                            CoordinateEdit(field.name, &@field(hitbox, field.name));
+                        },
+                        else => {
+                            z.separatorText(field.name);
+                        },
+                    }
                 }
-            }
-        },
-        else => {
-            z.separatorText("Unknown Type");
-        },
+            },
+            else => {
+                z.separatorText("Unknown Type");
+            },
+        }
     }
 }
 
 fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator) !void {
     switch (@typeInfo(@TypeOf(property.*))) {
         .Struct => |structInfo| {
-            z.separatorText(name);
             if (@hasField(@TypeOf(property.*), "items")) {
-                for (property.items) |*item| {
-                    try CompTimePropertyEdit(item, "index", allocator);
+                z.separatorText(name);
+                for (property.items, 0..) |*item, index| {
+                    z.pushPtrId(property);
+                    defer z.popId();
+                    z.indent(.{ .indent_w = 8 });
+                    defer z.unindent(.{ .indent_w = 8 });
+                    const label = z.formatZ("{}", .{index});
+                    try CompTimePropertyEdit(item, label, allocator);
                 }
             } else {
-                inline for (structInfo.fields) |field| {
-                    try CompTimePropertyEdit(&@field(property, field.name), field.name, allocator);
+                z.pushPtrId(property);
+                defer z.popId();
+                if (z.collapsingHeader(name, .{ .default_open = false })) {
+                    inline for (structInfo.fields) |field| {
+                        try CompTimePropertyEdit(&@field(property, field.name), field.name, allocator);
+                    }
                 }
             }
         },
@@ -101,7 +112,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
 
 fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
-        HitboxPropertyEdit(property, allocator);
+        HitboxPropertyEdit(property, name, allocator);
     } else {
         try GenericPropertyEdit(property, name, allocator);
     }
@@ -115,24 +126,21 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
     // z.showDemoWindow(&open);
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
-        if (z.collapsingHeader("Settings", .{ .default_open = true })) {
-            if (gameState.gameData) |gameData| {
-                const entity = 0;
-                const stateMachine = &gameState.state_machine_components[entity].stateMachine;
+        if (gameState.gameData) |gameData| {
+            const entity = 0;
+            const stateMachine = &gameState.state_machine_components[entity].stateMachine;
+            const CurrentState = stateMachine.CurrentState;
 
-                const CurrentState = stateMachine.CurrentState;
+            var actionName: []const u8 = "";
+            if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
+                actionName = state.name;
+            }
 
-                var actionName: []const u8 = "";
-                if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                    actionName = state.name;
-                }
-
-                // Get all the hitboxes for the current action.
-                if (character_data.findAction(gameData.Characters.items[0], gameData.ActionMaps.items[0], actionName)) |actionData| {
-                    var editActionName = [_]u8{0} ** 64;
-                    std.mem.copyForwards(u8, &editActionName, actionName);
-                    try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
-                }
+            // Get all the hitboxes for the current action.
+            if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
+                var editActionName = [_]u8{0} ** 64;
+                std.mem.copyForwards(u8, &editActionName, actionName);
+                try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
             }
         }
     }
