@@ -7,6 +7,12 @@ const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const common = @import("common.zig");
 const input = @import("input.zig");
+const editor = @import("editor.zig");
+const c = @cImport({
+    @cDefine("NO_FONT_AWESOME", "1");
+    @cInclude("rlImGui.h");
+});
+const z = @import("zgui");
 
 var texture: rl.Texture2D = undefined;
 
@@ -303,6 +309,9 @@ pub fn gameLoop() !void {
     // Flag for showing hitboxes
     var bDebugShowHitboxes = false;
 
+    // Flag for showing the editor
+    var bShowEditor = false;
+
     var bPauseGame = false;
     var GameFrameCount: i32 = 0;
 
@@ -313,6 +322,14 @@ pub fn gameLoop() !void {
             texture = sequence.textures.items[0];
         }
     }
+
+    // Imgui setup
+    c.rlImGuiSetup(true);
+    defer c.rlImGuiShutdown();
+
+    // zgui setup
+    z.initNoContext(std.heap.c_allocator);
+    defer z.deinitNoContext();
 
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
@@ -343,6 +360,10 @@ pub fn gameLoop() !void {
                 try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
             }
 
+            if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F8)) {
+                bShowEditor = !bShowEditor;
+            }
+
             // Debug color toggle
             if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F9)) {
                 bDebugColorEnabled = !bDebugColorEnabled;
@@ -354,7 +375,7 @@ pub fn gameLoop() !void {
             pollGamepadInput(&gameState, 1, 1);
         }
 
-        if (rl.IsWindowFocused()) {
+        if (!bShowEditor and rl.IsWindowFocused()) {
             if (rl.IsKeyDown(rl.KeyboardKey.KEY_W)) {
                 gameState.input_components[0].input_command.up = true;
             }
@@ -429,7 +450,11 @@ pub fn gameLoop() !void {
             rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
         }
 
-        rl.EndDrawing();
+        defer rl.EndDrawing();
         //----------------------------------------------------------------------------------
+
+        if (bShowEditor) {
+            try editor.Tick(gameState, AssetAllocator.allocator());
+        }
     }
 }

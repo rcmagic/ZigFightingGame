@@ -6,6 +6,36 @@ pub const Hitbox = struct {
     left: i32 = 0,
     bottom: i32 = 0,
     right: i32 = 0,
+
+    const Self = @This();
+    pub fn SetLocation(self: *Self, x: i32, y: i32) void {
+        self.right = x + (self.right - self.left);
+        self.bottom = y - (self.top - self.bottom);
+        self.left = x;
+        self.top = y;
+    }
+
+    pub fn SetWidth(self: *Self, width: i32) void {
+        const center = @divFloor((self.left + self.right), 2);
+        const half = @divFloor(width, 2);
+        self.left = center - half;
+        self.right = center + half;
+    }
+
+    pub fn SetHeight(self: *Self, height: i32) void {
+        const center = @divFloor((self.top + self.bottom), 2);
+        const half = @divFloor(height, 2);
+        self.bottom = center - half;
+        self.top = center + half;
+    }
+
+    pub fn Width(self: *Self) i32 {
+        return self.right - self.left;
+    }
+
+    pub fn Height(self: *Self) i32 {
+        return self.top - self.bottom;
+    }
 };
 
 pub const HitboxGroup = struct {

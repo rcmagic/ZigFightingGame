@@ -2,15 +2,14 @@ const std = @import("std");
 const rl = @import("raylib");
 const game = @import("game.zig");
 
-
 pub fn main() anyerror!void {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    const screenWidth = 800;
-    const screenHeight = 450;
+    const screenWidth = 1280;
+    const screenHeight = 720;
 
-    rl.InitWindow(screenWidth, screenHeight, "raylib-zig [core] example - basic window");
+    rl.InitWindow(screenWidth, screenHeight, "Zig Fighting Game");
 
     rl.SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -24,4 +23,3 @@ pub fn main() anyerror!void {
     //--------------------------------------------------------------------------------------
 
 }
-
