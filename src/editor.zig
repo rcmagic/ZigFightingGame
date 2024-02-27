@@ -22,6 +22,9 @@ fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, alloca
         _ = allocator;
         //z.separatorText(@typeName(@TypeOf(hitbox.*)));
 
+        z.pushPtrId(hitbox);
+        defer z.popId();
+
         var x = hitbox.left;
         CoordinateEdit("x", &x);
         var y = hitbox.top;
@@ -71,9 +74,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 var deleteIndex: i32 = -1;
                 z.sameLine(.{});
 
-                if (z.smallButton("+")) {
-                    _ = try property.addOne();
-                }
+                const addButtonClicked = z.smallButton("+");
 
                 for (property.items, 0..) |*item, index| {
                     z.pushPtrId(item);
@@ -92,6 +93,27 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
 
                 if (deleteIndex >= 0) {
                     RemoveItem(property, @intCast(deleteIndex));
+                } else if (addButtonClicked) {
+                    switch (@typeInfo(@TypeOf(property.items))) {
+                        .Pointer => |ptrInfo| {
+                            switch (@typeInfo(ptrInfo.child)) {
+                                .Struct => {
+                                    var instance: ptrInfo.child = undefined;
+                                    if (@hasDecl(ptrInfo.child, "init")) {
+                                        instance = try ptrInfo.child.init(allocator);
+                                    } else {
+                                        instance = .{};
+                                    }
+                                    try property.append(instance);
+                                },
+                                else => {
+                                    const instance: ptrInfo.child = 0;
+                                    try property.append(instance);
+                                },
+                            }
+                        },
+                        else => {},
+                    }
                 }
             } else {
                 z.pushPtrId(property);
