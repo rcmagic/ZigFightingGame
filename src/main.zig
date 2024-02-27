@@ -6,9 +6,10 @@ pub fn main() anyerror!void {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    const screenWidth = 1280;
-    const screenHeight = 720;
+    const screenWidth = 800;
+    const screenHeight = 450;
 
+    rl.SetConfigFlags(rl.ConfigFlags{ .FLAG_WINDOW_RESIZABLE = true });
     rl.InitWindow(screenWidth, screenHeight, "Zig Fighting Game");
 
     rl.SetTargetFPS(60); // Set our game to run at 60 frames-per-second
