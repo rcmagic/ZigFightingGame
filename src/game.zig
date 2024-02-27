@@ -331,9 +331,26 @@ pub fn gameLoop() !void {
     z.initNoContext(std.heap.c_allocator);
     defer z.deinitNoContext();
 
+    // Our 2D Camera
+    var Camera: rl.Camera2D = .{
+        .offset = .{ .x = 0, .y = 0 },
+        .target = .{ .x = 0, .y = 0 },
+        .rotation = 0,
+        .zoom = 1,
+    };
+
+    Camera.offset.x = 0;
+
+    const screenWidth: f32 = 800;
+    const screenHeight: f32 = 450;
+
     // Main game loop
     while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
 
+        const widthF: f32 = @floatFromInt(rl.GetScreenWidth());
+        const heightF: f32 = @floatFromInt(rl.GetScreenHeight());
+        //float scale = MIN((float)GetScreenWidth()/gameScreenWidth, (float)GetScreenHeight()/gameScreenHeight);
+        Camera.zoom = @min(widthF / screenWidth, heightF / screenHeight);
         // Advance the game by one frame.
         var bAdvanceOnce = false;
 
@@ -419,11 +436,14 @@ pub fn gameLoop() !void {
 
         // Draw
         rl.BeginDrawing();
+        rl.BeginMode2D(Camera);
 
         rl.ClearBackground(rl.WHITE);
 
         renderDrawState(prepareDrawState(gameState, 0));
         renderDrawState(prepareDrawState(gameState, 1));
+
+        rl.EndMode2D();
 
         // Draw hitboxes when enabled.
         if (bDebugShowHitboxes) {
@@ -450,11 +470,12 @@ pub fn gameLoop() !void {
             rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
         }
 
-        defer rl.EndDrawing();
         //----------------------------------------------------------------------------------
 
         if (bShowEditor) {
             try editor.Tick(gameState, AssetAllocator.allocator());
         }
+
+        rl.EndDrawing();
     }
 }
