@@ -443,13 +443,13 @@ pub fn gameLoop() !void {
         renderDrawState(prepareDrawState(gameState, 0));
         renderDrawState(prepareDrawState(gameState, 1));
 
-        rl.EndMode2D();
-
         // Draw hitboxes when enabled.
         if (bDebugShowHitboxes) {
             drawCharacterHitboxes(gameState, 0);
             drawCharacterHitboxes(gameState, 1);
         }
+
+        rl.EndMode2D();
 
         // if(gameState.gameData) | gameData |
         // {
