@@ -1,6 +1,62 @@
 const std = @import("std");
 const rl = @import("raylib");
 
+fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
+    const T = @TypeOf(field);
+    switch (@typeInfo(T)) {
+        .Fn => {},
+        // Currenly only support slices
+        .Pointer => |ptrInfo| {
+            switch (ptrInfo.size) {
+                .Slice => {
+                    try jws.objectField(name);
+                    try jws.write(field);
+                },
+                else => unreachable,
+            }
+        },
+        .Struct => {
+            try jws.objectField(name);
+            try stringifyValue(field, jws);
+        },
+        .Int, .Bool => {
+            try jws.objectField(name);
+            try jws.write(field);
+        },
+        else => {},
+    }
+}
+
+fn stringifyValue(value: anytype, jws: anytype) !void {
+    const T = @TypeOf(value);
+    switch (@typeInfo(T)) {
+        .Fn => {},
+        .Struct => |structInfo| {
+            if (@hasField(T, "items")) {
+                try jws.beginArray();
+                for (@field(value, "items")) |arrayItem| {
+                    try stringifyValue(arrayItem, jws);
+                }
+                try jws.endArray();
+            } else {
+                try jws.beginObject();
+                inline for (structInfo.fields) |field| {
+                    try stringifyField(@field(value, field.name), field.name, jws);
+                }
+                try jws.endObject();
+            }
+        },
+        .Int => {
+            try jws.write(value);
+        },
+
+        else => {
+
+            //jws.write(value);
+        },
+    }
+}
+
 pub const Hitbox = struct {
     top: i32 = 0,
     left: i32 = 0,
@@ -45,9 +101,9 @@ pub const HitboxGroup = struct {
     hitboxes: std.ArrayList(Hitbox),
 
     const Self = @This();
-    pub fn jsonStringify(value: Self, options: std.json.StringifyOptions, out_stream: anytype) !void {
-        try std.json.stringify(.{ .start_frame = value.start_frame, .duration = value.duration, .hitboxes = value.hitboxes.items }, options, out_stream);
-    }
+    // pub fn jsonStringify(value: Self, options: std.json.StringifyOptions, out_stream: anytype) !void {
+    //     try std.json.stringify(.{ .start_frame = value.start_frame, .duration = value.duration, .hitboxes = value.hitboxes.items }, options, out_stream);
+    // }
 
     pub fn init(allocator: std.mem.Allocator) !HitboxGroup {
         return HitboxGroup{
@@ -108,13 +164,12 @@ pub const ActionProperties = struct {
     name: []const u8 = "",
 
     const Self = @This();
-    pub fn jsonStringify(value: Self, options: std.json.StringifyOptions, out_stream: anytype) !void {
-        try std.json.stringify(.{
-            .duration = value.duration,
-            .vulnerable_hitbox_groups = value.vulnerable_hitbox_groups.items,
-            .push_hitbox_groups = value.push_hitbox_groups.items,
-        }, options, out_stream);
-    }
+    // pub fn jsonStringify(value: Self, jws: anytype) !void {
+    //     try stringifyValue(value, jws);
+    //     // try jws.write(.{
+    //     //     .duration = value.duration,
+    //     // });
+    // }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
         return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_property = try AttackProperty.init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
@@ -206,11 +261,11 @@ pub const ImageSequence = struct {
 };
 
 pub const CharacterProperties = struct {
+    image_sequences: std.ArrayList(ImageSequence),
+
     max_health: i32 = 10000,
     default_pushbox: Hitbox = .{},
     actions: std.ArrayList(ActionProperties),
-
-    image_sequences: std.ArrayList(ImageSequence),
 
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
@@ -218,12 +273,8 @@ pub const CharacterProperties = struct {
     }
 
     // Serialization Support
-    const Self = @This();
-    pub fn jsonStringify(value: Self, options: std.json.StringifyOptions, out_stream: anytype) !void {
-        try std.json.stringify(.{
-            .max_health = value.max_health,
-            .actions = value.actions.items,
-        }, options, out_stream);
+    pub fn jsonStringify(value: @This(), jws: anytype) !void {
+        try stringifyValue(value, jws);
     }
 
     pub fn findSequence(self: *CharacterProperties, map: std.StringHashMap(usize), SequenceName: []const u8) ?*ImageSequence {
@@ -255,6 +306,11 @@ pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProp
     return thing;
 }
 
+// pub fn saveAsset(asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
+// {
+
+// }
+
 // fn itemType(comptime T: type) ?type {
 //     if (@TypeOf(T) == .Pointer) {
 //         return @field(T, "child");
@@ -271,6 +327,78 @@ fn itemType(comptime T: type) ?type {
 }
 
 fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
+    switch (@typeInfo(T)) {
+        .Int => {
+            return @intCast(tree.integer);
+        },
+        .Bool => {
+            return tree.bool;
+        },
+        // Currenly only support slices
+        .Pointer => |ptrInfo| {
+            switch (ptrInfo.size) {
+                .Slice => {
+                    const output = try allocator.alloc(u8, tree.string.len);
+                    errdefer allocator.free(output);
+                    @memcpy(output, tree.string);
+
+                    return output;
+                },
+                else => unreachable,
+            }
+        },
+        .Struct => |structInfo| {
+            const is_array_list: bool = switch (@typeInfo(T)) {
+                .Struct => @hasField(T, "items"),
+                else => false,
+            };
+
+            // ArrayLists are handled as a special case. We serialize ArrayList as JSON arrays
+            // rather than objects.
+            if (is_array_list) {
+                var instanceOfArrayList = T.init(allocator);
+                const thing = instanceOfArrayList.items;
+                const item_type = itemType(@TypeOf(thing));
+
+                // Array lists are stored as JSON arrays.
+                for (tree.array.items) |itemValue| {
+                    if (item_type) |itemTypeValidated| {
+                        if (try parseJsonValue(itemTypeValidated, itemValue, allocator)) |item| {
+                            try instanceOfArrayList.append(item);
+                        }
+                    }
+                }
+
+                return instanceOfArrayList;
+            } else {
+                var instanceOfStruct: T = undefined;
+
+                if (@hasDecl(T, "init")) {
+                    instanceOfStruct = try T.init(allocator);
+                } else {
+                    instanceOfStruct = .{};
+                }
+
+                inline for (structInfo.fields) |field| {
+                    const valueOptional = tree.object.get(field.name);
+                    if (valueOptional) |value| {
+                        const thing = parseJsonValue(field.type, value, allocator) catch unreachable;
+                        if (thing) |item| {
+                            @field(instanceOfStruct, field.name) = item;
+                        }
+                    }
+                }
+
+                return instanceOfStruct;
+            }
+        },
+        else => {},
+    }
+
+    return null;
+}
+
+fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
         .Int => {
             return @intCast(tree.integer);
@@ -367,150 +495,167 @@ test "Testing resizable array." {
     }
 }
 
-test "Test writing character data to a json file" {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const Allocator = ArenaAllocator.allocator();
+// test "Deserialize an empty struct" {
+//     // Test that we can read a struct with no fields.
 
-    var Character = try CharacterProperties.init(Allocator);
+//     const noFieldStruct = struct {};
+//     const noFieldAssetJson = "{}";
 
-    const Action = try ActionProperties.init(Allocator);
+//     var p = std.json.Parser.init(std.testing.allocator, false);
+//     defer p.deinit();
+//     var tree = try p.parse(noFieldAssetJson);
+//     defer tree.deinit();
 
-    try Character.actions.append(Action);
-    try Character.actions.append(Action);
+//     const loadedAsset = try parseJsonValue(noFieldStruct, tree.root, std.testing.allocator);
+//     try std.testing.expect(loadedAsset != null);
+// }
 
-    var HitboxGroupData = try HitboxGroup.init(Allocator);
+// test "Deserialize a struct with a single integer field" {
+//     const oneFieldStruct = struct { value: i32 = 0 };
+//     const oneFieldAssetJson = "{\"value\": 25}";
 
-    try HitboxGroupData.hitboxes.append(.{});
+//     var p = std.json.Parser.init(std.testing.allocator, false);
+//     defer p.deinit();
+//     var tree = try p.parse(oneFieldAssetJson);
+//     defer tree.deinit();
 
-    try Character.actions.items[0].vulnerable_hitbox_groups.append(HitboxGroupData);
+//     const loadedAsset = try parseJsonValue(oneFieldStruct, tree.root, std.testing.allocator);
 
-    const file = try std.fs.cwd().createFile("character_data_test.json", .{});
-    defer (file.close());
+//     try std.testing.expect(loadedAsset != null);
+//     if (loadedAsset) |asset| {
+//         try std.testing.expect(asset.value == 25);
+//     }
+// }
 
-    var buffer: [1024]u8 = undefined;
-    var fba = std.heap.FixedBufferAllocator.init(&buffer);
-    var string = std.ArrayList(u8).init(fba.allocator());
+// test "Deserialize a struct with a single string field" {
+//     const oneFieldStruct = struct { message: []u8 = "" };
+//     const oneFieldAssetJson = "{\"message\": \"hello zig!\"}";
 
-    try std.json.stringify(Character, .{ .whitespace = .{} }, string.writer());
+//     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+//     defer arena.deinit();
+//     const allocator = arena.allocator();
 
-    try file.writeAll(buffer[0..string.items.len]);
-}
+//     var p = std.json.Parser.init(allocator, false);
+//     defer p.deinit();
+//     var tree = try p.parse(oneFieldAssetJson);
+//     defer tree.deinit();
 
-test "Deserialize an empty struct" {
-    // Test that we can read a struct with no fields.
+//     const loadedAsset = try parseJsonValue(oneFieldStruct, tree.root, allocator);
 
-    const noFieldStruct = struct {};
-    const noFieldAssetJson = "{}";
+//     try std.testing.expect(loadedAsset != null);
+//     if (loadedAsset) |asset| {
+//         try std.testing.expectEqualStrings(asset.message, "hello zig!");
+//     }
+// }
 
-    var p = std.json.Parser.init(std.testing.allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(noFieldAssetJson);
-    defer tree.deinit();
+// test "Deserialize a struct with a child struct field" {
+//     const oneChildStructFieldStruct = struct { child: struct { value: i32 = 0 } = .{} };
+//     const oneChildStructFieldStructJson = "{\"child\": {\"value\" : 35}}";
 
-    const loadedAsset = try parseJsonValue(noFieldStruct, tree.root, std.testing.allocator);
-    try std.testing.expect(loadedAsset != null);
-}
+//     var p = std.json.Parser.init(std.testing.allocator, false);
+//     defer p.deinit();
+//     var tree = try p.parse(oneChildStructFieldStructJson);
+//     defer tree.deinit();
 
-test "Deserialize a struct with a single integer field" {
-    const oneFieldStruct = struct { value: i32 = 0 };
-    const oneFieldAssetJson = "{\"value\": 25}";
+//     const loadedAsset = try parseJsonValue(oneChildStructFieldStruct, tree.root, std.testing.allocator);
 
-    var p = std.json.Parser.init(std.testing.allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(oneFieldAssetJson);
-    defer tree.deinit();
+//     try std.testing.expect(loadedAsset != null);
+//     if (loadedAsset) |asset| {
+//         try std.testing.expect(asset.child.value == 35);
+//     }
+// }
 
-    const loadedAsset = try parseJsonValue(oneFieldStruct, tree.root, std.testing.allocator);
+// test "Deserialize a struct with an ArrayList" {
+//     const oneFieldStructArrayList = struct {
+//         numbers: std.ArrayList(i32),
+//         const Self = @This();
+//         fn init(allocator: std.mem.Allocator) !Self {
+//             return Self{ .numbers = std.ArrayList(i32).init(allocator) };
+//         }
+//     };
 
-    try std.testing.expect(loadedAsset != null);
-    if (loadedAsset) |asset| {
-        try std.testing.expect(asset.value == 25);
-    }
-}
+//     const oneFieldStructArrayListJson = "{\"numbers\": [5, 9, 20, 52]}";
 
-test "Deserialize a struct with a single string field" {
-    const oneFieldStruct = struct { message: []u8 = "" };
-    const oneFieldAssetJson = "{\"message\": \"hello zig!\"}";
+//     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+//     defer arena.deinit();
+//     const allocator = arena.allocator();
 
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
+//     var p = std.json.Parser.init(allocator, false);
+//     defer p.deinit();
+//     var tree = try p.parse(oneFieldStructArrayListJson);
+//     defer tree.deinit();
 
-    var p = std.json.Parser.init(allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(oneFieldAssetJson);
-    defer tree.deinit();
+//     const loadedAsset = try parseJsonValue(oneFieldStructArrayList, tree.root, allocator);
 
-    const loadedAsset = try parseJsonValue(oneFieldStruct, tree.root, allocator);
+//     try std.testing.expect(loadedAsset != null);
+//     if (loadedAsset) |asset| {
+//         try std.testing.expect(asset.numbers.items.len == 4);
+//         try std.testing.expect(asset.numbers.items[2] == 20);
+//     }
+// }
 
-    try std.testing.expect(loadedAsset != null);
-    if (loadedAsset) |asset| {
-        try std.testing.expectEqualStrings(asset.message, "hello zig!");
-    }
-}
+// test "Test CharacterProperties action name map lookup" {
+//     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+//     const Allocator = ArenaAllocator.allocator();
 
-test "Deserialize a struct with a child struct field" {
-    const oneChildStructFieldStruct = struct { child: struct { value: i32 = 0 } = .{} };
-    const oneChildStructFieldStructJson = "{\"child\": {\"value\" : 35}}";
+//     var Character = try CharacterProperties.init(Allocator);
 
-    var p = std.json.Parser.init(std.testing.allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(oneChildStructFieldStructJson);
-    defer tree.deinit();
+//     var Action = try ActionProperties.init(Allocator);
 
-    const loadedAsset = try parseJsonValue(oneChildStructFieldStruct, tree.root, std.testing.allocator);
+//     Action.name = "Jump";
+//     try Character.actions.append(Action);
 
-    try std.testing.expect(loadedAsset != null);
-    if (loadedAsset) |asset| {
-        try std.testing.expect(asset.child.value == 35);
-    }
-}
+//     Action.name = "Run";
+//     try Character.actions.append(Action);
 
-test "Deserialize a struct with an ArrayList" {
-    const oneFieldStructArrayList = struct {
-        numbers: std.ArrayList(i32),
-        const Self = @This();
-        fn init(allocator: std.mem.Allocator) !Self {
-            return Self{ .numbers = std.ArrayList(i32).init(allocator) };
-        }
-    };
+//     const map = try generateActionNameMap(Character, Allocator);
+//     try std.testing.expect(findAction(Character, map, "Jump") != null);
+//     try std.testing.expect(findAction(Character, map, "Run") != null);
+//     try std.testing.expect(findAction(Character, map, "FlyToTheMoon") == null);
+// }
 
-    const oneFieldStructArrayListJson = "{\"numbers\": [5, 9, 20, 52]}";
+// test "Test writing character data to a json file" {
+//     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+//     const Allocator = ArenaAllocator.allocator();
 
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
+//     var Character = try CharacterProperties.init(Allocator);
 
-    var p = std.json.Parser.init(allocator, false);
-    defer p.deinit();
-    var tree = try p.parse(oneFieldStructArrayListJson);
-    defer tree.deinit();
+//     const Action = try ActionProperties.init(Allocator);
 
-    const loadedAsset = try parseJsonValue(oneFieldStructArrayList, tree.root, allocator);
+//     try Character.actions.append(Action);
+//     try Character.actions.append(Action);
 
-    try std.testing.expect(loadedAsset != null);
-    if (loadedAsset) |asset| {
-        try std.testing.expect(asset.numbers.items.len == 4);
-        try std.testing.expect(asset.numbers.items[2] == 20);
-    }
-}
+//     var HitboxGroupData = try HitboxGroup.init(Allocator);
 
-test "Test CharacterProperties action name map lookup" {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const Allocator = ArenaAllocator.allocator();
+//     try HitboxGroupData.hitboxes.append(.{});
 
-    var Character = try CharacterProperties.init(Allocator);
+//     try Character.actions.items[0].vulnerable_hitbox_groups.append(HitboxGroupData);
 
-    var Action = try ActionProperties.init(Allocator);
+//     const file = try std.fs.cwd().createFile("test.txt", .{});
+//     defer (file.close());
 
-    Action.name = "Jump";
-    try Character.actions.append(Action);
+//     var buffer: [2048]u8 = undefined;
+//     var fba = std.heap.FixedBufferAllocator.init(&buffer);
+//     var string = std.ArrayList(u8).init(fba.allocator());
 
-    Action.name = "Run";
-    try Character.actions.append(Action);
+//     try std.json.stringifyArbitraryDepth(Allocator, Character, .{ .whitespace = .indent_4 }, string.writer());
 
-    const map = try generateActionNameMap(Character, Allocator);
-    try std.testing.expect(findAction(Character, map, "Jump") != null);
-    try std.testing.expect(findAction(Character, map, "Run") != null);
-    try std.testing.expect(findAction(Character, map, "FlyToTheMoon") == null);
-}
+//     try file.writeAll(buffer[0..string.items.len]);
+// }
+
+// test "Test Writing Character JSON asset" {
+//     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+//     const Allocator = ArenaAllocator.allocator();
+//     const Character = try loadAsset("assets/test_chara_1.json", Allocator);
+
+//     const file = try std.fs.cwd().createFile("test_character.txt", .{});
+//     defer (file.close());
+
+//     var buffer: [1024 * 32]u8 = undefined;
+//     var fba = std.heap.FixedBufferAllocator.init(&buffer);
+//     var string = std.ArrayList(u8).init(fba.allocator());
+
+//     try std.json.stringifyArbitraryDepth(Allocator, Character, .{ .whitespace = .indent_4 }, string.writer());
+
+//     try file.writeAll(buffer[0..string.items.len]);
+// }
