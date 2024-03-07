@@ -188,7 +188,7 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
                 std.mem.copyForwards(u8, &editActionName, actionName);
 
                 if (z.button("Save Character", .{})) {
-                    try character_data.saveAsset(gameData.Characters.items[entity], "assets/test_char_editor.txt", allocator);
+                    try character_data.saveAsset(gameData.Characters.items[entity], "assets/test_chara_1.json", allocator);
                 }
                 try CompTimePropertyEdit(&gameData.Characters.items[entity], "Character", allocator);
                 try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
