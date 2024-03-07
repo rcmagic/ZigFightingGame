@@ -118,7 +118,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
             } else {
                 z.pushPtrId(property);
                 defer z.popId();
-                if (z.collapsingHeader(name, .{ .default_open = false })) {
+                if (z.collapsingHeader(name, .{ .default_open = true })) {
                     inline for (structInfo.fields) |field| {
                         try CompTimePropertyEdit(&@field(property, field.name), field.name, allocator);
                     }
@@ -186,6 +186,11 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
             if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
                 var editActionName = [_]u8{0} ** 64;
                 std.mem.copyForwards(u8, &editActionName, actionName);
+
+                if (z.button("Save Character", .{})) {
+                    try character_data.saveAsset(gameData.Characters.items[entity], "assets/test_char_editor.txt", allocator);
+                }
+                try CompTimePropertyEdit(&gameData.Characters.items[entity], "Character", allocator);
                 try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
             }
         }

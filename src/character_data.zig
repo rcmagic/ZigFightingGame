@@ -285,11 +285,12 @@ pub const CharacterProperties = struct {
     }
 };
 
+const MaxAssetBufferSize = 1024 * 512;
 pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties {
     const file = try std.fs.cwd().openFile(path, .{});
     defer (file.close());
 
-    var buffer: [16 * 2048]u8 = undefined;
+    var buffer: [MaxAssetBufferSize]u8 = undefined;
     const bytesRead = try file.readAll(&buffer);
     const message = buffer[0..bytesRead];
 
@@ -306,10 +307,18 @@ pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProp
     return thing;
 }
 
-// pub fn saveAsset(asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
-// {
+pub fn saveAsset(asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
+    const file = try std.fs.cwd().createFile(path, .{});
+    defer (file.close());
 
-// }
+    var buffer: [MaxAssetBufferSize]u8 = undefined;
+    var fba = std.heap.FixedBufferAllocator.init(&buffer);
+    var string = std.ArrayList(u8).init(fba.allocator());
+
+    try std.json.stringifyArbitraryDepth(allocator, asset, .{ .whitespace = .indent_4 }, string.writer());
+
+    try file.writeAll(buffer[0..string.items.len]);
+}
 
 // fn itemType(comptime T: type) ?type {
 //     if (@TypeOf(T) == .Pointer) {
@@ -646,16 +655,9 @@ test "Testing resizable array." {
 // test "Test Writing Character JSON asset" {
 //     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 //     const Allocator = ArenaAllocator.allocator();
-//     const Character = try loadAsset("assets/test_chara_1.json", Allocator);
+//     const asset = try loadAsset("assets/test_chara_1.json", Allocator);
 
-//     const file = try std.fs.cwd().createFile("test_character.txt", .{});
-//     defer (file.close());
-
-//     var buffer: [1024 * 32]u8 = undefined;
-//     var fba = std.heap.FixedBufferAllocator.init(&buffer);
-//     var string = std.ArrayList(u8).init(fba.allocator());
-
-//     try std.json.stringifyArbitraryDepth(Allocator, Character, .{ .whitespace = .indent_4 }, string.writer());
-
-//     try file.writeAll(buffer[0..string.items.len]);
+//     if (asset) |Character| {
+//         try saveAsset(Character, "test_character.txt", Allocator);
+//     }
 // }
