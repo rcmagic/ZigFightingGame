@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const asset = @import("asset.zig");
 
 fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
     const T = @TypeOf(field);
@@ -272,6 +273,16 @@ pub const CharacterProperties = struct {
         return CharacterProperties{ .actions = std.ArrayList(ActionProperties).init(allocator), .image_sequences = std.ArrayList(ImageSequence).init(allocator) };
     }
 
+    pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !asset.AssetType {
+        const asset_test_load = try loadCharacterAsset(path, allocator);
+        if (asset_test_load) |loaded_asset| {
+            const data = try allocator.create(CharacterProperties);
+            data.* = loaded_asset;
+            return .{ .Character = data };
+        }
+        return .{ .Empty = 0 };
+    }
+
     // Serialization Support
     pub fn jsonStringify(value: @This(), jws: anytype) !void {
         try stringifyValue(value, jws);
@@ -286,7 +297,7 @@ pub const CharacterProperties = struct {
 };
 
 const MaxAssetBufferSize = 1024 * 512;
-pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties {
+pub fn loadCharacterAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties {
     const file = try std.fs.cwd().openFile(path, .{});
     defer (file.close());
 
@@ -307,7 +318,7 @@ pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProp
     return thing;
 }
 
-pub fn saveAsset(asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
+pub fn saveAsset(character_asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
     const file = try std.fs.cwd().createFile(path, .{});
     defer (file.close());
 
@@ -315,7 +326,7 @@ pub fn saveAsset(asset: CharacterProperties, path: []const u8, allocator: std.me
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     var string = std.ArrayList(u8).init(fba.allocator());
 
-    try std.json.stringifyArbitraryDepth(allocator, asset, .{ .whitespace = .indent_4 }, string.writer());
+    try std.json.stringifyArbitraryDepth(allocator, character_asset, .{ .whitespace = .indent_4 }, string.writer());
 
     try file.writeAll(buffer[0..string.items.len]);
 }

@@ -183,14 +183,14 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
             }
 
             // Get all the hitboxes for the current action.
-            if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
+            if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
                 var editActionName = [_]u8{0} ** 64;
                 std.mem.copyForwards(u8, &editActionName, actionName);
 
                 if (z.button("Save Character", .{})) {
-                    try character_data.saveAsset(gameData.Characters.items[entity], "assets/test_chara_1.json", allocator);
+                    try character_data.saveAsset(gameData.CharacterAssets.items[entity].*, "assets/test_chara_1.json", allocator);
                 }
-                try CompTimePropertyEdit(&gameData.Characters.items[entity], "Character", allocator);
+                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator);
                 try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
             }
         }

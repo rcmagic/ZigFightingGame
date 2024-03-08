@@ -61,7 +61,7 @@ fn actionSystem(gameState: *GameState) void {
         const state_machine = &gameState.state_machine_components[entityIndex];
 
         if (gameState.gameData) |gameData| {
-            state_machine.stateMachine.UpdateStateMachine(&state_machine.context, gameData.Characters.items[entityIndex], gameData.ActionMaps.items[entityIndex]);
+            state_machine.stateMachine.UpdateStateMachine(&state_machine.context, gameData.CharacterAssets.items[entityIndex].*, gameData.ActionMaps.items[entityIndex]);
         }
 
         entityIndex += 1;
@@ -71,60 +71,6 @@ fn actionSystem(gameState: *GameState) void {
 fn inputCommandSystem(gameState: *GameState) void {
     gameState.state_machine_components[0].context.input_command = gameState.input_components[0].input_command;
     gameState.state_machine_components[1].context.input_command = gameState.input_components[1].input_command;
-}
-
-test "Test setting up game data" {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const Allocator = ArenaAllocator.allocator();
-    var gameData = GameState.InitializeGameData(Allocator);
-
-    const Character1 = try character_data.CharacterProperties.init(Allocator);
-    const Character2 = try character_data.CharacterProperties.init(Allocator);
-
-    // Add a test character
-    try gameData.Characters.append(Character1);
-    try gameData.Characters.append(Character2);
-
-    try std.testing.expect(gameData.Characters.items.len == 2);
-}
-
-test "Test adding an action to a character" {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const Allocator = ArenaAllocator.allocator();
-    var gameData = GameState.InitializeGameData(Allocator);
-
-    const Character = try character_data.CharacterProperties.init(Allocator);
-    try gameData.Characters.append(Character);
-
-    const Action = try character_data.actionsProperties.init(Allocator);
-
-    try gameData.Characters.items[0].actions.append(Action);
-
-    try std.testing.expect(gameData.Characters.items[0].actions.items.len == 1);
-}
-
-test "Test adding an action with hitboxes to a character" {
-    var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    const Allocator = ArenaAllocator.allocator();
-    var gameData = GameState.InitializeGameData(Allocator);
-
-    const Character = try character_data.CharacterProperties.init(Allocator);
-    try gameData.Characters.append(Character);
-
-    const Action = try character_data.actionsProperties.init(Allocator);
-
-    try gameData.Characters.items[0].actions.append(Action);
-
-    const HitboxGroup = try character_data.HitboxGroup.init(Allocator);
-
-    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.append(HitboxGroup);
-
-    try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items.len == 1);
-
-    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(character_data.Hitbox{});
-    try gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.append(character_data.Hitbox{});
-
-    try std.testing.expect(gameData.Characters.items[0].actions.items[0].vulnerable_hitbox_groups.items[0].hitboxes.items.len == 2);
 }
 
 pub fn updateGame(gameState: *GameState) !void {

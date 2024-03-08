@@ -6,12 +6,14 @@ const input = @import("input.zig");
 const character_data = @import("character_data.zig");
 const collision_system = @import("collision_system.zig").CollisionSystem;
 const reaction_system = @import("reaction_system.zig").reaction_system;
+const asset = @import("asset.zig");
 
 pub const GameData = struct {
-    Characters: std.ArrayList(character_data.CharacterProperties),
+    CharacterAssets: std.ArrayList(*character_data.CharacterProperties),
     ActionMaps: std.ArrayList(std.StringHashMap(usize)),
     image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
+    AssetStorage: asset.Storage,
 
     pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef {
         if (self.ImageSequenceMap.items[characterIndex].get(SequenceName)) |index| {
@@ -24,22 +26,35 @@ pub const GameData = struct {
 const StateMachineComponent = struct { context: StateMachine.CombatStateContext = .{}, stateMachine: StateMachine.CombatStateMachineProcessor = .{} };
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
-    var gameData = GameData{ .Characters = std.ArrayList(character_data.CharacterProperties).init(allocator), .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator), .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator), .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator) };
+    var gameData = GameData{
+        .CharacterAssets = std.ArrayList(*character_data.CharacterProperties).init(allocator),
+        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
+        .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
+        .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator),
+        .AssetStorage = asset.Storage.init(allocator),
+    };
 
-    const data1 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
-    const data2 = try character_data.loadAsset("assets/test_chara_1.json", allocator);
+    // const data1 = try character_data.loadCharacterAsset("assets/test_chara_1.json", allocator);
+    const data2 = try character_data.loadCharacterAsset("assets/test_chara_1.json", allocator);
 
-    if (data1) |loadedData| {
-        try gameData.Characters.append(loadedData);
-        try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
+    try gameData.AssetStorage.loadAsset(character_data.CharacterProperties, "assets/test_chara_1.json");
 
-        try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
-        // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
+    const characterAsset: asset.AssetInfo = gameData.AssetStorage.getAsset("assets/test_chara_1.json");
+
+    switch (characterAsset.type) {
+        .Character => |character| {
+            try gameData.CharacterAssets.append(character);
+            try gameData.CharacterAssets.append(character);
+            try gameData.image_sequences.append(try character_data.loadSequenceImages(character.*, allocator));
+
+            try gameData.ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
+            // Create a hash map that lets us reference textures with a sequence name and index
+            try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(character.*, allocator));
+        },
+        else => {},
     }
 
     if (data2) |loadedData| {
-        try gameData.Characters.append(loadedData);
         try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
 
         try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));

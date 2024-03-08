@@ -85,7 +85,7 @@ pub const CollisionSystem = struct {
                                     actionName = state.name;
                                 }
 
-                                if (character_data.findAction(gameData.Characters.items[attackerIndex], gameData.ActionMaps.items[attackerIndex], actionName)) |actionData| {
+                                if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, gameData.ActionMaps.items[attackerIndex], actionName)) |actionData| {
                                     try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
                                 }
                             }
@@ -172,12 +172,12 @@ pub const CollisionSystem = struct {
             }
 
             if (gameState.gameData) |gameData| {
-                if (entity >= gameData.Characters.items.len) {
+                if (entity >= gameData.CharacterAssets.items.len) {
                     continue;
                 }
 
                 // Get all the hitboxes for the current action.
-                if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
+                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
 
                     // Gather attack boxes
                     {
@@ -219,7 +219,7 @@ pub const CollisionSystem = struct {
                             pushCount = 1;
                             // Get the slice of push hitboxes still available after processing previous push boxes.
                             var scratchHitboxes = self.PushHitboxScratch[PushScratchCount..];
-                            const hitbox = gameData.Characters.items[entity].default_pushbox;
+                            const hitbox = gameData.CharacterAssets.items[entity].default_pushbox;
                             const translatedBox = if (facingLeft) common.translate_hitbox_flipped(hitbox, entityOffset) else common.translate_hitbox(hitbox, entityOffset);
 
                             scratchHitboxes[0] = translatedBox;

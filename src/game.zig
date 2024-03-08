@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const game_simulation = @import("game_simulation.zig");
 const GameState = @import("GameState.zig").GameState;
+const asset = @import("asset.zig");
 const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const common = @import("common.zig");
@@ -52,7 +53,7 @@ fn prepareDrawState(gameState: GameState, entity: usize) DrawState {
             actionName = state.name;
         }
 
-        if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
+        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
             const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
             // Get the sprite texture
@@ -61,7 +62,7 @@ fn prepareDrawState(gameState: GameState, entity: usize) DrawState {
             }
 
             // Get the sprite offset
-            if (gameData.Characters.items[entity].findSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) |sequence| {
+            if (gameData.CharacterAssets.items[entity].findSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) |sequence| {
                 const image = sequence.images.items[@intCast(imageRange.index)];
                 drawState.x += if (facingLeft) -image.x else image.x;
                 drawState.y += image.y;
@@ -147,7 +148,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
             actionName = state.name;
         }
 
-        if (character_data.findAction(gameData.Characters.items[entity], gameData.ActionMaps.items[entity], actionName)) |actionData| {
+        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
             const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
             if (vulCount > 0) {
@@ -178,7 +179,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
             }
             // Draw Default Hitbox
             {
-                const data = gameData.Characters.items[entity];
+                const data = gameData.CharacterAssets.items[entity];
 
                 const hitbox = if (facingLeft) common.translate_hitbox_flipped(data.default_pushbox, .{}) else common.translate_hitbox(data.default_pushbox, .{});
 
