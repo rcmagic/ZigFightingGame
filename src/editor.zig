@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const game_simulation = @import("game_simulation.zig");
 const GameState = @import("GameState.zig").GameState;
+const asset = @import("asset.zig");
 const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const c = @cImport({
@@ -164,12 +165,38 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
     }
 }
 
+pub fn AssetSelectWindow(gameState: GameState, allocator: std.mem.Allocator) !void {
+    _ = allocator;
+    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
+        if (z.beginTable("AssetTable", .{ .column = 2 })) {
+            z.tableSetupColumn("Type", .{});
+            z.tableSetupColumn("Path", .{});
+            z.tableHeadersRow();
+
+            if (gameState.gameData) |gameData| {
+                var it = gameData.AssetStorage.asset_map.iterator();
+                while (it.next()) |kv| {
+                    z.tableNextRow(.{});
+                    _ = z.tableSetColumnIndex(0);
+                    z.textUnformatted(asset.GetAssetName(kv.value_ptr.*));
+                    _ = z.tableSetColumnIndex(1);
+                    z.textUnformatted(kv.key_ptr.*);
+                }
+            }
+        }
+        z.endTable();
+    }
+    z.end();
+}
+
 pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
     c.rlImGuiBegin();
     defer c.rlImGuiEnd();
 
-    // var open = true;
-    // z.showDemoWindow(&open);
+    var open = true;
+    z.showDemoWindow(&open);
+
+    try AssetSelectWindow(gameState, allocator);
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
         if (gameState.gameData) |gameData| {

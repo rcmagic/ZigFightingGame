@@ -18,6 +18,14 @@ pub const AssetInfo = struct {
     path: [:0]const u8,
 };
 
+pub fn GetAssetName(asset: AssetInfo) []const u8 {
+    switch (asset.type) {
+        AssetType.Empty => return "Empty",
+        AssetType.Character => return "Character",
+        else => return "Unknown",
+    }
+}
+
 pub const Storage = struct {
     asset_map: std.StringHashMap(AssetInfo),
     allocator: std.mem.Allocator,
