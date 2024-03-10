@@ -1,0 +1,482 @@
+{
+    "image_sequences": [
+        {
+            "name": "stand",
+            "images": [
+                {
+                    "source": "assets/animation/test_chara_1/color1/idle_00.png",
+                    "x": -32,
+                    "y": -152
+                }
+            ]
+        },
+        {
+            "name": "attack",
+            "images": [
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "x": -108,
+                    "y": -131
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_01.png",
+                    "x": -103,
+                    "y": -146
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "x": -32,
+                    "y": -63
+                }
+            ]
+        },
+        {
+            "name": "special",
+            "images": [
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "x": -108,
+                    "y": -131
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/special_attack_00.png",
+                    "x": -103,
+                    "y": -146
+                },
+                {
+                    "source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "x": -32,
+                    "y": -63
+                }
+            ]
+        }
+    ],
+    "max_health": 10000,
+    "default_pushbox": {
+        "top": 100000,
+        "left": -25000,
+        "bottom": 0,
+        "right": 25000
+    },
+    "actions": [
+        {
+            "duration": 10,
+            "isLooping": true,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -50000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "Standing"
+        },
+        {
+            "duration": 1,
+            "isLooping": true,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "WalkingForward"
+        },
+        {
+            "duration": 1,
+            "isLooping": true,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "WalkingBackward"
+        },
+        {
+            "duration": 0,
+            "isLooping": false,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "Jump"
+        },
+        {
+            "duration": 20,
+            "isLooping": false,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [
+                    {
+                        "start_frame": 8,
+                        "duration": 2,
+                        "hitboxes": [
+                            {
+                                "top": 100000,
+                                "left": 0,
+                                "bottom": 0,
+                                "right": 120000
+                            }
+                        ]
+                    }
+                ],
+                "hit_property": {
+                    "hitStun": 12,
+                    "guardStun": 15,
+                    "hitStop": 10,
+                    "knockBack": 10000,
+                    "isLaunch": false,
+                    "airKnockback": 2000,
+                    "launchVelocityY": 20000
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "attack",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 4
+                },
+                {
+                    "sequence": "attack",
+                    "index": 1,
+                    "start": 4,
+                    "duration": 10
+                },
+                {
+                    "sequence": "attack",
+                    "index": 2,
+                    "start": 14,
+                    "duration": 20
+                }
+            ],
+            "name": "Attack"
+        },
+        {
+            "duration": 20,
+            "isLooping": false,
+            "isSpecial": true,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [
+                    {
+                        "start_frame": 8,
+                        "duration": 2,
+                        "hitboxes": [
+                            {
+                                "top": 100000,
+                                "left": 0,
+                                "bottom": 0,
+                                "right": 120000
+                            }
+                        ]
+                    }
+                ],
+                "hit_property": {
+                    "hitStun": 200,
+                    "guardStun": 5,
+                    "hitStop": 35,
+                    "knockBack": 10000,
+                    "isLaunch": true,
+                    "airKnockback": 2000,
+                    "launchVelocityY": 30000
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "special",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 4
+                },
+                {
+                    "sequence": "special",
+                    "index": 1,
+                    "start": 4,
+                    "duration": 10
+                },
+                {
+                    "sequence": "special",
+                    "index": 2,
+                    "start": 14,
+                    "duration": 20
+                }
+            ],
+            "name": "Special"
+        },
+        {
+            "duration": 100,
+            "isLooping": false,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "Reaction"
+        },
+        {
+            "duration": 10000,
+            "isLooping": true,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "LaunchReaction"
+        },
+        {
+            "duration": 100,
+            "isLooping": false,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [
+                {
+                    "start_frame": 0,
+                    "duration": 100,
+                    "hitboxes": [
+                        {
+                            "top": 100000,
+                            "left": -100000,
+                            "bottom": 0,
+                            "right": 100000
+                        }
+                    ]
+                }
+            ],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "stand",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 100
+                }
+            ],
+            "name": "GuardReaction"
+        }
+    ]
+}

@@ -21,6 +21,24 @@ pub const GameData = struct {
         }
         return null;
     }
+
+    fn LoadOneCharacter(self: *GameData, path: [:0]const u8, allocator: std.mem.Allocator) !void {
+        try self.AssetStorage.loadAsset(character_data.CharacterProperties, path);
+
+        const characterAsset: asset.AssetInfo = self.AssetStorage.getAsset(path);
+
+        switch (characterAsset.type) {
+            .Character => |character| {
+                try self.CharacterAssets.append(character);
+                try self.image_sequences.append(try character_data.loadSequenceImages(character.*, allocator));
+
+                try self.ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
+                // Create a hash map that lets us reference textures with a sequence name and index
+                try self.ImageSequenceMap.append(try character_data.generateImageSequenceMap(character.*, allocator));
+            },
+            else => @panic("Character Data Failed to Load"),
+        }
+    }
 };
 
 const StateMachineComponent = struct { context: StateMachine.CombatStateContext = .{}, stateMachine: StateMachine.CombatStateMachineProcessor = .{} };
@@ -34,33 +52,8 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
         .AssetStorage = asset.Storage.init(allocator),
     };
 
-    // const data1 = try character_data.loadCharacterAsset("assets/test_chara_1.json", allocator);
-    const data2 = try character_data.loadCharacterAsset("assets/test_chara_1.json", allocator);
-
-    try gameData.AssetStorage.loadAsset(character_data.CharacterProperties, "assets/test_chara_1.json");
-
-    const characterAsset: asset.AssetInfo = gameData.AssetStorage.getAsset("assets/test_chara_1.json");
-
-    switch (characterAsset.type) {
-        .Character => |character| {
-            try gameData.CharacterAssets.append(character);
-            try gameData.CharacterAssets.append(character);
-            try gameData.image_sequences.append(try character_data.loadSequenceImages(character.*, allocator));
-
-            try gameData.ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
-            // Create a hash map that lets us reference textures with a sequence name and index
-            try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(character.*, allocator));
-        },
-        else => {},
-    }
-
-    if (data2) |loadedData| {
-        try gameData.image_sequences.append(try character_data.loadSequenceImages(loadedData, allocator));
-
-        try gameData.ActionMaps.append(try character_data.generateActionNameMap(loadedData, allocator));
-        // Create a hash map that lets us reference textures with a sequence name and index
-        try gameData.ImageSequenceMap.append(try character_data.generateImageSequenceMap(loadedData, allocator));
-    }
+    try gameData.LoadOneCharacter("assets/test_chara_1.json", allocator);
+    try gameData.LoadOneCharacter("assets/test_chara_2.json", allocator);
 
     return gameData;
 }
