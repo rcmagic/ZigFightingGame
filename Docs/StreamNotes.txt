@@ -49,3 +49,20 @@ Numpad
 - Hook up hit properties in the collision system
 - Hook up hit properties in the reaction system
 - Hook up hit properties in reaction states
+
+
+2024/3/19
+- Throws (Concepts)
+- Throws Possible Implementations
+- Implement Throws - Data structure
+- Implement Throws - Behavior
+- Implement Collisions.
+
+
+How are throws different than attacks?
+- Attacks cause a hit reaction when an opponent isn't blocking, but causes a block reaction when they are blocking.
+- Throws cause the same reaction on hit or block.
+- Hit reactions can be context dependent, but throw reactions are always the same.
+- Throws lock the opponent into a state in which the thrower controls them.
+- Thrower releases the throwee when the throw is finished.
+- Throws are branching. On collision they perform the success action, on whiff they perform a whiff action.

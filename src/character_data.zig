@@ -125,6 +125,7 @@ pub const HitProperty = struct {
     isLaunch: bool = false,
     airKnockback: i32 = 0,
     launchVelocityY: i32 = 0,
+    isGrab: bool = false,
 };
 
 pub const AttackProperty = struct {
@@ -151,6 +152,7 @@ pub const ImageRange = struct {
 };
 
 pub const ActionProperties = struct {
+    name: []const u8 = "",
     duration: i32 = 0,
     isLooping: bool = false,
     isSpecial: bool = false,
@@ -161,8 +163,6 @@ pub const ActionProperties = struct {
     attack_property: AttackProperty,
 
     animation_timeline: std.ArrayList(ImageRange),
-
-    name: []const u8 = "",
 
     const Self = @This();
     // pub fn jsonStringify(value: Self, jws: anytype) !void {

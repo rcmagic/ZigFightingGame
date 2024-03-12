@@ -110,7 +110,17 @@ pub const PhysicsComponent = struct {
 
 pub const TimelineComponent = struct { framesElapsed: i32 = 0 };
 
-pub const ReactionComponent = struct { hitStun: i32 = 0, guardStun: i32 = 0, hitStop: i32 = 0, knockBack: i32 = 0, airKnockback: i32 = 0, launchVelocityY: i32 = 0, attackHasHit: bool = false, attackHasHitForSpecialCancel: bool = false };
+pub const ReactionComponent = struct {
+    hitStun: i32 = 0,
+    guardStun: i32 = 0,
+    hitStop: i32 = 0,
+    knockBack: i32 = 0,
+    airKnockback: i32 = 0,
+    launchVelocityY: i32 = 0,
+    attackHasHit: bool = false,
+    attackHasHitForSpecialCancel: bool = false,
+    grabLocked: bool = false,
+};
 
 pub const StatsComponent = struct {
     totalHitStun: i32 = 0,

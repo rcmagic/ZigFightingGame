@@ -214,8 +214,10 @@ pub const CollisionSystem = struct {
                         // Here we insert the translated hitboxes for the action into PushHitboxScratch
                         var pushCount = get_translated_active_hitboxes(actionData.push_hitbox_groups.items, entityOffset, facingLeft, self.PushHitboxScratch[PushScratchCount..], timeline.framesElapsed);
 
+                        // Don't allow characters in a grab reaction to be pushed.
+                        if (gameState.reaction_components[entity].grabLocked) {}
                         // If there is no push hitbox overrides, use the default push hitbox for the character.
-                        if (pushCount <= 0) {
+                        else if (pushCount <= 0) {
                             pushCount = 1;
                             // Get the slice of push hitboxes still available after processing previous push boxes.
                             var scratchHitboxes = self.PushHitboxScratch[PushScratchCount..];

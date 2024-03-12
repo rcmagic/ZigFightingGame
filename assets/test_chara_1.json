@@ -11,6 +11,16 @@
             ]
         },
         {
+            "name": "grab_reaction",
+            "images": [
+                {
+                    "source": "assets/animation/test_chara_1/color1/grab_reaction.png",
+                    "x": -32,
+                    "y": -152
+                }
+            ]
+        },
+        {
             "name": "attack",
             "images": [
                 {
@@ -60,6 +70,7 @@
     },
     "actions": [
         {
+            "name": "Standing",
             "duration": 10,
             "isLooping": true,
             "isSpecial": false,
@@ -87,7 +98,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -97,10 +109,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "Standing"
+            ]
         },
         {
+            "name": "WalkingForward",
             "duration": 1,
             "isLooping": true,
             "isSpecial": false,
@@ -128,7 +140,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -138,10 +151,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "WalkingForward"
+            ]
         },
         {
+            "name": "WalkingBackward",
             "duration": 1,
             "isLooping": true,
             "isSpecial": false,
@@ -169,7 +182,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -179,10 +193,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "WalkingBackward"
+            ]
         },
         {
+            "name": "Jump",
             "duration": 0,
             "isLooping": false,
             "isSpecial": false,
@@ -210,7 +224,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -220,10 +235,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "Jump"
+            ]
         },
         {
+            "name": "Attack",
             "duration": 20,
             "isLooping": false,
             "isSpecial": false,
@@ -264,7 +279,8 @@
                     "knockBack": 10000,
                     "isLaunch": false,
                     "airKnockback": 2000,
-                    "launchVelocityY": 20000
+                    "launchVelocityY": 20000,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -286,10 +302,10 @@
                     "start": 14,
                     "duration": 20
                 }
-            ],
-            "name": "Attack"
+            ]
         },
         {
+            "name": "Special",
             "duration": 20,
             "isLooping": false,
             "isSpecial": true,
@@ -330,7 +346,8 @@
                     "knockBack": 10000,
                     "isLaunch": true,
                     "airKnockback": 2000,
-                    "launchVelocityY": 30000
+                    "launchVelocityY": 30000,
+                    "isGrab": true
                 }
             },
             "animation_timeline": [
@@ -352,10 +369,10 @@
                     "start": 14,
                     "duration": 20
                 }
-            ],
-            "name": "Special"
+            ]
         },
         {
+            "name": "Reaction",
             "duration": 100,
             "isLooping": false,
             "isSpecial": false,
@@ -383,7 +400,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -393,10 +411,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "Reaction"
+            ]
         },
         {
+            "name": "LaunchReaction",
             "duration": 10000,
             "isLooping": true,
             "isSpecial": false,
@@ -424,7 +442,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -434,10 +453,10 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "LaunchReaction"
+            ]
         },
         {
+            "name": "GuardReaction",
             "duration": 100,
             "isLooping": false,
             "isSpecial": false,
@@ -465,7 +484,8 @@
                     "knockBack": 0,
                     "isLaunch": false,
                     "airKnockback": 0,
-                    "launchVelocityY": 0
+                    "launchVelocityY": 0,
+                    "isGrab": false
                 }
             },
             "animation_timeline": [
@@ -475,8 +495,36 @@
                     "start": 0,
                     "duration": 100
                 }
-            ],
-            "name": "GuardReaction"
+            ]
+        },
+        {
+            "name": "GrabReaction",
+            "duration": 300,
+            "isLooping": false,
+            "isSpecial": false,
+            "vulnerable_hitbox_groups": [],
+            "push_hitbox_groups": [],
+            "attack_property": {
+                "hitbox_groups": [],
+                "hit_property": {
+                    "hitStun": 0,
+                    "guardStun": 0,
+                    "hitStop": 0,
+                    "knockBack": 0,
+                    "isLaunch": false,
+                    "airKnockback": 0,
+                    "launchVelocityY": 0,
+                    "isGrab": false
+                }
+            },
+            "animation_timeline": [
+                {
+                    "sequence": "grab_reaction",
+                    "index": 0,
+                    "start": 0,
+                    "duration": 1000
+                }
+            ]
         }
     ]
 }

@@ -383,3 +383,20 @@ pub const GuardReaction = struct {
         std.debug.print("GuardReaction.OnEnd()\n", .{});
     }
 };
+
+pub const GrabReaction = struct {
+    pub fn OnStart(context: *StateMachine.CombatStateContext) void {
+        std.debug.print("GrabReaction.OnStart()\n", .{});
+
+        common.flip_to_face_opponent(context.physics_component);
+    }
+
+    pub fn OnUpdate(context: *StateMachine.CombatStateContext) void {
+        _ = context;
+    }
+
+    pub fn OnEnd(context: *StateMachine.CombatStateContext) void {
+        _ = context;
+        std.debug.print("GrabReaction.OnEnd()\n", .{});
+    }
+};

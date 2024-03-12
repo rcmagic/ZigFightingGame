@@ -53,7 +53,7 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
     };
 
     try gameData.LoadOneCharacter("assets/test_chara_1.json", allocator);
-    try gameData.LoadOneCharacter("assets/test_chara_2.json", allocator);
+    try gameData.LoadOneCharacter("assets/test_chara_1.json", allocator);
 
     return gameData;
 }
@@ -69,6 +69,7 @@ var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special", .On
 var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction", .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
 var LaunchReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "LaunchReaction", .OnUpdate = CommonStates.LaunchReaction.OnUpdate, .OnStart = CommonStates.LaunchReaction.OnStart, .OnEnd = CommonStates.LaunchReaction.OnEnd };
 var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction", .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
+var GrabReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GrabReaction", .OnUpdate = CommonStates.GrabReaction.OnUpdate, .OnStart = CommonStates.GrabReaction.OnStart, .OnEnd = CommonStates.GrabReaction.OnEnd };
 
 // Register states for our character
 fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void {
@@ -81,6 +82,7 @@ fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void {
     registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
     registery.RegisterCommonState(.LaunchReaction, &LaunchReactionCallbacks);
     registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
+    registery.RegisterCommonState(.GrabReaction, &GrabReactionCallbacks);
 }
 
 pub const HitEvent = struct {

@@ -3,7 +3,20 @@ const component = @import("../component.zig");
 const input = @import("../input.zig");
 const character_data = @import("../character_data.zig");
 // Identifies common character states.
-pub const CombatStateID = enum(u32) { Standing, Crouching, WalkingForward, WalkingBackward, Jump, Attack, Special, Reaction, LaunchReaction, GuardReaction, _ };
+pub const CombatStateID = enum(u32) {
+    Standing,
+    Crouching,
+    WalkingForward,
+    WalkingBackward,
+    Jump,
+    Attack,
+    Special,
+    Reaction,
+    LaunchReaction,
+    GuardReaction,
+    GrabReaction,
+    _,
+};
 
 // A context is passed into the combat state callbacks.
 pub const CombatStateContext = struct {
