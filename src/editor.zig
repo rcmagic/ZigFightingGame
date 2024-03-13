@@ -132,10 +132,9 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                     var editText = [_]u8{0} ** 64;
                     std.mem.copyForwards(u8, &editText, property.*);
                     if (z.inputText(name, .{ .buf = &editText })) {
-                        const result = try allocator.alloc(u8, editText.len);
-                        errdefer allocator.free(result);
-                        @memcpy(result, &editText);
-                        property.* = result;
+                        const ptr = @as([*c]u8, &editText);
+                        const string = editText[0..std.mem.len(ptr)];
+                        property.* = try allocator.dupe(u8, string);
                     }
                 },
                 else => {
