@@ -13,6 +13,7 @@ const c = @cImport({
 const z = @import("zgui");
 
 var ShowPropertyEditor = true;
+var SelectedEntity: i32 = 0;
 
 fn CoordinateEdit(name: [:0]const u8, coordinate: *i32) void {
     _ = z.dragInt(name, .{ .v = coordinate, .speed = 100 });
@@ -199,25 +200,36 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
         if (gameState.gameData) |gameData| {
-            const entity = 0;
-            const stateMachine = &gameState.state_machine_components[entity].stateMachine;
-            const CurrentState = stateMachine.CurrentState;
+            _ = z.dragInt("Entity", .{ .v = &SelectedEntity, .min = 0, .max = @intCast(gameData.CharacterAssets.items.len - 1) });
 
-            var actionName: []const u8 = "";
-            if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                actionName = state.name;
+            const entity: usize = @intCast(SelectedEntity);
+
+            // Properties for the entire character asset for the selected entity.
+            if (entity < gameData.CharacterAssets.items.len) {
+                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator);
             }
 
-            // Get all the hitboxes for the current action.
-            if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
-                var editActionName = [_]u8{0} ** 64;
-                std.mem.copyForwards(u8, &editActionName, actionName);
+            // Property for the current performing action.
+            if (entity < gameState.state_machine_components.len) {
+                const stateMachine = &gameState.state_machine_components[entity].stateMachine;
+                const CurrentState = stateMachine.CurrentState;
 
-                if (z.button("Save Character", .{})) {
-                    try character_data.saveAsset(gameData.CharacterAssets.items[entity].*, "assets/test_chara_1.json", allocator);
+                var actionName: []const u8 = "";
+                if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
+                    actionName = state.name;
                 }
-                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator);
-                try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
+
+                // Get all the hitboxes for the current action.
+                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
+                    var editActionName = [_]u8{0} ** 64;
+                    std.mem.copyForwards(u8, &editActionName, actionName);
+
+                    if (z.button("Save Character", .{})) {
+                        try character_data.saveAsset(gameData.CharacterAssets.items[entity].*, "assets/test_chara_1.json", allocator);
+                    }
+
+                    try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
+                }
             }
         }
     }
