@@ -148,6 +148,8 @@ pub const GrabProperty: type = struct {
     pub fn isActiveOnFrame(self: GrabProperty, frame: i32) bool {
         return (frame >= self.start_frame) and (frame < (self.start_frame + self.duration));
     }
+
+    pub const metaData = .{ .start_frame = .{ .min_value = 0 } };
 };
 
 pub const ImageRange = struct {
@@ -313,6 +315,11 @@ pub const CharacterProperties = struct {
         }
         return null;
     }
+
+    pub const metaData = .{
+        .max_health = .{ .min_value = 0 },
+        .grabbable_distance = .{ .min_value = 0 },
+    };
 };
 
 const MaxAssetBufferSize = 1024 * 512;

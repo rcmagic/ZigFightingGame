@@ -66,7 +66,7 @@ fn RemoveItem(list: anytype, index: usize) void {
     list.allocator.destroy(&deleted);
 }
 
-fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator) !void {
+fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     switch (@typeInfo(@TypeOf(property.*))) {
         .Struct => |structInfo| {
             if (@hasField(@TypeOf(property.*), "items")) {
@@ -90,7 +90,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
 
                     z.sameLine(.{});
                     const label = z.formatZ("{}", .{index});
-                    try CompTimePropertyEdit(item, label, allocator);
+                    try CompTimePropertyEdit(item, label, allocator, meta_data);
                 }
 
                 if (deleteIndex >= 0) {
@@ -122,7 +122,12 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 defer z.popId();
                 if (z.collapsingHeader(name, .{ .default_open = true })) {
                     inline for (structInfo.fields) |field| {
-                        try CompTimePropertyEdit(&@field(property, field.name), field.name, allocator);
+
+                        // Handle meta data
+                        const field_meta = if (@hasDecl(@TypeOf(property.*), "metaData") and @hasField(@TypeOf(@TypeOf(property.*).metaData), field.name))
+                            @field(@TypeOf(property.*).metaData, field.name);
+
+                        try CompTimePropertyEdit(&@field(property, field.name), field.name, allocator, field_meta);
                     }
                 }
             }
@@ -145,7 +150,21 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
         },
         .Int => {
             var value: i32 = @intCast(property.*);
-            _ = z.dragInt(name, .{ .v = &value, .speed = 100 });
+
+            var min_value: i32 = -1000;
+            var max_value: i32 = 1000;
+
+            if (@TypeOf(meta_data) != void) {
+                // handle meta data
+                if (@hasField(@TypeOf(meta_data), "min_value")) {
+                    min_value = meta_data.min_value;
+                }
+
+                if (@hasField(@TypeOf(meta_data), "max_value")) {
+                    max_value = meta_data.max_value;
+                }
+            }
+            _ = z.dragInt(name, .{ .v = &value, .speed = 100, .min = min_value, .max = max_value });
             property.* = @intCast(value);
         },
         .Bool => {
@@ -157,11 +176,15 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
     }
 }
 
-fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator) !void {
+const FieldMetaData = struct {
+    min_value: i32 = -10000,
+};
+
+fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
         HitboxPropertyEdit(property, name, allocator);
     } else {
-        try GenericPropertyEdit(property, name, allocator);
+        try GenericPropertyEdit(property, name, allocator, meta_data);
     }
 }
 
@@ -206,7 +229,7 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
 
             // Properties for the entire character asset for the selected entity.
             if (entity < gameData.CharacterAssets.items.len) {
-                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator);
+                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator, .{});
             }
 
             // Property for the current performing action.
@@ -228,7 +251,7 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
                         try character_data.saveAsset(gameData.CharacterAssets.items[entity].*, "assets/test_chara_1.json", allocator);
                     }
 
-                    try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator);
+                    try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator, .{});
                 }
             }
         }
