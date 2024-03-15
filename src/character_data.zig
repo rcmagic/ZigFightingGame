@@ -140,6 +140,16 @@ pub const AttackProperty = struct {
     }
 };
 
+pub const GrabProperty: type = struct {
+    start_frame: i32 = 0,
+    duration: i32 = 1,
+    grab_distance: i32 = 0,
+
+    pub fn isActiveOnFrame(self: GrabProperty, frame: i32) bool {
+        return (frame >= self.start_frame) and (frame < (self.start_frame + self.duration));
+    }
+};
+
 pub const ImageRange = struct {
     sequence: []const u8 = "",
     index: i32 = 0,
@@ -162,6 +172,8 @@ pub const ActionProperties = struct {
 
     attack_property: AttackProperty,
 
+    grab_properties: std.ArrayList(GrabProperty),
+
     animation_timeline: std.ArrayList(ImageRange),
 
     const Self = @This();
@@ -173,7 +185,13 @@ pub const ActionProperties = struct {
     // }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
-        return ActionProperties{ .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator), .attack_property = try AttackProperty.init(allocator), .animation_timeline = std.ArrayList(ImageRange).init(allocator) };
+        return ActionProperties{
+            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .attack_property = try AttackProperty.init(allocator),
+            .grab_properties = std.ArrayList(GrabProperty).init(allocator),
+            .animation_timeline = std.ArrayList(ImageRange).init(allocator),
+        };
     }
 
     pub fn getActiveImage(self: ActionProperties, frame: i32) ImageRange {
@@ -266,6 +284,7 @@ pub const CharacterProperties = struct {
 
     max_health: i32 = 10000,
     default_pushbox: Hitbox = .{},
+    grabbable_distance: i32 = 50000,
     actions: std.ArrayList(ActionProperties),
 
     // Deinitialize with `deinit`

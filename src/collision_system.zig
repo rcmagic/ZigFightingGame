@@ -42,11 +42,43 @@ pub const CollisionSystem = struct {
         return CollisionSystem{};
     }
 
+    fn getActionProperties(entity: usize, gameState: *GameState) ?*character_data.ActionProperties {
+        if (gameState.gameData) |gameData| {
+            const state_machine_component = gameState.state_machine_components[entity];
+            var grabber_action_name: []const u8 = "";
+
+            const grabber_state = state_machine_component.stateMachine.CurrentState;
+            if (state_machine_component.stateMachine.Registery.CombatStates[@intFromEnum(grabber_state)]) |state| {
+                grabber_action_name = state.name;
+            }
+
+            return character_data.findAction(
+                gameData.CharacterAssets.items[entity].*,
+                gameData.ActionMaps.items[entity],
+                grabber_action_name,
+            );
+        }
+
+        return null;
+    }
+
+    pub fn grab_collision_phase(gameState: *GameState) !void {
+        for (0..gameState.entityCount) |grabber_entity| {
+            if (getActionProperties(grabber_entity, gameState)) |grabber_action_properties| {
+                for (0..gameState.entityCount) |other_entity| {
+                    if (other_entity == grabber_entity) continue;
+                    for (grabber_action_properties.grab_properties.items) |grabber_property| {
+                        if (grabber_property.isActiveOnFrame(gameState.timeline_components[grabber_entity].framesElapsed)) {
+                            // const grabber_physics = gameState.physics_components[entity];
+                            try gameState.hitEvents.append(.{ .hitProperty = .{ .isGrab = true }, .attackerID = grabber_entity, .defenderID = other_entity });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     pub fn collision_phase(self: *CollisionSystem, gameState: *GameState) !void {
-
-        // Clear all hit events
-        gameState.hitEvents.shrinkRetainingCapacity(0);
-
         const activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
         const activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
 
@@ -234,6 +266,11 @@ pub const CollisionSystem = struct {
                 }
             }
         }
+
+        // Clear all hit events
+        gameState.hitEvents.shrinkRetainingCapacity(0);
+
+        try grab_collision_phase(gameState);
 
         try self.collision_phase(gameState);
     }
