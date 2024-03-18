@@ -75,14 +75,13 @@ pub const InputComponent = struct {
             adjustLimit = self.input_buffer.len + self.buffer_index;
         }
 
-        const BufferStart: usize = (self.input_buffer.len + self.buffer_index - adjustLimit) % self.input_buffer.len;
-
         var CurrentMotionIndex: usize = 0;
 
         const MotionList = input.MotionInputs[@intFromEnum(motionName)];
 
-        _ = BufferStart;
-        for (self.input_buffer) |input_command| {
+        for (0..adjustLimit) |count| {
+            const buffer_position: usize = (self.input_buffer.len + self.buffer_index - (adjustLimit - 1) + count) % self.input_buffer.len;
+            const input_command = self.input_buffer[buffer_position];
             if (input.CheckNumpadDirection(input_command, MotionList[CurrentMotionIndex])) {
                 std.debug.print("Detected Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
                 CurrentMotionIndex = CurrentMotionIndex + 1;
