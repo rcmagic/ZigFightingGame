@@ -74,14 +74,17 @@ pub const CollisionSystem = struct {
                         for (grabber_action_properties.grab_properties.items) |grabber_property| {
                             if (grabber_property.isActiveOnFrame(gameState.timeline_components[grabber_entity].framesElapsed)) {
                                 const other_character = gameData.CharacterAssets.items[other_entity];
-                                // Range check
 
                                 const grabber_physics = gameState.physics_components[grabber_entity];
                                 const other_physics = gameState.physics_components[other_entity];
 
                                 const distance = @abs(other_physics.position.x - grabber_physics.position.x);
 
+                                // Range check
                                 if (distance > (grabber_property.grab_distance + other_character.grabbable_distance)) continue;
+
+                                // Ground check
+                                if ((grabber_physics.position.y != 0) or (other_physics.position.y != 0)) continue;
 
                                 try gameState.hitEvents.append(.{ .hitProperty = .{ .isGrab = true }, .attackerID = grabber_entity, .defenderID = other_entity });
                             }
