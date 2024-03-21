@@ -135,9 +135,28 @@ pub const CollisionSystem = struct {
                                 }
 
                                 if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, gameData.ActionMaps.items[attackerIndex], actionName)) |actionData| {
-                                    try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
+                                    if (!actionData.attack_property.hit_property.isGrab) {
+                                        try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+
+                const active_push_slices = self.PushSlices[0..gameState.entityCount];
+
+                // Grab hit events
+                for (active_push_slices, 0..) |OneEntityVulnerableBoxes, defenderIndex| {
+                    if (attackerIndex == defenderIndex) continue;
+
+                    for (OneEntityVulnerableBoxes) |vulnerableBox| {
+                        if (do_hitboxes_overlap(attackBox, vulnerableBox)) {
+                            try gameState.hitEvents.append(.{
+                                .hitProperty = .{ .isGrab = true },
+                                .attackerID = attackerIndex,
+                                .defenderID = defenderIndex,
+                            });
                         }
                     }
                 }

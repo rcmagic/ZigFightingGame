@@ -48,8 +48,12 @@ pub const reaction_system = struct {
             const WasGuarded = (AttackerOnLeftSide and input.right) or (!AttackerOnLeftSide and input.left);
 
             if (hitEvent.hitProperty.isGrab) {
-                defenderState.context.TransitionToState(.GrabReaction);
-                defenderState.context.reaction_component.grabLocked = true;
+                if ((attackerPhysics.position.y > 0 and defenderPhysics.position.y > 0) or
+                    (attackerPhysics.position.y == 0 and defenderPhysics.position.y == 0))
+                {
+                    defenderState.context.TransitionToState(.GrabReaction);
+                    defenderState.context.reaction_component.grabLocked = true;
+                }
             } else if (WasGuarded) {
                 defenderState.context.TransitionToState(.GuardReaction);
                 gameState.reaction_components[hitEvent.defenderID].guardStun = hitEvent.hitProperty.guardStun;
