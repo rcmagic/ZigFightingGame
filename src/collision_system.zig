@@ -63,14 +63,28 @@ pub const CollisionSystem = struct {
     }
 
     pub fn grab_collision_phase(gameState: *GameState) !void {
-        for (0..gameState.entityCount) |grabber_entity| {
-            if (getActionProperties(grabber_entity, gameState)) |grabber_action_properties| {
-                for (0..gameState.entityCount) |other_entity| {
-                    if (other_entity == grabber_entity) continue;
-                    for (grabber_action_properties.grab_properties.items) |grabber_property| {
-                        if (grabber_property.isActiveOnFrame(gameState.timeline_components[grabber_entity].framesElapsed)) {
-                            // const grabber_physics = gameState.physics_components[entity];
-                            try gameState.hitEvents.append(.{ .hitProperty = .{ .isGrab = true }, .attackerID = grabber_entity, .defenderID = other_entity });
+        if (gameState.gameData) |gameData| {
+            for (0..gameState.entityCount) |grabber_entity| {
+                if (getActionProperties(grabber_entity, gameState)) |grabber_action_properties| {
+                    for (0..gameState.entityCount) |other_entity| {
+
+                        // Make sure the grabbing entity doesn't grab itself
+                        if (other_entity == grabber_entity) continue;
+
+                        for (grabber_action_properties.grab_properties.items) |grabber_property| {
+                            if (grabber_property.isActiveOnFrame(gameState.timeline_components[grabber_entity].framesElapsed)) {
+                                const other_character = gameData.CharacterAssets.items[other_entity];
+                                // Range check
+
+                                const grabber_physics = gameState.physics_components[grabber_entity];
+                                const other_physics = gameState.physics_components[other_entity];
+
+                                const distance = @abs(other_physics.position.x - grabber_physics.position.x);
+
+                                if (distance > (grabber_property.grab_distance + other_character.grabbable_distance)) continue;
+
+                                try gameState.hitEvents.append(.{ .hitProperty = .{ .isGrab = true }, .attackerID = grabber_entity, .defenderID = other_entity });
+                            }
                         }
                     }
                 }
