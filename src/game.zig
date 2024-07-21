@@ -200,7 +200,7 @@ pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState
     const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const XOffset: i32 = player * 200 + 10;
     const YOffset: i32 = 80;
-    rl.drawText(rl.textFormat("player: {}\nhitStop: {}\nhitStun: {}\nguardStun:{}\nframesElapsed:{}", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.Color.black);
+    rl.drawText(rl.textFormat("player: %d\nhitStop: %d\nhitStun: %d\nguardStun:%d\nframesElapsed:%d", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.Color.black);
 }
 
 pub fn debugDrawTimeline(gameState: GameState, entity: usize) void {
@@ -460,7 +460,7 @@ pub fn gameLoop() !void {
         // }
 
         // Debug information
-        rl.drawText(rl.textFormat("Game Frame: {}", .{GameFrameCount}), 10, 10, 16, rl.Color.dark_gray);
+        rl.drawText(rl.textFormat("Game Frame: %d", .{GameFrameCount}), 10, 10, 16, rl.Color.dark_gray);
 
         try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 0);
         try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 1);
