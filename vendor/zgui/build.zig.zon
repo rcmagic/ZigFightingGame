@@ -1,6 +1,6 @@
 .{
     .name = "zgui",
-    .version = "1.89.6",
+    .version = "0.2.0",
     .paths = .{
         "build.zig",
         "build.zig.zon",
@@ -11,5 +11,6 @@
     .dependencies = .{
         .zglfw = .{ .path = "../zglfw" },
         .zgpu = .{ .path = "../zgpu" },
+        .system_sdk = .{ .path = "../system-sdk" },
     },
 }
