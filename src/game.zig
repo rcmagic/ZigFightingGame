@@ -17,7 +17,7 @@ const z = @import("zgui");
 
 var texture: rl.Texture2D = undefined;
 
-const DrawState = struct { x: i32 = 0, y: i32 = 0, xScale: f32 = 1.0, yScale: f32 = 1.0, flipped: bool = false, color: rl.Color = rl.WHITE, texture: rl.Texture2D = undefined };
+const DrawState = struct { x: i32 = 0, y: i32 = 0, xScale: f32 = 1.0, yScale: f32 = 1.0, flipped: bool = false, color: rl.Color = rl.Color.ray_white, texture: rl.Texture2D = undefined };
 
 const GroundOffset = 390;
 const ScreenCenter = 400;
@@ -83,14 +83,14 @@ fn prepareDrawState(gameState: GameState, entity: usize) DrawState {
         const CurrentState = gameState.state_machine_components[entity].stateMachine.CurrentState;
 
         drawState.color = switch (CurrentState) {
-            .Standing, .WalkingForward, .WalkingBackward, .Jump => rl.YELLOW,
-            .Attack => rl.RED,
-            else => rl.WHITE,
+            .Standing, .WalkingForward, .WalkingBackward, .Jump => rl.Color.yellow,
+            .Attack => rl.Color.red,
+            else => rl.Color.ray_white,
         };
 
         // Color the character when they are hit.
         if (gameState.reaction_components[entity].hitStun > 0) {
-            drawState.color = rl.BLUE;
+            drawState.color = rl.Color.blue;
         }
     }
 
@@ -100,12 +100,12 @@ fn prepareDrawState(gameState: GameState, entity: usize) DrawState {
 // Render a single DrawState. Uses the results from prepareDrawState() and renders one Character.
 fn renderDrawState(state: DrawState) void {
     const x: f32 = @floatFromInt(if (state.flipped) (state.x - state.texture.width) else state.x);
-    //rl.DrawTexture(state.texture, state.x, state.y, rl.WHITE);
+    //rl.drawTexture(state.texture, state.x, state.y, rl.Color.ray_white);
     const width: f32 = @floatFromInt(state.texture.width);
     const height: f32 = @floatFromInt(state.texture.height);
     const rect = rl.Rectangle{ .x = 0, .y = 0, .width = (state.xScale * width), .height = (state.yScale * height) };
     const pos = rl.Vector2{ .x = x, .y = @floatFromInt(state.y) };
-    rl.DrawTextureRec(state.texture, rect, pos, state.color);
+    rl.drawTextureRec(state.texture, rect, pos, state.color);
 }
 
 fn getActiveHitboxes(hitboxGroups: []const character_data.HitboxGroup, hitboxes: []character_data.Hitbox, framesElapsed: i32) usize {
@@ -136,8 +136,8 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
     const AxisLength = 40;
     const AxisThickness = 2;
     // Draw axis
-    rl.DrawRectangle(ScreenX - AxisLength / 2, ScreenY, AxisLength, AxisThickness, rl.BLACK);
-    rl.DrawRectangle(ScreenX, ScreenY - AxisLength / 2, AxisThickness, AxisLength, rl.BLACK);
+    rl.drawRectangle(ScreenX - AxisLength / 2, ScreenY, AxisLength, AxisThickness, rl.Color.black);
+    rl.drawRectangle(ScreenX, ScreenY - AxisLength / 2, AxisThickness, AxisLength, rl.Color.black);
 
     if (gameState.gameData) |gameData| {
         const stateMachine = &gameState.state_machine_components[entity].stateMachine;
@@ -159,7 +159,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
                     const width = math.WorldToScreen(hitbox.right - hitbox.left);
                     const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                    rl.DrawRectangleLines(left, top, width, height, rl.BLUE);
+                    rl.drawRectangleLines(left, top, width, height, rl.Color.blue);
                 }
             }
 
@@ -174,7 +174,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
                     const top = ScreenY - math.WorldToScreen(hitbox.top);
                     const width = math.WorldToScreen(hitbox.right - hitbox.left);
                     const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                    rl.DrawRectangleLines(left, top, width, height, rl.RED);
+                    rl.drawRectangleLines(left, top, width, height, rl.Color.red);
                 }
             }
             // Draw Default Hitbox
@@ -187,19 +187,20 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
                 const top = ScreenY - math.WorldToScreen(hitbox.top);
                 const width = math.WorldToScreen(hitbox.right - hitbox.left);
                 const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                rl.DrawRectangleLines(left, top, width, height, rl.GREEN);
+                rl.drawRectangleLines(left, top, width, height, rl.Color.green);
             }
         }
     }
 }
 
 pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState, entity: usize) !void {
+    _ = allocator;
     const reaction = gameState.reaction_components[entity];
     const player: i32 = @intCast(entity);
     const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const XOffset: i32 = player * 200 + 10;
     const YOffset: i32 = 80;
-    rl.DrawText(try rl.TextFormat(allocator, "player: {}\nhitStop: {}\nhitStun: {}\nguardStun:{}\nframesElapsed:{}", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.BLACK);
+    rl.drawText(rl.textFormat("player: {}\nhitStop: {}\nhitStun: {}\nguardStun:{}\nframesElapsed:{}", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.Color.black);
 }
 
 pub fn debugDrawTimeline(gameState: GameState, entity: usize) void {
@@ -235,29 +236,29 @@ pub fn debugDrawTimeline(gameState: GameState, entity: usize) void {
 
     var index: i32 = 0;
     while (index < totalFrames) : (index += 1) {
-        const color = if (index == activeFrame) rl.YELLOW else rl.BLACK;
-        rl.DrawRectangle(timelineXOffset + index * (frameWidth + padding), timelineYOffset, frameWidth, timelineHeight, color);
+        const color = if (index == activeFrame) rl.Color.yellow else rl.Color.black;
+        rl.drawRectangle(timelineXOffset + index * (frameWidth + padding), timelineYOffset, frameWidth, timelineHeight, color);
     }
 }
 
 pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void {
-    if (!rl.IsGamepadAvailable(controller)) {
+    if (!rl.isGamepadAvailable(controller)) {
         return;
     }
 
     const inputCommand = &gameState.input_components[entity].input_command;
 
-    if (rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_up)) {
         inputCommand.*.up = true;
     }
 
-    if (rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_down)) {
         inputCommand.*.down = true;
     }
 
     const bFlipInput = gameState.physics_components[entity].facingLeft;
 
-    if (rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_LEFT)) {
+    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_left)) {
         inputCommand.*.left = true;
 
         if (bFlipInput) {
@@ -267,7 +268,7 @@ pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         }
     }
 
-    if (rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) {
+    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_right)) {
         inputCommand.*.right = true;
 
         if (bFlipInput) {
@@ -277,7 +278,7 @@ pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) v
         }
     }
 
-    if (rl.IsGamepadButtonDown(controller, rl.GamepadButton.GAMEPAD_BUTTON_RIGHT_FACE_LEFT)) {
+    if (rl.isGamepadButtonDown(controller, .gamepad_button_right_face_left)) {
         inputCommand.*.attack = true;
     }
 }
@@ -316,7 +317,7 @@ pub fn gameLoop() !void {
     var bPauseGame = false;
     var GameFrameCount: i32 = 0;
 
-    //const texture = rl.LoadTexture("assets/animation/test_chara_1/color1/idle_00.png");
+    //const texture = rl.loadTexture("assets/animation/test_chara_1/color1/idle_00.png");
 
     if (gameState.gameData) |gameData| {
         if (gameData.findSequenceTextures(0, "stand")) |sequence| {
@@ -346,10 +347,10 @@ pub fn gameLoop() !void {
     const screenHeight: f32 = 450;
 
     // Main game loop
-    while (!rl.WindowShouldClose()) { // Detect window close button or ESC key
+    while (!rl.windowShouldClose()) { // Detect window close button or ESC key
 
-        const widthF: f32 = @floatFromInt(rl.GetScreenWidth());
-        const heightF: f32 = @floatFromInt(rl.GetScreenHeight());
+        const widthF: f32 = @floatFromInt(rl.getScreenWidth());
+        const heightF: f32 = @floatFromInt(rl.getScreenHeight());
         //float scale = MIN((float)GetScreenWidth()/gameScreenWidth, (float)GetScreenHeight()/gameScreenHeight);
         Camera.zoom = @min(widthF / screenWidth, heightF / screenHeight);
         // Advance the game by one frame.
@@ -359,52 +360,52 @@ pub fn gameLoop() !void {
         gameState.input_components[0].input_command.reset();
         gameState.input_components[1].input_command.reset();
 
-        if (rl.IsWindowFocused()) {
-            if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F3)) {
+        if (rl.isWindowFocused()) {
+            if (rl.isKeyPressed(.key_f3)) {
                 bPauseGame = !bPauseGame;
-            } else if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F2)) {
+            } else if (rl.isKeyPressed(.key_f2)) {
                 bAdvanceOnce = true;
             }
             // Toggle hitbox display
-            else if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F4)) {
+            else if (rl.isKeyPressed(.key_f4)) {
                 bDebugShowHitboxes = !bDebugShowHitboxes;
             }
 
             // Force reload assets with ctrl+F5
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_LEFT_CONTROL) and rl.IsKeyPressed(rl.KeyboardKey.KEY_F5)) {
+            if (rl.isKeyDown(.key_left_control) and rl.isKeyPressed(.key_f5)) {
                 std.debug.print("Reloading assets...\n", .{});
                 AssetAllocator.deinit();
                 AssetAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
                 try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
             }
 
-            if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F8)) {
+            if (rl.isKeyPressed(.key_f8)) {
                 bShowEditor = !bShowEditor;
             }
 
             // Debug color toggle
-            if (rl.IsKeyPressed(rl.KeyboardKey.KEY_F9)) {
+            if (rl.isKeyPressed(.key_f9)) {
                 bDebugColorEnabled = !bDebugColorEnabled;
             }
         }
 
-        if (rl.IsWindowFocused()) {
+        if (rl.isWindowFocused()) {
             pollGamepadInput(&gameState, 0, 0);
             pollGamepadInput(&gameState, 1, 1);
         }
 
-        if (!bShowEditor and rl.IsWindowFocused()) {
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_W)) {
+        if (!bShowEditor and rl.isWindowFocused()) {
+            if (rl.isKeyDown(.key_w)) {
                 gameState.input_components[0].input_command.up = true;
             }
 
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_S)) {
+            if (rl.isKeyDown(.key_s)) {
                 gameState.input_components[0].input_command.down = true;
             }
 
             const bFlipInput = gameState.physics_components[0].facingLeft;
 
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_A)) {
+            if (rl.isKeyDown(.key_a)) {
                 if (bFlipInput) {
                     gameState.input_components[0].input_command.forward = true;
                 } else {
@@ -412,7 +413,7 @@ pub fn gameLoop() !void {
                 }
             }
 
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_D)) {
+            if (rl.isKeyDown(.key_d)) {
                 if (bFlipInput) {
                     gameState.input_components[0].input_command.back = true;
                 } else {
@@ -420,7 +421,7 @@ pub fn gameLoop() !void {
                 }
             }
 
-            if (rl.IsKeyDown(rl.KeyboardKey.KEY_J)) {
+            if (rl.isKeyDown(.key_j)) {
                 gameState.input_components[0].input_command.attack = true;
             }
         }
@@ -436,10 +437,10 @@ pub fn gameLoop() !void {
         }
 
         // Draw
-        rl.BeginDrawing();
-        rl.BeginMode2D(Camera);
+        rl.beginDrawing();
+        rl.beginMode2D(Camera);
 
-        rl.ClearBackground(rl.WHITE);
+        rl.clearBackground(rl.Color.ray_white);
 
         renderDrawState(prepareDrawState(gameState, 0));
         renderDrawState(prepareDrawState(gameState, 1));
@@ -450,16 +451,16 @@ pub fn gameLoop() !void {
             drawCharacterHitboxes(gameState, 1);
         }
 
-        rl.EndMode2D();
+        rl.endMode2D();
 
         // if(gameState.gameData) | gameData |
         // {
         //     const hitbox = gameData.HitboxGroup.hitboxes.items[0];
-        //    rl.DrawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.RED);
+        //    rl.drawRectangleLines(hitbox.left, hitbox.top, hitbox.right - hitbox.left, hitbox.top - hitbox.bottom, rl.Color.red);
         // }
 
         // Debug information
-        rl.DrawText(try rl.TextFormat(std.heap.c_allocator, "Game Frame: {}", .{GameFrameCount}), 10, 10, 16, rl.DARKGRAY);
+        rl.drawText(rl.textFormat("Game Frame: {}", .{GameFrameCount}), 10, 10, 16, rl.Color.dark_gray);
 
         try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 0);
         try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 1);
@@ -468,7 +469,7 @@ pub fn gameLoop() !void {
         debugDrawTimeline(gameState, 1);
 
         if (bPauseGame) {
-            rl.DrawText("(Paused)", 10 + 150, 10, 16, rl.DARKGRAY);
+            rl.drawText("(Paused)", 10 + 150, 10, 16, rl.Color.dark_gray);
         }
 
         //----------------------------------------------------------------------------------
@@ -477,6 +478,6 @@ pub fn gameLoop() !void {
             try editor.Tick(gameState, AssetAllocator.allocator());
         }
 
-        rl.EndDrawing();
+        rl.endDrawing();
     }
 }

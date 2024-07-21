@@ -257,7 +257,7 @@ pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.All
             defer allocator.free(source);
             std.mem.copyForwards(u8, source, image.source);
             source[source.len - 1] = 0;
-            try sequenceTexRef.textures.append(rl.LoadTexture(@ptrCast(source)));
+            try sequenceTexRef.textures.append(rl.loadTexture(@ptrCast(source)));
         }
     }
 

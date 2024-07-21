@@ -135,7 +135,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
         .Pointer => |ptrInfo| {
             switch (ptrInfo.size) {
                 .Slice => {
-                    var editText = [_]u8{0} ** 64;
+                    var editText = [_:0]u8{0} ** 64;
                     std.mem.copyForwards(u8, &editText, property.*);
                     if (z.inputText(name, .{ .buf = &editText })) {
                         const ptr = @as([*c]u8, &editText);

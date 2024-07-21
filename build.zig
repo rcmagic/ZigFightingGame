@@ -1,6 +1,4 @@
 const std = @import("std");
-const raylib = @import("raylib_zig");
-const zgui = @import("zgui");
 
 pub fn build(b: *std.Build) !void {
     // Standard target options allows the person running `zig build` to choose
@@ -13,34 +11,38 @@ pub fn build(b: *std.Build) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const optimize = b.standardOptimizeOption(.{});
 
-    const raylib_zig = b.dependency("raylib_zig", .{
+    const raylib_dep = b.dependency("raylib-zig", .{
         .target = target,
         .optimize = optimize,
     });
 
-    // const exe = b.addExecutable(.{
-    //     .name = "zfg",
-    //     .root_source_file = .{ .path = "src/main.zig" },
-    //     .target = target,
-    //     .optimize = optimize,
-    // });
+    const raylib = raylib_dep.module("raylib"); // main raylib module
+    const raygui = raylib_dep.module("raygui"); // raygui module
+    const raylib_artifact = raylib_dep.artifact("raylib"); // raylib C library
 
-    const exe = try raylib.setup(b, raylib_zig, .{
+    const exe = b.addExecutable(.{
         .name = "zfg",
-        .src = "src/main.zig",
+        // In this case the main source file is merely a path, however, in more
+        // complicated build scripts, this could be a generated file.
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
-        .createRunStep = false,
     });
+
+    exe.linkLibrary(raylib_artifact);
+    exe.root_module.addImport("raylib", raylib);
+    exe.root_module.addImport("raygui", raygui);
 
     exe.linkLibCpp();
 
-    const zgui_pkg = zgui.package(b, target, optimize, .{
-        .options = .{ .backend = .no_backend },
+    const zgui = b.dependency("zgui", .{
+        .shared = false,
+        .with_implot = true,
     });
 
-    zgui_pkg.link(exe);
-    exe.addIncludePath(.{ .path = "vendor/zgui/libs/imgui" });
+    exe.root_module.addImport("zgui", zgui.module("root"));
+    exe.linkLibrary(zgui.artifact("imgui"));
+    exe.addIncludePath(zgui.path("libs/imgui"));
 
     const rlimgui_cflags = &.{
         "-fno-sanitize=undefined",
@@ -68,10 +70,14 @@ pub fn build(b: *std.Build) !void {
     const run_step = b.step("run", "Run the application");
     run_step.dependOn(&run_exe.step);
 
-    // const exe_tests = b.addTest("src/main.zig");
-    // exe_tests.setTarget(target);
-    // exe_tests.setBuildMode(mode);
+    // const unit_tests = b.addTest(.{
+    //     .root_source_file = .{ .path = "src/main.zig" },
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
+
+    // const run_unit_tests = b.addRunArtifact(unit_tests);
 
     // const test_step = b.step("test", "Run unit tests");
-    // test_step.dependOn(&exe_tests.step);
+    // test_step.dependOn(&run_unit_tests.step);
 }

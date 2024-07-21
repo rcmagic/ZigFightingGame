@@ -9,10 +9,10 @@ pub fn main() anyerror!void {
     const screenWidth = 800;
     const screenHeight = 450;
 
-    rl.SetConfigFlags(rl.ConfigFlags{ .FLAG_WINDOW_RESIZABLE = true });
-    rl.InitWindow(screenWidth, screenHeight, "Zig Fighting Game");
+    rl.setConfigFlags(rl.ConfigFlags{ .window_resizable = true });
+    rl.initWindow(screenWidth, screenHeight, "Zig Fighting Game");
 
-    rl.SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Run the game
@@ -20,7 +20,7 @@ pub fn main() anyerror!void {
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    rl.CloseWindow(); // Close window and OpenGL context
+    rl.closeWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
 }

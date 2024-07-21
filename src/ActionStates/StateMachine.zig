@@ -157,7 +157,7 @@ const TestContext = struct {
 };
 
 fn TestOnUpdate(context: *CombatStateContext) void {
-    const context_sub = @fieldParentPtr(TestContext, "base", context);
+    const context_sub: TestContext = @fieldParentPtr("base", context);
     context_sub.TestVar = true;
 }
 
@@ -181,12 +181,12 @@ test "Test transitioning the state machine from one state to another." {
         }
 
         fn StandingOnEnd(context: *CombatStateContext) void {
-            const context_sub = @fieldParentPtr(TestContext, "base", context);
+            const context_sub: TestContext = @fieldParentPtr("base", context);
             context_sub.TestVar = true;
         }
 
         fn JumpOnStart(context: *CombatStateContext) void {
-            const context_sub = @fieldParentPtr(TestContext, "base", context);
+            const context_sub: TestContext = @fieldParentPtr("base", context);
             context_sub.TestVar2 = true;
         }
     };
