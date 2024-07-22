@@ -4,7 +4,9 @@
             "name": "stand",
             "images": [
                 {
-                    "source": "assets/animation/test_chara_1/color1/idle_00.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/idle_00.png"
+                    },
                     "x": -32,
                     "y": -152
                 }
@@ -14,7 +16,9 @@
             "name": "grab_reaction",
             "images": [
                 {
-                    "source": "assets/animation/test_chara_1/color1/grab_reaction.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/grab_reaction.png"
+                    },
                     "x": -32,
                     "y": -152
                 }
@@ -24,17 +28,23 @@
             "name": "attack",
             "images": [
                 {
-                    "source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/attack_00.png"
+                    },
                     "x": -108,
                     "y": -131
                 },
                 {
-                    "source": "assets/animation/test_chara_1/color1/attack_01.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/attack_01.png"
+                    },
                     "x": -103,
                     "y": -146
                 },
                 {
-                    "source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/attack_02.png"
+                    },
                     "x": -32,
                     "y": -63
                 }
@@ -44,17 +54,23 @@
             "name": "special",
             "images": [
                 {
-                    "source": "assets/animation/test_chara_1/color1/attack_00.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/attack_00.png"
+                    },
                     "x": -108,
                     "y": -131
                 },
                 {
-                    "source": "assets/animation/test_chara_1/color1/special_attack_00.png",
-                    "x": -103,
-                    "y": -146
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/special_attack_00.png"
+                    },
+                    "x": -190,
+                    "y": -170
                 },
                 {
-                    "source": "assets/animation/test_chara_1/color1/attack_02.png",
+                    "asset": {
+                        "path": "assets/animation/test_chara_1/color1/attack_02.png"
+                    },
                     "x": -32,
                     "y": -63
                 }
@@ -68,6 +84,7 @@
         "bottom": 0,
         "right": 25000
     },
+    "grabbable_distance": 0,
     "actions": [
         {
             "name": "Standing",
@@ -102,6 +119,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -144,6 +162,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -186,6 +205,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -228,6 +248,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -283,6 +304,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "attack",
@@ -327,14 +349,14 @@
             "attack_property": {
                 "hitbox_groups": [
                     {
-                        "start_frame": 8,
-                        "duration": 2,
+                        "start_frame": 0,
+                        "duration": 100,
                         "hitboxes": [
                             {
-                                "top": 100000,
-                                "left": 0,
-                                "bottom": 0,
-                                "right": 120000
+                                "top": 80250,
+                                "left": 7300,
+                                "bottom": 26350,
+                                "right": 105900
                             }
                         ]
                     }
@@ -350,6 +372,13 @@
                     "isGrab": true
                 }
             },
+            "grab_properties": [
+                {
+                    "start_frame": 0,
+                    "duration": 4,
+                    "grab_distance": 25000
+                }
+            ],
             "animation_timeline": [
                 {
                     "sequence": "special",
@@ -404,6 +433,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -446,6 +476,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -488,6 +519,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "stand",
@@ -517,6 +549,7 @@
                     "isGrab": false
                 }
             },
+            "grab_properties": [],
             "animation_timeline": [
                 {
                     "sequence": "grab_reaction",

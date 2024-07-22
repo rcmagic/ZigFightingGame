@@ -21,6 +21,14 @@ pub const AssetInfo = struct {
     path: []const u8,
 };
 
+// Reference to an asset on disk that can be loaded
+pub fn LoadableAssetReference(comptime T: type) type {
+    _ = T;
+    return struct {
+        path: []const u8 = "",
+    };
+}
+
 pub fn GetAssetName(asset: AssetInfo) []const u8 {
     switch (asset.type) {
         AssetType.Empty => return "Empty",

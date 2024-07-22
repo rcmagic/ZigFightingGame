@@ -194,7 +194,10 @@ var SelectedAsset: *asset.AssetInfo = &DummyAssetInfo;
 pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
     _ = allocator;
     if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
-        if (z.beginTable("AssetTable", .{ .column = 2 })) {
+        if (z.beginTable("AssetTable", .{
+            .column = 2,
+            .flags = .{ .resizable = true },
+        })) {
             z.tableSetupColumn("Type", .{});
             z.tableSetupColumn("Path", .{});
             z.tableHeadersRow();
@@ -244,6 +247,9 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
         switch (entry.type) {
             //.AssetType.Empty => return "Empty",
             .Character => {
+                if (z.button("Save Character", .{})) {
+                    try character_data.saveAsset(entry.type.Character.*, entry.path, allocator);
+                }
                 try CompTimePropertyEdit(
                     entry.type.Character,
                     "Character",
