@@ -1,6 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const asset = @import("asset.zig");
+const gameState = @import("GameState.zig");
 
 fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
     const T = @TypeOf(field);
@@ -243,6 +244,15 @@ pub fn generateImageSequenceMap(character: CharacterProperties, allocator: std.m
     return SequenceNameMap;
 }
 
+pub fn loadTexture(path: []const u8, allocator: std.mem.Allocator) !rl.Texture2D {
+    // Need a better way to handle conversion from non-null terminated strings to c strings.
+    const source = try allocator.alloc(u8, path.len + 1);
+    defer allocator.free(source);
+    std.mem.copyForwards(u8, source, path);
+    source[source.len - 1] = 0;
+    return rl.loadTexture(@ptrCast(path));
+}
+
 // Sequences are loaded in the same order as the character data asset.
 pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.Allocator) !std.ArrayList(SequenceTexRef) {
     var imageSequences = std.ArrayList(SequenceTexRef).init(allocator);
@@ -253,11 +263,12 @@ pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.All
 
         for (sequence.images.items) |image| {
             // Need a better way to handle conversion from non-null terminated strings to c strings.
-            const source = try allocator.alloc(u8, image.source.len + 1);
-            defer allocator.free(source);
-            std.mem.copyForwards(u8, source, image.source);
+            var source = [_:0]u8{0} ** 128;
+            std.mem.copyForwards(u8, &source, image.source);
             source[source.len - 1] = 0;
-            try sequenceTexRef.textures.append(rl.loadTexture(@ptrCast(source)));
+            try gameState.AssetStorage.loadAsset(Texture, &source);
+            const textureAsset: asset.AssetInfo = gameState.AssetStorage.getAsset(&source);
+            try sequenceTexRef.textures.append(textureAsset.type.Texture.Texture);
         }
     }
 
@@ -320,6 +331,21 @@ pub const CharacterProperties = struct {
         .max_health = .{ .min_value = 0 },
         .grabbable_distance = .{ .min_value = 0 },
     };
+};
+
+pub const Texture = struct {
+    Texture: rl.Texture2D,
+    // Deinitialize with `deinit`
+    pub fn init(allocator: std.mem.Allocator) !Texture {
+        _ = allocator;
+        return .{};
+    }
+
+    pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !asset.AssetType {
+        const data: *Texture = try allocator.create(Texture);
+        data.*.Texture = try loadTexture(path, allocator);
+        return .{ .Texture = data };
+    }
 };
 
 const MaxAssetBufferSize = 1024 * 512;

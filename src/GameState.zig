@@ -8,12 +8,14 @@ const collision_system = @import("collision_system.zig").CollisionSystem;
 const reaction_system = @import("reaction_system.zig").reaction_system;
 const asset = @import("asset.zig");
 
+var StorageAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+pub var AssetStorage = asset.Storage.init(StorageAllocator.allocator());
+
 pub const GameData = struct {
     CharacterAssets: std.ArrayList(*character_data.CharacterProperties),
     ActionMaps: std.ArrayList(std.StringHashMap(usize)),
     image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
-    AssetStorage: asset.Storage,
 
     pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef {
         if (self.ImageSequenceMap.items[characterIndex].get(SequenceName)) |index| {
@@ -23,9 +25,9 @@ pub const GameData = struct {
     }
 
     fn LoadOneCharacter(self: *GameData, path: [:0]const u8, allocator: std.mem.Allocator) !void {
-        try self.AssetStorage.loadAsset(character_data.CharacterProperties, path);
+        try AssetStorage.loadAsset(character_data.CharacterProperties, path);
 
-        const characterAsset: asset.AssetInfo = self.AssetStorage.getAsset(path);
+        const characterAsset: asset.AssetInfo = AssetStorage.getAsset(path);
 
         switch (characterAsset.type) {
             .Character => |character| {
@@ -49,7 +51,6 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
         .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
         .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
         .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator),
-        .AssetStorage = asset.Storage.init(allocator),
     };
 
     try gameData.LoadOneCharacter("assets/test_chara_1.json", allocator);

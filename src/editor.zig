@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const game_simulation = @import("game_simulation.zig");
-const GameState = @import("GameState.zig").GameState;
+const GameState = @import("GameState.zig");
 const asset = @import("asset.zig");
 const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
@@ -188,7 +188,9 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
     }
 }
 
-pub fn AssetSelectWindow(gameState: GameState, allocator: std.mem.Allocator) !void {
+var DummyAssetInfo = asset.AssetInfo{ .type = .{ .Empty = 0 }, .path = "" };
+var SelectedAsset: *asset.AssetInfo = &DummyAssetInfo;
+pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
     _ = allocator;
     if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
         if (z.beginTable("AssetTable", .{ .column = 2 })) {
@@ -196,30 +198,38 @@ pub fn AssetSelectWindow(gameState: GameState, allocator: std.mem.Allocator) !vo
             z.tableSetupColumn("Path", .{});
             z.tableHeadersRow();
 
-            if (gameState.gameData) |gameData| {
-                var it = gameData.AssetStorage.asset_map.iterator();
-                while (it.next()) |kv| {
-                    z.tableNextRow(.{});
-                    _ = z.tableSetColumnIndex(0);
-                    z.textUnformatted(asset.GetAssetName(kv.value_ptr.*));
-                    _ = z.tableSetColumnIndex(1);
-                    z.textUnformatted(kv.key_ptr.*);
+            var it = GameState.AssetStorage.asset_map.iterator();
+            while (it.next()) |kv| {
+                z.pushPtrId(kv.value_ptr);
+                z.tableNextRow(.{});
+                _ = z.tableSetColumnIndex(0);
+
+                if (z.selectable(
+                    asset.GetAssetNameSentinal(kv.value_ptr.*),
+                    .{ .selected = true, .flags = .{ .span_all_columns = false } },
+                )) {
+                    SelectedAsset = kv.value_ptr;
                 }
+                _ = z.tableSetColumnIndex(1);
+                z.textUnformatted(kv.value_ptr.path);
+                z.popId();
             }
         }
         z.endTable();
     }
     z.end();
+
+    return SelectedAsset;
 }
 
-pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
+pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void {
     c.rlImGuiBegin();
     defer c.rlImGuiEnd();
 
     var open = true;
     z.showDemoWindow(&open);
 
-    try AssetSelectWindow(gameState, allocator);
+    const selection = try AssetSelectWindow(allocator);
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
         if (gameState.gameData) |gameData| {
@@ -227,9 +237,34 @@ pub fn Tick(gameState: GameState, allocator: std.mem.Allocator) !void {
 
             const entity: usize = @intCast(SelectedEntity);
 
-            // Properties for the entire character asset for the selected entity.
-            if (entity < gameData.CharacterAssets.items.len) {
-                try CompTimePropertyEdit(&gameData.CharacterAssets.items[entity].*, "Character", allocator, .{});
+            // Use the asset storage
+            //gameData.AssetStorage.asset_map.get
+            //var it = gameData.AssetStorage.asset_map.iterator();
+            //while (it.next()) |kv| {
+            const entry = selection;
+
+            // @todo Wanna do some code generation here so I don't have to manually do this for all types.
+            switch (entry.type) {
+                //.AssetType.Empty => return "Empty",
+                .Character => {
+                    try CompTimePropertyEdit(
+                        entry.type.Character,
+                        "Character",
+                        allocator,
+                        .{},
+                    );
+                },
+                .Texture => {
+                    try CompTimePropertyEdit(
+                        entry.type.Texture,
+                        "Texture",
+                        allocator,
+                        .{},
+                    );
+                },
+                else => {
+                    z.textUnformatted("Unknown");
+                },
             }
 
             // Property for the current performing action.
