@@ -207,7 +207,10 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
 
                 if (z.selectable(
                     asset.GetAssetNameSentinal(kv.value_ptr.*),
-                    .{ .selected = true, .flags = .{ .span_all_columns = false } },
+                    .{
+                        .selected = (SelectedAsset == kv.value_ptr),
+                        .flags = .{ .span_all_columns = true },
+                    },
                 )) {
                     SelectedAsset = kv.value_ptr;
                 }
