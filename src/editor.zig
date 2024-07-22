@@ -249,6 +249,10 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                 );
             },
             .Texture => {
+                z.image(&entry.type.Texture.Texture.id, .{
+                    .w = @floatFromInt(entry.type.Texture.Texture.width),
+                    .h = @floatFromInt(entry.type.Texture.Texture.height),
+                });
                 try CompTimePropertyEdit(
                     entry.type.Texture,
                     "Texture",
