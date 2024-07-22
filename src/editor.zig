@@ -13,6 +13,7 @@ const c = @cImport({
 const z = @import("zgui");
 
 var ShowPropertyEditor = true;
+var ShowActiveActionProperties = true;
 var SelectedEntity: i32 = 0;
 
 fn CoordinateEdit(name: [:0]const u8, coordinate: *i32) void {
@@ -232,37 +233,41 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
     const selection = try AssetSelectWindow(allocator);
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
+
+        // Use the asset storage
+        const entry = selection;
+
+        // @todo Wanna do some code generation here so I don't have to manually do this for all types.
+        switch (entry.type) {
+            //.AssetType.Empty => return "Empty",
+            .Character => {
+                try CompTimePropertyEdit(
+                    entry.type.Character,
+                    "Character",
+                    allocator,
+                    .{},
+                );
+            },
+            .Texture => {
+                try CompTimePropertyEdit(
+                    entry.type.Texture,
+                    "Texture",
+                    allocator,
+                    .{},
+                );
+            },
+            else => {
+                z.textUnformatted("Unknown");
+            },
+        }
+    }
+    z.end();
+
+    if (z.begin("Active Action Properties", .{ .popen = &ShowActiveActionProperties, .flags = .{} })) {
         if (gameState.gameData) |gameData| {
             _ = z.dragInt("Entity", .{ .v = &SelectedEntity, .min = 0, .max = @intCast(gameData.CharacterAssets.items.len - 1) });
 
             const entity: usize = @intCast(SelectedEntity);
-
-            const entry = selection;
-
-            // @todo Wanna do some code generation here so I don't have to manually do this for all types.
-            switch (entry.type) {
-                //.AssetType.Empty => return "Empty",
-                .Character => {
-                    try CompTimePropertyEdit(
-                        entry.type.Character,
-                        "Character",
-                        allocator,
-                        .{},
-                    );
-                },
-                .Texture => {
-                    try CompTimePropertyEdit(
-                        entry.type.Texture,
-                        "Texture",
-                        allocator,
-                        .{},
-                    );
-                },
-                else => {
-                    z.textUnformatted("Unknown");
-                },
-            }
-
             // Property for the current performing action.
             if (entity < gameState.state_machine_components.len) {
                 const stateMachine = &gameState.state_machine_components[entity].stateMachine;
@@ -287,5 +292,6 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
             }
         }
     }
+
     z.end();
 }
