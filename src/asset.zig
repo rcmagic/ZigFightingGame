@@ -54,7 +54,8 @@ pub const Storage = struct {
 
     pub fn loadAsset(self: *Self, comptime T: type, path: [:0]const u8) !void {
         if (self.asset_map.contains(path)) return;
-        const copied_key: []u8 = self.asset_map.allocator.dupe(u8, path) catch |err| {
+        const ptr: [*:0]const u8 = @ptrCast(path);
+        const copied_key: []u8 = self.asset_map.allocator.dupe(u8, path[0..std.mem.len(ptr)]) catch |err| {
             _ = self.asset_map.remove(path);
             return err;
         };
@@ -63,14 +64,17 @@ pub const Storage = struct {
 
         const loaded_asset: AssetType = try T.loadAsset(path, self.allocator);
 
-        std.debug.print("Loaded Asset: {s}\n", .{path});
+        std.debug.print("Loaded Asset: {s}\n", .{copied_key});
 
         try self.asset_map.putNoClobber(copied_key, AssetInfo{ .type = loaded_asset, .path = copied_key });
     }
 
     pub fn getAsset(self: *const Self, path: []const u8) AssetInfo {
-        if (self.asset_map.contains(path)) {
-            if (self.asset_map.get(path)) |value| {
+        const ptr: [*:0]const u8 = @ptrCast(path);
+        const key = path[0..std.mem.len(ptr)];
+
+        if (self.asset_map.contains(key)) {
+            if (self.asset_map.get(key)) |value| {
                 return value;
             }
         }

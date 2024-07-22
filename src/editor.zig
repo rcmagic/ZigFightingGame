@@ -237,10 +237,6 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
 
             const entity: usize = @intCast(SelectedEntity);
 
-            // Use the asset storage
-            //gameData.AssetStorage.asset_map.get
-            //var it = gameData.AssetStorage.asset_map.iterator();
-            //while (it.next()) |kv| {
             const entry = selection;
 
             // @todo Wanna do some code generation here so I don't have to manually do this for all types.
