@@ -63,6 +63,37 @@ pub fn build(b: *std.Build) !void {
 
     exe.addIncludePath(rlimgui.path("."));
 
+    const sfd = b.dependency("sfd", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const sfd_cflags = &.{};
+    exe.root_module.addCSourceFile(.{
+        .file = sfd.path("src/sfd.c"),
+        .flags = sfd_cflags,
+    });
+
+    exe.addIncludePath(sfd.path("src/"));
+
+    // @todo might use this library for dialogs in the future. chase 2024/7/23
+    // const tinyfiledialogs = b.dependency("tinyfiledialogs", .{
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
+
+    // const tinyfiledialogs_cflags = &.{};
+    // exe.root_module.addCSourceFile(.{
+    //     .file = tinyfiledialogs.path("tinyfiledialogs.c"),
+    //     .flags = tinyfiledialogs_cflags,
+    // });
+
+    // exe.addIncludePath(tinyfiledialogs.path("."));
+
+    // Windows link for file dialogs. Will add other platforms later. Pull request please orz.
+    exe.linkSystemLibrary("comdlg32");
+    // exe.linkSystemLibrary("ole32");
+
     b.installArtifact(exe);
 
     const run_exe = b.addRunArtifact(exe);

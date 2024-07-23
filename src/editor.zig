@@ -9,11 +9,14 @@ const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
 const c = @cImport({
     @cDefine("NO_FONT_AWESOME", "1");
     @cInclude("rlImGui.h");
+    @cInclude("sfd.h");
+    //@cInclude("tinyfiledialogs.h");
 });
 const z = @import("zgui");
 
 var ShowPropertyEditor = true;
 var ShowActiveActionProperties = true;
+var AssetWindowImportMenu = false;
 var SelectedEntity: i32 = 0;
 
 fn CoordinateEdit(name: [:0]const u8, coordinate: *i32) void {
@@ -191,9 +194,32 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
 
 var DummyAssetInfo = asset.AssetInfo{ .type = .{ .Empty = 0 }, .path = "" };
 var SelectedAsset: *asset.AssetInfo = &DummyAssetInfo;
+
 pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
     _ = allocator;
-    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
+    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
+        if (z.beginMenuBar()) {
+            if (z.beginMenu("Import", true)) {
+                if (z.menuItem("Texture", .{})) {
+                    var args = c.sfd_Options{
+                        .title = "Import Texture",
+                        .filter_name = "Texture",
+                        .filter = "*.png",
+                    };
+
+                    // apparently calling this will change the current working directory so I need to be careful.
+                    // Consider adding the OFN_NOCHANGEDIR flag to the GetOpenFileName() call in sfd
+                    const argptr: *[1]c.sfd_Options = &args;
+                    const result = c.sfd_open_dialog(argptr);
+
+                    const path: [:0]const u8 = std.mem.span(result)[GameState.AssetStorage.base_director.len + 1 ..];
+                    try GameState.AssetStorage.loadAsset(character_data.Texture, path);
+                }
+                z.endMenu();
+            }
+            z.endMenuBar();
+        }
+
         if (z.beginTable("AssetTable", .{
             .column = 2,
             .flags = .{ .resizable = true },
@@ -250,6 +276,7 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                 if (z.button("Save Character", .{})) {
                     try character_data.saveAsset(entry.type.Character.*, entry.path, allocator);
                 }
+
                 try CompTimePropertyEdit(
                     entry.type.Character,
                     "Character",

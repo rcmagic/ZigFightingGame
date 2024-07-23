@@ -351,7 +351,9 @@ pub const Texture = struct {
 
 const MaxAssetBufferSize = 1024 * 512;
 pub fn loadCharacterAsset(path: []const u8, allocator: std.mem.Allocator) !?CharacterProperties {
-    const file = try std.fs.cwd().openFile(path, .{});
+    var dir = try std.fs.openDirAbsolute(gameState.AssetStorage.base_director, .{});
+    defer dir.close();
+    const file = try dir.openFile(path, .{});
     defer (file.close());
 
     var buffer: [MaxAssetBufferSize]u8 = undefined;

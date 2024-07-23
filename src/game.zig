@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const math = @import("utils/math.zig");
 const game_simulation = @import("game_simulation.zig");
-const GameState = @import("GameState.zig").GameState;
+const GameState = @import("GameState.zig");
 const asset = @import("asset.zig");
 const character_data = @import("character_data.zig");
 const CombatStateID = @import("ActionStates/StateMachine.zig").CombatStateID;
@@ -26,7 +26,7 @@ const ScreenCenter = 400;
 var bDebugColorEnabled = false;
 
 // Prepare state struct which describes how to draw a character
-fn prepareDrawState(gameState: GameState, entity: usize) DrawState {
+fn prepareDrawState(gameState: GameState.GameState, entity: usize) DrawState {
     const position = gameState.physics_components[entity].position;
 
     const ScreenX = math.WorldToScreen(position.x) + ScreenCenter;
@@ -125,7 +125,7 @@ fn getActiveHitboxes(hitboxGroups: []const character_data.HitboxGroup, hitboxes:
 // Hitboxes to draw.
 var debugDrawHitboxes: [100]character_data.Hitbox = [_]character_data.Hitbox{.{}} ** 100;
 
-fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
+fn drawCharacterHitboxes(gameState: GameState.GameState, entity: usize) void {
     const position = gameState.physics_components[entity].position;
     const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const facingLeft = gameState.physics_components[entity].facingLeft;
@@ -193,7 +193,7 @@ fn drawCharacterHitboxes(gameState: GameState, entity: usize) void {
     }
 }
 
-pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState, entity: usize) !void {
+pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState.GameState, entity: usize) !void {
     _ = allocator;
     const reaction = gameState.reaction_components[entity];
     const player: i32 = @intCast(entity);
@@ -203,7 +203,7 @@ pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState
     rl.drawText(rl.textFormat("player: %d\nhitStop: %d\nhitStun: %d\nguardStun:%d\nframesElapsed:%d", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.Color.black);
 }
 
-pub fn debugDrawTimeline(gameState: GameState, entity: usize) void {
+pub fn debugDrawTimeline(gameState: GameState.GameState, entity: usize) void {
     const player: i32 = @intCast(entity);
     const timelineHeight = 10;
     const timelineXOffset = 10;
@@ -241,7 +241,7 @@ pub fn debugDrawTimeline(gameState: GameState, entity: usize) void {
     }
 }
 
-pub fn pollGamepadInput(gameState: *GameState, controller: i32, entity: usize) void {
+pub fn pollGamepadInput(gameState: *GameState.GameState, controller: i32, entity: usize) void {
     if (!rl.isGamepadAvailable(controller)) {
         return;
     }
@@ -296,9 +296,12 @@ pub fn gameLoop() !void {
     // Free all memory used by the allocator at once
     defer ArenaAllocator.deinit();
 
+    // Init base director for assets
+    GameState.AssetStorage.base_director = try std.fs.realpathAlloc(GameState.AssetStorage.allocator, "./");
+    std.debug.print("Base Asset Directory set to: {s}\n", .{GameState.AssetStorage.base_director});
     // Our game state
 
-    var gameState: GameState = undefined;
+    var gameState: GameState.GameState = undefined;
     try gameState.init(ArenaAllocator.allocator());
     try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
 

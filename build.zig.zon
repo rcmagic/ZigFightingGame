@@ -12,5 +12,11 @@
             .url = "https://github.com/Not-Nik/raylib-zig/archive/devel.tar.gz",
             .hash = "122064a960fff658211413c4b3b56e1699719126c3d099d3ed43f9eaff17a936ad91",
         },
+        .sfd = .{
+            .url = "https://github.com/rxi/sfd/archive/refs/heads/master.zip",
+            .hash = "1220742f1f76bd65e433319dbc4a2e5f812932dcbb70e8c92d182aad18ff26e9a0da",
+        },
+        // @todo enable this if I decide to use the tinyfiledialogs library. chase 2024/7/23
+        // .tinyfiledialogs = .{ .path = "vendor/tinyfiledialogs" },
     },
 }
