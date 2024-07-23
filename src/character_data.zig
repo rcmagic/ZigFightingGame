@@ -245,12 +245,10 @@ pub fn generateImageSequenceMap(character: CharacterProperties, allocator: std.m
 }
 
 pub fn loadTexture(path: []const u8, allocator: std.mem.Allocator) !rl.Texture2D {
-    // Need a better way to handle conversion from non-null terminated strings to c strings.
-    const source = try allocator.alloc(u8, path.len + 1);
-    defer allocator.free(source);
-    std.mem.copyForwards(u8, source, path);
-    source[source.len - 1] = 0;
-    return rl.loadTexture(@ptrCast(path));
+    // Need a null terminate string for the raylib function
+    const load_path = try allocator.dupeZ(u8, path);
+    defer allocator.free(load_path);
+    return rl.loadTexture(@ptrCast(load_path));
 }
 
 // Sequences are loaded in the same order as the character data asset.

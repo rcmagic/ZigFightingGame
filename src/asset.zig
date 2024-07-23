@@ -81,11 +81,21 @@ pub const Storage = struct {
             return;
         }
 
-        const loaded_asset: AssetType = try T.loadAsset(path, self.allocator);
+        const fullPath_buf = try self.allocator.alloc(u8, self.base_director.len + copied_key.len + 1);
+        defer self.allocator.free(fullPath_buf);
+        const fullPath_slice = try std.fmt.bufPrint(fullPath_buf, "{s}/{s}", .{
+            self.base_director,
+            copied_key,
+        });
+
+        const loaded_asset: AssetType = try T.loadAsset(fullPath_slice, self.allocator);
 
         std.debug.print("Loaded Asset: {s}\n", .{copied_key});
 
-        try self.asset_map.putNoClobber(copied_key, AssetInfo{ .type = loaded_asset, .path = copied_key });
+        try self.asset_map.putNoClobber(copied_key, AssetInfo{
+            .type = loaded_asset,
+            .path = copied_key,
+        });
     }
 
     pub fn loadAssetNoSentinel(self: *Self, comptime T: type, path: []const u8) !void {
