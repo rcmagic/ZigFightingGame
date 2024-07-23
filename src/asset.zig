@@ -98,21 +98,16 @@ pub const Storage = struct {
         });
     }
 
-    pub fn loadAssetNoSentinel(self: *Self, comptime T: type, path: []const u8) !void {
-        if (self.asset_map.contains(path)) return;
-        const ptr: [*:0]const u8 = @ptrCast(path);
-        const copied_key: []u8 = self.asset_map.allocator.dupe(u8, path[0..std.mem.len(ptr)]) catch |err| {
-            _ = self.asset_map.remove(path);
-            return err;
-        };
+    // Load asset give a full path to the asset.
+    pub fn loadAssetFullPath(self: *Self, comptime T: type, path: [:0]const u8) !void {
+        const relative_path: [:0]const u8 = std.mem.span(path)[self.base_director.len + 1 ..];
+        try self.loadAsset(T, relative_path);
+    }
 
-        if (self.asset_map.contains(copied_key)) return;
-
-        const loaded_asset: AssetType = try T.loadAsset(path, self.allocator);
-
-        std.debug.print("Loaded Asset: {s}\n", .{copied_key});
-
-        try self.asset_map.putNoClobber(copied_key, AssetInfo{ .type = loaded_asset, .path = copied_key });
+    // Load asset give a full path to the asset. C string version.
+    pub fn loadAssetFullPathCStr(self: *Self, comptime T: type, path: [*c]const u8) !void {
+        const relative_path: [:0]const u8 = std.mem.span(path)[self.base_director.len + 1 ..];
+        try self.loadAsset(T, relative_path);
     }
 
     pub fn getAsset(self: *const Self, path: []const u8) AssetInfo {

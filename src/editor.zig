@@ -195,25 +195,37 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
 var DummyAssetInfo = asset.AssetInfo{ .type = .{ .Empty = 0 }, .path = "" };
 var SelectedAsset: *asset.AssetInfo = &DummyAssetInfo;
 
+// Open a dialog for importing an asset.
+fn AssetImporter(comptime T: type, window_title: [*c]const u8, filter_name: [*c]const u8, filter: [*c]const u8) !void {
+    var args = c.sfd_Options{
+        .title = window_title,
+        .filter_name = filter_name,
+        .filter = filter,
+    };
+
+    // Apparently calling this will change the current working directory so I need to be careful.
+    // Consider adding the OFN_NOCHANGEDIR flag to the GetOpenFileName() call in sfd
+    const argptr: *[1]c.sfd_Options = &args;
+    const result = c.sfd_open_dialog(argptr);
+
+    try GameState.AssetStorage.loadAssetFullPathCStr(T, result);
+}
+
 pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
     _ = allocator;
+
+    // Asset Selector Window
     if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
+        // Menu Bar
         if (z.beginMenuBar()) {
+            // Import Menu
             if (z.beginMenu("Import", true)) {
                 if (z.menuItem("Texture", .{})) {
-                    var args = c.sfd_Options{
-                        .title = "Import Texture",
-                        .filter_name = "Texture",
-                        .filter = "*.png",
-                    };
+                    try AssetImporter(character_data.Texture, "Import Texture", "Texture", "*.png");
+                }
 
-                    // apparently calling this will change the current working directory so I need to be careful.
-                    // Consider adding the OFN_NOCHANGEDIR flag to the GetOpenFileName() call in sfd
-                    const argptr: *[1]c.sfd_Options = &args;
-                    const result = c.sfd_open_dialog(argptr);
-
-                    const path: [:0]const u8 = std.mem.span(result)[GameState.AssetStorage.base_director.len + 1 ..];
-                    try GameState.AssetStorage.loadAsset(character_data.Texture, path);
+                if (z.menuItem("Character", .{})) {
+                    try AssetImporter(character_data.CharacterProperties, "Import Character Asset", "Character", "*.json");
                 }
                 z.endMenu();
             }
