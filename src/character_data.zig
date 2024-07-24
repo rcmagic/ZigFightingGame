@@ -352,7 +352,7 @@ pub fn loadCharacterAsset(path: []const u8, allocator: std.mem.Allocator) !?Char
     var dir = try std.fs.openDirAbsolute(gameState.AssetStorage.base_director, .{});
     defer dir.close();
     const file = try dir.openFile(path, .{});
-    defer (file.close());
+    defer file.close();
 
     var buffer: [MaxAssetBufferSize]u8 = undefined;
     const bytesRead = try file.readAll(&buffer);
@@ -372,7 +372,15 @@ pub fn loadCharacterAsset(path: []const u8, allocator: std.mem.Allocator) !?Char
 }
 
 pub fn saveAsset(character_asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
-    const file = try std.fs.cwd().createFile(path, .{});
+    const file = std.fs.cwd().createFile(
+        path,
+        .{},
+    ) catch |err| switch (err) {
+        else => {
+            std.debug.print("File Error saving {s}: {s} \n", .{ path, @errorName(err) });
+            return err;
+        },
+    };
     defer (file.close());
 
     var buffer: [MaxAssetBufferSize]u8 = undefined;

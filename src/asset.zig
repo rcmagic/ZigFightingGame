@@ -19,6 +19,7 @@ pub const AssetType = union(AssetTypeTag) {
 pub const AssetInfo = struct {
     type: AssetType,
     path: []const u8,
+    full_path: []const u8,
 };
 
 // Reference to an asset on disk that can be loaded
@@ -67,7 +68,7 @@ pub const Storage = struct {
     pub fn loadAsset(self: *Self, comptime T: type, path: [:0]const u8) !void {
         if (self.asset_map.contains(path)) return;
         const ptr: [*:0]const u8 = @ptrCast(path);
-        const copied_key: []u8 = self.asset_map.allocator.dupe(u8, path[0..std.mem.len(ptr)]) catch |err| {
+        const copied_key: []u8 = self.allocator.dupe(u8, path[0..std.mem.len(ptr)]) catch |err| {
             _ = self.asset_map.remove(path);
             return err;
         };
@@ -82,7 +83,7 @@ pub const Storage = struct {
         }
 
         const fullPath_buf = try self.allocator.alloc(u8, self.base_director.len + copied_key.len + 1);
-        defer self.allocator.free(fullPath_buf);
+
         const fullPath_slice = try std.fmt.bufPrint(fullPath_buf, "{s}/{s}", .{
             self.base_director,
             copied_key,
@@ -95,6 +96,7 @@ pub const Storage = struct {
         try self.asset_map.putNoClobber(copied_key, AssetInfo{
             .type = loaded_asset,
             .path = copied_key,
+            .full_path = fullPath_buf,
         });
     }
 
@@ -104,9 +106,21 @@ pub const Storage = struct {
         try self.loadAsset(T, relative_path);
     }
 
-    // Load asset give a full path to the asset. C string version.
+    // Load asset given a full path to the asset. C string version.
     pub fn loadAssetFullPathCStr(self: *Self, comptime T: type, path: [*c]const u8) !void {
         const relative_path: [:0]const u8 = std.mem.span(path)[self.base_director.len + 1 ..];
+        try self.loadAsset(T, relative_path);
+    }
+
+    // Create an asset given a full path to the asset. C string version.
+    pub fn createAssetFullPathCStr(self: *Self, comptime T: type, path: [*c]const u8) !void {
+        const relative_path: [:0]const u8 = std.mem.span(path)[self.base_director.len + 1 ..];
+
+        const asset = try T.init(self.allocator);
+
+        const full_path: [:0]const u8 = std.mem.span(path)[0..];
+        _ = try character_data.saveAsset(asset, full_path, self.allocator);
+
         try self.loadAsset(T, relative_path);
     }
 
@@ -120,7 +134,11 @@ pub const Storage = struct {
             }
         }
 
-        return .{ .type = .{ .Empty = 0 }, .path = path };
+        return .{
+            .type = .{ .Empty = 0 },
+            .path = path,
+            .full_path = "",
+        };
     }
 };
 

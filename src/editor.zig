@@ -192,7 +192,7 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
     }
 }
 
-var DummyAssetInfo = asset.AssetInfo{ .type = .{ .Empty = 0 }, .path = "" };
+var DummyAssetInfo = asset.AssetInfo{ .type = .{ .Empty = 0 }, .path = "", .full_path = "" };
 var SelectedAsset: *asset.AssetInfo = &DummyAssetInfo;
 
 // Open a dialog for importing an asset.
@@ -208,7 +208,33 @@ fn AssetImporter(comptime T: type, window_title: [*c]const u8, filter_name: [*c]
     const argptr: *[1]c.sfd_Options = &args;
     const result = c.sfd_open_dialog(argptr);
 
+    if (result == null) {
+        return;
+    }
+
     try GameState.AssetStorage.loadAssetFullPathCStr(T, result);
+}
+
+// Opens a dialog for creating a new asset on the disk and loads that asset.
+fn AssetCreator(comptime T: type, window_title: [*c]const u8, filter_name: [*c]const u8, filter: [*c]const u8) !void {
+    var args = c.sfd_Options{
+        .title = window_title,
+        .filter_name = filter_name,
+        .filter = filter,
+    };
+
+    // Apparently calling this will change the current working directory so I need to be careful.
+    // Consider adding the OFN_NOCHANGEDIR flag to the GetOpenFileName() call in sfd
+    const argptr: *[1]c.sfd_Options = &args;
+    const result = c.sfd_save_dialog(argptr);
+
+    if (result == null) {
+        return;
+    }
+
+    std.debug.print("Filename for save: {s}", .{result});
+
+    try GameState.AssetStorage.createAssetFullPathCStr(T, result);
 }
 
 pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
@@ -226,6 +252,13 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
 
                 if (z.menuItem("Character", .{})) {
                     try AssetImporter(character_data.CharacterProperties, "Import Character Asset", "Character", "*.json");
+                }
+                z.endMenu();
+            }
+
+            if (z.beginMenu("Create", true)) {
+                if (z.menuItem("Character", .{})) {
+                    try AssetCreator(character_data.CharacterProperties, "Create Character Asset", "Character", "*.json");
                 }
                 z.endMenu();
             }
@@ -286,7 +319,13 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
             //.AssetType.Empty => return "Empty",
             .Character => {
                 if (z.button("Save Character", .{})) {
-                    try character_data.saveAsset(entry.type.Character.*, entry.path, allocator);
+                    character_data.saveAsset(
+                        entry.type.Character.*,
+                        entry.full_path,
+                        allocator,
+                    ) catch {
+                        std.debug.print("Any Error", .{});
+                    };
                 }
 
                 try CompTimePropertyEdit(
@@ -336,7 +375,13 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                     std.mem.copyForwards(u8, &editActionName, actionName);
 
                     if (z.button("Save Character", .{})) {
-                        try character_data.saveAsset(gameData.CharacterAssets.items[entity].*, "assets/test_chara_1.json", allocator);
+                        character_data.saveAsset(
+                            gameData.CharacterAssets.items[entity].*,
+                            "assets/test_chara_1.json",
+                            allocator,
+                        ) catch {
+                            std.debug.print("Any Error!", .{});
+                        };
                     }
 
                     try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator, .{});
