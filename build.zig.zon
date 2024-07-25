@@ -9,7 +9,7 @@
         },
         .zgui = .{ .path = "vendor/zgui" },
         .@"raylib-zig" = .{
-            .url = "https://github.com/Not-Nik/raylib-zig/archive/devel.tar.gz",
+            .url = "https://github.com/Not-Nik/raylib-zig/archive/85e07d7db56c2e228d543ca17a9df0ef87f349d8.tar.gz",
             .hash = "122064a960fff658211413c4b3b56e1699719126c3d099d3ed43f9eaff17a936ad91",
         },
         .sfd = .{
