@@ -194,6 +194,8 @@ const FieldMetaData = struct {
     min_value: i32 = -10000,
 };
 
+var assigning_asset: bool = false;
+var assigning_id: z.Ident = 0;
 fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
         HitboxPropertyEdit(property, name, allocator);
@@ -202,8 +204,26 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
         TexturePreview(property, allocator, meta_data);
     } else if (@TypeOf(property.*) == asset.LoadableAssetReference(asset.AssetTypeTag.Texture)) {
         z.textUnformatted("Texture Asset Reference");
+
+        // Show texture asset path
         try GenericPropertyEdit(property, "", allocator, meta_data);
         const texture_asset = GameState.AssetStorage.getAsset(property.*.path);
+
+        // Replace asset with another asset.
+        if (z.button("Replace", .{})) {
+            assigning_asset = true;
+            assigning_id = z.getPtrId(property);
+        }
+        if (assigning_asset and (z.getPtrId(property) == assigning_id)) {
+            // Assign texture
+            if (try AssetSelectPopup(asset.AssetTypeTag.Texture)) |selected_asset| {
+                property.*.path = selected_asset.path;
+                assigning_asset = false;
+                assigning_id = 0;
+            }
+        }
+
+        // Thumbnail preview of the texture
         if (texture_asset.type == asset.AssetTypeTag.Texture) {
             TexturePreview(texture_asset.type.Texture, allocator, meta_data);
         }
@@ -257,11 +277,11 @@ fn AssetCreator(comptime T: type, window_title: [*c]const u8, filter_name: [*c]c
     try GameState.AssetStorage.createAssetFullPathCStr(T, result);
 }
 
-pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
+pub fn AssetSelectWindow(allocator: std.mem.Allocator, asset_tag: ?asset.AssetTypeTag) !*asset.AssetInfo {
     _ = allocator;
 
     // Asset Selector Window
-    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
+    if (z.begin("Asset Select", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
         // Menu Bar
         if (z.beginMenuBar()) {
             // Import Menu
@@ -284,7 +304,6 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
             }
             z.endMenuBar();
         }
-
         if (z.beginTable("AssetTable", .{
             .column = 2,
             .flags = .{ .resizable = true },
@@ -295,22 +314,32 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
 
             var it = GameState.AssetStorage.asset_map.iterator();
             while (it.next()) |kv| {
-                z.pushPtrId(kv.value_ptr);
-                z.tableNextRow(.{});
-                _ = z.tableSetColumnIndex(0);
+                var show_asset = true;
 
-                if (z.selectable(
-                    asset.GetAssetNameSentinal(kv.value_ptr.*),
-                    .{
-                        .selected = (SelectedAsset == kv.value_ptr),
-                        .flags = .{ .span_all_columns = true },
-                    },
-                )) {
-                    SelectedAsset = kv.value_ptr;
+                if (asset_tag) |tag| {
+                    if (kv.value_ptr.type != tag) {
+                        show_asset = false;
+                    }
                 }
-                _ = z.tableSetColumnIndex(1);
-                z.textUnformatted(kv.value_ptr.path);
-                z.popId();
+
+                if (show_asset) {
+                    z.pushPtrId(kv.value_ptr);
+                    z.tableNextRow(.{});
+                    _ = z.tableSetColumnIndex(0);
+
+                    if (z.selectable(
+                        asset.GetAssetNameSentinal(kv.value_ptr.*),
+                        .{
+                            .selected = (SelectedAsset == kv.value_ptr),
+                            .flags = .{ .span_all_columns = true },
+                        },
+                    )) {
+                        SelectedAsset = kv.value_ptr;
+                    }
+                    _ = z.tableSetColumnIndex(1);
+                    z.textUnformatted(kv.value_ptr.path);
+                    z.popId();
+                }
             }
         }
         z.endTable();
@@ -320,6 +349,57 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator) !*asset.AssetInfo {
     return SelectedAsset;
 }
 
+// A popup window that allows you to select and get an asset reference.
+pub fn AssetSelectPopup(asset_tag: ?asset.AssetTypeTag) !?*asset.AssetInfo {
+    var select_asset: ?*asset.AssetInfo = null;
+
+    // Asset Selector Window
+    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
+        if (z.beginTable("AssetTable", .{
+            .column = 2,
+            .flags = .{ .resizable = true },
+        })) {
+            z.tableSetupColumn("Type", .{});
+            z.tableSetupColumn("Path", .{});
+            z.tableHeadersRow();
+
+            var it = GameState.AssetStorage.asset_map.iterator();
+            while (it.next()) |kv| {
+                var show_asset = true;
+
+                if (asset_tag) |tag| {
+                    if (kv.value_ptr.type != tag) {
+                        show_asset = false;
+                    }
+                }
+
+                if (show_asset) {
+                    z.pushPtrId(kv.value_ptr);
+                    z.tableNextRow(.{});
+                    _ = z.tableSetColumnIndex(0);
+
+                    if (z.selectable(
+                        asset.GetAssetNameSentinal(kv.value_ptr.*),
+                        .{
+                            .selected = (select_asset == kv.value_ptr),
+                            .flags = .{ .span_all_columns = true },
+                        },
+                    )) {
+                        select_asset = kv.value_ptr;
+                    }
+                    _ = z.tableSetColumnIndex(1);
+                    z.textUnformatted(kv.value_ptr.path);
+                    z.popId();
+                }
+            }
+        }
+        z.endTable();
+    }
+    z.end();
+
+    return select_asset;
+}
+
 pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void {
     c.rlImGuiBegin();
     defer c.rlImGuiEnd();
@@ -327,7 +407,7 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
     var open = true;
     z.showDemoWindow(&open);
 
-    const selection = try AssetSelectWindow(allocator);
+    const selection = try AssetSelectWindow(allocator, null);
 
     if (z.begin("Properties", .{ .popen = &ShowPropertyEditor, .flags = .{} })) {
 
