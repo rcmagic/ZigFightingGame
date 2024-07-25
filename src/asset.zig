@@ -23,9 +23,11 @@ pub const AssetInfo = struct {
 };
 
 // Reference to an asset on disk that can be loaded
-pub fn LoadableAssetReference(comptime T: type) type {
-    _ = T;
+//pub fn LoadableAssetReference(comptime T: type) type {
+pub fn LoadableAssetReference(comptime tag: AssetTypeTag) type {
+    //_ = T;
     return struct {
+        asset_tag: AssetTypeTag = tag,
         path: []const u8 = "",
     };
 }
@@ -65,10 +67,9 @@ pub const Storage = struct {
         };
     }
 
-    pub fn loadAsset(self: *Self, comptime T: type, path: [:0]const u8) !void {
+    pub fn loadAsset(self: *Self, comptime T: type, path: []const u8) !void {
         if (self.asset_map.contains(path)) return;
-        const ptr: [*:0]const u8 = @ptrCast(path);
-        const copied_key: []u8 = self.allocator.dupe(u8, path[0..std.mem.len(ptr)]) catch |err| {
+        const copied_key: []u8 = self.allocator.dupe(u8, path[0..path.len]) catch |err| {
             _ = self.asset_map.remove(path);
             return err;
         };
@@ -125,11 +126,8 @@ pub const Storage = struct {
     }
 
     pub fn getAsset(self: *const Self, path: []const u8) AssetInfo {
-        const ptr: [*:0]const u8 = @ptrCast(path);
-        const key = path[0..std.mem.len(ptr)];
-
-        if (self.asset_map.contains(key)) {
-            if (self.asset_map.get(key)) |value| {
+        if (self.asset_map.contains(path)) {
+            if (self.asset_map.get(path)) |value| {
                 return value;
             }
         }

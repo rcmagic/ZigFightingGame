@@ -65,6 +65,16 @@ fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, alloca
     }
 }
 
+fn TexturePreview(texture: *character_data.Texture, allocator: std.mem.Allocator, meta_data: anytype) void {
+    // try GenericPropertyEdit(texture, "", allocator, meta_data);
+    _ = allocator;
+    _ = meta_data;
+    z.image(&texture.Texture.id, .{
+        .w = @floatFromInt(texture.Texture.width),
+        .h = @floatFromInt(texture.Texture.height),
+    });
+}
+
 fn RemoveItem(list: anytype, index: usize) void {
     const deleted = list.orderedRemove(index);
     list.allocator.destroy(&deleted);
@@ -187,6 +197,16 @@ const FieldMetaData = struct {
 fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
         HitboxPropertyEdit(property, name, allocator);
+    } else if (@TypeOf(property.*) == character_data.Texture) {
+        try GenericPropertyEdit(property, "", allocator, meta_data);
+        TexturePreview(property, allocator, meta_data);
+    } else if (@TypeOf(property.*) == asset.LoadableAssetReference(asset.AssetTypeTag.Texture)) {
+        z.textUnformatted("Texture Asset Reference");
+        try GenericPropertyEdit(property, "", allocator, meta_data);
+        const texture_asset = GameState.AssetStorage.getAsset(property.*.path);
+        if (texture_asset.type == asset.AssetTypeTag.Texture) {
+            TexturePreview(texture_asset.type.Texture, allocator, meta_data);
+        }
     } else {
         try GenericPropertyEdit(property, name, allocator, meta_data);
     }
@@ -336,10 +356,6 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                 );
             },
             .Texture => {
-                z.image(&entry.type.Texture.Texture.id, .{
-                    .w = @floatFromInt(entry.type.Texture.Texture.width),
-                    .h = @floatFromInt(entry.type.Texture.Texture.height),
-                });
                 try CompTimePropertyEdit(
                     entry.type.Texture,
                     "Texture",

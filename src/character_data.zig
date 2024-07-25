@@ -260,13 +260,8 @@ pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.All
         var sequenceTexRef = &imageSequences.items[imageSequences.items.len - 1];
 
         for (sequence.images.items) |*image| {
-            // Need a better way to handle conversion from non-null terminated strings to c strings.
-            var source = [_:0]u8{0} ** 128;
-            std.mem.copyForwards(u8, &source, image.asset.path);
-
-            source[source.len - 1] = 0;
-            try gameState.AssetStorage.loadAsset(Texture, &source);
-            const textureAsset: asset.AssetInfo = gameState.AssetStorage.getAsset(&source);
+            try gameState.AssetStorage.loadAsset(Texture, image.asset.path);
+            const textureAsset: asset.AssetInfo = gameState.AssetStorage.getAsset(image.asset.path);
             try sequenceTexRef.textures.append(textureAsset.type.Texture.Texture);
         }
     }
@@ -276,7 +271,7 @@ pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.All
 
 // A single image with an offset.
 pub const Image = struct {
-    asset: asset.LoadableAssetReference(Texture) = .{},
+    asset: asset.LoadableAssetReference(asset.AssetTypeTag.Texture) = .{},
     x: i32 = 0,
     y: i32 = 0,
 };
