@@ -194,41 +194,63 @@ const FieldMetaData = struct {
     min_value: i32 = -10000,
 };
 
+// Add custom widgets here for asset reference previews.
+fn AssetTypeReferencePreview(asset_info: asset.AssetInfo, allocator: std.mem.Allocator, meta_data: anytype) void {
+    switch (asset_info.type) {
+        .Texture => TexturePreview(asset_info.type.Texture, allocator, meta_data),
+        else => {},
+    }
+}
+
+// Use for selecting a replacement asset.
 var assigning_asset: bool = false;
 var assigning_id: z.Ident = 0;
+
+// Select custom type editors
 fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
         HitboxPropertyEdit(property, name, allocator);
     } else if (@TypeOf(property.*) == character_data.Texture) {
         try GenericPropertyEdit(property, "", allocator, meta_data);
         TexturePreview(property, allocator, meta_data);
-    } else if (@TypeOf(property.*) == asset.LoadableAssetReference(asset.AssetTypeTag.Texture)) {
-        z.textUnformatted("Texture Asset Reference");
-
-        // Show texture asset path
-        try GenericPropertyEdit(property, "", allocator, meta_data);
-        const texture_asset = GameState.AssetStorage.getAsset(property.*.path);
-
-        // Replace asset with another asset.
-        if (z.button("Replace", .{})) {
-            assigning_asset = true;
-            assigning_id = z.getPtrId(property);
-        }
-        if (assigning_asset and (z.getPtrId(property) == assigning_id)) {
-            // Assign texture
-            if (try AssetSelectPopup(asset.AssetTypeTag.Texture)) |selected_asset| {
-                property.*.path = selected_asset.path;
-                assigning_asset = false;
-                assigning_id = 0;
-            }
-        }
-
-        // Thumbnail preview of the texture
-        if (texture_asset.type == asset.AssetTypeTag.Texture) {
-            TexturePreview(texture_asset.type.Texture, allocator, meta_data);
-        }
+        //} else if (@TypeOf(property.*) == asset.LoadableAssetReference(asset.AssetTypeTag.Texture)) {
     } else {
-        try GenericPropertyEdit(property, name, allocator, meta_data);
+        switch (@typeInfo(@TypeOf(property.*))) {
+            .Struct => {
+                if (@hasField(@TypeOf(property.*), "asset_tag")) {
+                    z.textUnformatted("Asset Reference");
+
+                    // Replace asset with another asset.
+                    if (z.button("Replace", .{})) {
+                        assigning_asset = true;
+                        assigning_id = z.getPtrId(property);
+                    }
+
+                    // Show asset path
+                    try GenericPropertyEdit(&property.path, "##", allocator, meta_data);
+
+                    const the_asset = GameState.AssetStorage.getAsset(property.*.path);
+
+                    // set assign when selected
+                    if (assigning_asset and (z.getPtrId(property) == assigning_id)) {
+                        // Assign asset
+                        if (try AssetSelectPopup(the_asset.type)) |selected_asset| {
+                            property.*.path = selected_asset.path;
+                            assigning_asset = false;
+                            assigning_id = 0;
+                        }
+                    }
+
+                    // Thumbnail preview of the asset
+                    AssetTypeReferencePreview(the_asset, allocator, meta_data);
+                } else {
+                    try GenericPropertyEdit(property, name, allocator, meta_data);
+                }
+            },
+            else => {
+                try GenericPropertyEdit(property, name, allocator, meta_data);
+            },
+        }
     }
 }
 
