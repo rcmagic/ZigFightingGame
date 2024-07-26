@@ -19,6 +19,11 @@ var ShowActiveActionProperties = true;
 var AssetWindowImportMenu = false;
 var SelectedEntity: i32 = 0;
 
+// Use for selecting a replacement asset.
+var assigning_asset: bool = false;
+var assigning_id: z.Ident = 0;
+var show_asset_select_popup: bool = false;
+
 fn CoordinateEdit(name: [:0]const u8, coordinate: *i32) void {
     _ = z.dragInt(name, .{ .v = coordinate, .speed = 100 });
 }
@@ -202,10 +207,6 @@ fn AssetTypeReferencePreview(asset_info: asset.AssetInfo, allocator: std.mem.All
     }
 }
 
-// Use for selecting a replacement asset.
-var assigning_asset: bool = false;
-var assigning_id: z.Ident = 0;
-
 // Select custom type editors
 fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     if (@TypeOf(property.*) == character_data.Hitbox) {
@@ -375,8 +376,10 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator, asset_tag: ?asset.AssetTy
 pub fn AssetSelectPopup(asset_tag: ?asset.AssetTypeTag) !?*asset.AssetInfo {
     var select_asset: ?*asset.AssetInfo = null;
 
+    show_asset_select_popup = assigning_asset;
+
     // Asset Selector Window
-    if (z.begin("Assets", .{ .popen = &ShowPropertyEditor, .flags = .{ .menu_bar = true } })) {
+    if (z.begin("Assets", .{ .popen = &show_asset_select_popup, .flags = .{ .menu_bar = true } })) {
         if (z.beginTable("AssetTable", .{
             .column = 2,
             .flags = .{ .resizable = true },
@@ -419,6 +422,7 @@ pub fn AssetSelectPopup(asset_tag: ?asset.AssetTypeTag) !?*asset.AssetInfo {
     }
     z.end();
 
+    assigning_asset = show_asset_select_popup;
     return select_asset;
 }
 
