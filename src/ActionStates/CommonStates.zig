@@ -21,12 +21,12 @@ fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool {
 }
 
 fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool {
-    if (context.input_command.up) {
+    if (context.input_component.IsInputHeld(.Up, context.physics_component.facingLeft)) {
         context.action_flags_component.jumpFlags = .None;
 
-        if (context.input_command.forward) {
+        if (context.input_component.IsInputHeld(.Forward, context.physics_component.facingLeft)) {
             context.action_flags_component.jumpFlags = .JumpForward;
-        } else if (context.input_command.back) {
+        } else if (context.input_component.IsInputHeld(.Back, context.physics_component.facingLeft)) {
             context.action_flags_component.jumpFlags = .JumpBack;
         }
 
@@ -39,14 +39,23 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool {
 }
 
 fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool {
-    if (context.input_component.WasInputPressed(input.InputNames.Attack) and
-        context.input_component.WasMotionExecuted(input.MotionNames.QCF, 30))
-    {
+    if (context.input_component.WasInputPressed(
+        input.InputNames.Attack,
+        context.physics_component.facingLeft,
+    ) and
+        context.input_component.WasMotionExecuted(
+        input.MotionNames.QCF,
+        30,
+        context.physics_component.facingLeft,
+    )) {
         context.TransitionToState(.Special);
         return true;
     }
 
-    if (context.input_component.WasInputPressed(input.InputNames.Attack)) {
+    if (context.input_component.WasInputPressed(
+        input.InputNames.Attack,
+        context.physics_component.facingLeft,
+    )) {
         context.TransitionToState(.Attack);
         return true;
     }
@@ -65,14 +74,18 @@ fn SpecialCancelTransitions(context: *StateMachine.CombatStateContext) bool {
         return false;
     }
 
-    // if(context.input_component.WasInputPressedBuffered(input.InputNames.Attack, 30) and
+    // if(context.input_component.WasInputPressedBuffered(input.InputNames.Attack, 30, context.physics_component.facingLeft) and
     //     context.input_component.WasMotionExecuted(input.MotionNames.QCF, 30))
     // {
     //      context.TransitionToState(.Special);
     //      return true;
     // }
 
-    if (context.input_component.WasInputPressedBuffered(input.InputNames.Attack, 15)) {
+    if (context.input_component.WasInputPressedBuffered(
+        input.InputNames.Attack,
+        15,
+        context.physics_component.facingLeft,
+    )) {
         context.TransitionToState(.Special);
         return true;
     }
@@ -89,10 +102,10 @@ fn CommonTransitions(context: *StateMachine.CombatStateContext) bool {
         return true;
     } else if (CommonJumpTransitions(context)) {
         return true;
-    } else if (context.input_command.forward) {
+    } else if (context.input_component.IsInputHeld(.Forward, context.physics_component.facingLeft)) {
         context.TransitionToState(.WalkingForward);
         return true;
-    } else if (context.input_command.back) {
+    } else if (context.input_component.IsInputHeld(.Back, context.physics_component.facingLeft)) {
         context.TransitionToState(.WalkingBackward);
         return true;
     }
@@ -169,12 +182,12 @@ pub const WalkingForward = struct {
             return; // Bail out of this state when a transition has been detected
         } else if (CommonJumpTransitions(context)) {
             return; // Bail out of this state when a transition has been detected
-        } else if (context.input_command.back) {
+        } else if (context.input_component.IsInputHeld(.Back, context.physics_component.facingLeft)) {
             context.TransitionToState(.WalkingBackward);
             return;
         }
 
-        if (!context.input_command.forward) {
+        if (!context.input_component.IsInputHeld(.Forward, context.physics_component.facingLeft)) {
             context.TransitionToState(.Standing);
         }
 
@@ -198,7 +211,7 @@ pub const WalkingBackward = struct {
             return; // Bail out of this state when a transition has been detected
         } else if (CommonJumpTransitions(context)) {
             return; // Bail out of this state when a transition has been detected
-        } else if (context.input_command.forward) {
+        } else if (context.input_component.IsInputHeld(.Forward, context.physics_component.facingLeft)) {
             context.TransitionToState(.WalkingForward);
             return;
         }
@@ -206,7 +219,7 @@ pub const WalkingBackward = struct {
         const WalkingBackSpeed = -2000;
         context.physics_component.SetForwardSpeed(WalkingBackSpeed);
 
-        if (!context.input_command.back) {
+        if (!context.input_component.IsInputHeld(.Back, context.physics_component.facingLeft)) {
             context.TransitionToState(.Standing);
         }
 

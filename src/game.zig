@@ -256,26 +256,12 @@ pub fn pollGamepadInput(gameState: *GameState.GameState, controller: i32, entity
         inputCommand.*.down = true;
     }
 
-    const bFlipInput = gameState.physics_components[entity].facingLeft;
-
     if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_left)) {
         inputCommand.*.left = true;
-
-        if (bFlipInput) {
-            inputCommand.*.forward = true;
-        } else {
-            inputCommand.*.back = true;
-        }
     }
 
     if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_right)) {
         inputCommand.*.right = true;
-
-        if (bFlipInput) {
-            inputCommand.*.back = true;
-        } else {
-            inputCommand.*.forward = true;
-        }
     }
 
     if (rl.isGamepadButtonDown(controller, .gamepad_button_right_face_left)) {
@@ -406,22 +392,12 @@ pub fn gameLoop() !void {
                 gameState.input_components[0].input_command.down = true;
             }
 
-            const bFlipInput = gameState.physics_components[0].facingLeft;
-
             if (rl.isKeyDown(.key_a)) {
-                if (bFlipInput) {
-                    gameState.input_components[0].input_command.forward = true;
-                } else {
-                    gameState.input_components[0].input_command.back = true;
-                }
+                gameState.input_components[0].input_command.left = true;
             }
 
             if (rl.isKeyDown(.key_d)) {
-                if (bFlipInput) {
-                    gameState.input_components[0].input_command.back = true;
-                } else {
-                    gameState.input_components[0].input_command.forward = true;
-                }
+                gameState.input_components[0].input_command.right = true;
             }
 
             if (rl.isKeyDown(.key_j)) {

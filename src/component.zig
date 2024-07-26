@@ -21,30 +21,49 @@ pub const InputComponent = struct {
         return self.input_buffer[(self.input_buffer.len + self.buffer_index - 1) % self.input_buffer.len];
     }
 
-    pub fn WasInputPressedOnFrame(self: InputComponent, inputName: input.InputNames, frame: usize) bool {
+    pub fn IsInputHeld(self: InputComponent, inputName: input.InputNames, facingLeft: bool) bool {
+        const currentInput = self.input_buffer[self.buffer_index];
+
+        const Pressed: bool = switch (inputName) {
+            .Up => currentInput.up,
+            .Down => currentInput.down,
+            .Left => currentInput.left,
+            .Right => currentInput.right,
+            .Back => if (facingLeft) currentInput.right else currentInput.left,
+            .Forward => if (facingLeft) currentInput.left else currentInput.right,
+            .Attack => currentInput.attack,
+        };
+
+        return Pressed;
+    }
+
+    pub fn WasInputPressedOnFrame(self: InputComponent, inputName: input.InputNames, frame: usize, facingLeft: bool) bool {
         const bufferIndex: usize = frame % self.input_buffer.len;
         const lastBufferIndex: usize = (self.input_buffer.len + frame - 1) % self.input_buffer.len;
 
         const currentInput = self.input_buffer[bufferIndex];
         const lastInput = self.input_buffer[lastBufferIndex];
 
+        const left_check: bool = currentInput.left and !lastInput.left;
+        const right_check: bool = currentInput.right and !lastInput.right;
+
         const Pressed: bool = switch (inputName) {
             .Up => currentInput.up and !lastInput.up,
             .Down => currentInput.down and !lastInput.down,
             .Left => currentInput.left and !lastInput.left,
             .Right => currentInput.right and !lastInput.right,
-            .Back => currentInput.back and !lastInput.back,
-            .Forward => currentInput.forward and !lastInput.forward,
+            .Back => if (facingLeft) right_check else left_check,
+            .Forward => if (facingLeft) left_check else right_check,
             .Attack => currentInput.attack and !lastInput.attack,
         };
 
         return Pressed;
     }
 
-    pub fn WasInputPressedBuffered(self: InputComponent, inputName: input.InputNames, duration: usize) bool {
+    pub fn WasInputPressedBuffered(self: InputComponent, inputName: input.InputNames, duration: usize, facingLeft: bool) bool {
         var i: usize = 0;
         while (i < duration) : (i += 1) {
-            if (self.WasInputPressedOnFrame(inputName, self.input_buffer.len + self.buffer_index - i)) {
+            if (self.WasInputPressedOnFrame(inputName, self.input_buffer.len + self.buffer_index - i, facingLeft)) {
                 return true;
             }
         }
@@ -52,23 +71,27 @@ pub const InputComponent = struct {
         return false;
     }
 
-    pub fn WasInputPressed(self: InputComponent, inputName: input.InputNames) bool {
+    pub fn WasInputPressed(self: InputComponent, inputName: input.InputNames, facingLeft: bool) bool {
         const currentInput = self.GetCurrentInputCommand();
         const lastInput = self.GetLastInputCommand();
+
+        const left_check: bool = currentInput.left and !lastInput.left;
+        const right_check: bool = currentInput.right and !lastInput.right;
+
         const Pressed: bool = switch (inputName) {
             .Up => currentInput.up and !lastInput.up,
             .Down => currentInput.down and !lastInput.down,
             .Left => currentInput.left and !lastInput.left,
             .Right => currentInput.right and !lastInput.right,
-            .Back => currentInput.back and !lastInput.back,
-            .Forward => currentInput.forward and !lastInput.forward,
+            .Back => if (facingLeft) right_check else left_check,
+            .Forward => if (facingLeft) left_check else right_check,
             .Attack => currentInput.attack and !lastInput.attack,
         };
 
         return Pressed;
     }
 
-    pub fn WasMotionExecuted(self: InputComponent, motionName: input.MotionNames, timeLimit: usize) bool {
+    pub fn WasMotionExecuted(self: InputComponent, motionName: input.MotionNames, timeLimit: usize, facingLeft: bool) bool {
         var adjustLimit: usize = timeLimit;
 
         if (adjustLimit > (self.input_buffer.len + self.buffer_index)) {
@@ -82,7 +105,7 @@ pub const InputComponent = struct {
         for (0..adjustLimit) |count| {
             const buffer_position: usize = (self.input_buffer.len + self.buffer_index - (adjustLimit - 1) + count) % self.input_buffer.len;
             const input_command = self.input_buffer[buffer_position];
-            if (input.CheckNumpadDirection(input_command, MotionList[CurrentMotionIndex])) {
+            if (input.CheckNumpadDirection(input_command, MotionList[CurrentMotionIndex], facingLeft)) {
                 std.debug.print("Detected Motion Direction {}\n", .{MotionList[CurrentMotionIndex]});
                 CurrentMotionIndex = CurrentMotionIndex + 1;
 

@@ -23,8 +23,6 @@ pub const InputCommand = struct {
     down: bool = false,
     left: bool = false,
     right: bool = false,
-    back: bool = false,
-    forward: bool = false,
     attack: bool = false,
 
     // Reset inputs back to their default values
@@ -33,16 +31,18 @@ pub const InputCommand = struct {
     }
 };
 
-pub fn CheckNumpadDirection(input_command: InputCommand, numpad_direction: u32) bool {
+pub fn CheckNumpadDirection(input_command: InputCommand, numpad_direction: u32, facingLeft: bool) bool {
+    const back: bool = if (facingLeft) input_command.right else input_command.left;
+    const forward: bool = if (facingLeft) input_command.left else input_command.right;
     return switch (numpad_direction) {
-        1 => input_command.back and input_command.down,
+        1 => back and input_command.down,
         2 => input_command.down and !(input_command.left or input_command.right),
-        3 => input_command.forward and input_command.down,
-        4 => input_command.back and !(input_command.up or input_command.down),
-        6 => input_command.forward and !(input_command.up or input_command.down),
-        7 => input_command.back and input_command.up,
+        3 => forward and input_command.down,
+        4 => back and !(input_command.up or input_command.down),
+        6 => forward and !(input_command.up or input_command.down),
+        7 => back and input_command.up,
         8 => input_command.up and !(input_command.left or input_command.right),
-        9 => input_command.forward and input_command.up,
+        9 => forward and input_command.up,
         else => false,
     };
 }
