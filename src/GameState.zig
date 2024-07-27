@@ -61,16 +61,16 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
 
 // Register states for our character
 fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void {
-    registery.RegisterCombatStateNew(.Standing, CommonStates.Standing);
-    registery.RegisterCombatStateNew(.WalkingForward, CommonStates.WalkingForward);
-    registery.RegisterCombatStateNew(.WalkingBackward, CommonStates.WalkingBackward);
-    registery.RegisterCombatStateNew(.Jump, CommonStates.Jump);
-    registery.RegisterCombatStateNew(.Attack, CommonStates.Attack);
-    registery.RegisterCombatStateNew(.Special, CommonStates.Special);
-    registery.RegisterCombatStateNew(.Reaction, CommonStates.Reaction);
-    registery.RegisterCombatStateNew(.LaunchReaction, CommonStates.LaunchReaction);
-    registery.RegisterCombatStateNew(.GuardReaction, CommonStates.GuardReaction);
-    registery.RegisterCombatStateNew(.GrabReaction, CommonStates.GrabReaction);
+    registery.RegisterCommonState(.Standing, CommonStates.Standing);
+    registery.RegisterCommonState(.WalkingForward, CommonStates.WalkingForward);
+    registery.RegisterCommonState(.WalkingBackward, CommonStates.WalkingBackward);
+    registery.RegisterCommonState(.Jump, CommonStates.Jump);
+    registery.RegisterCommonState(.Attack, CommonStates.Attack);
+    registery.RegisterCommonState(.Special, CommonStates.Special);
+    registery.RegisterCommonState(.Reaction, CommonStates.Reaction);
+    registery.RegisterCommonState(.LaunchReaction, CommonStates.LaunchReaction);
+    registery.RegisterCommonState(.GuardReaction, CommonStates.GuardReaction);
+    registery.RegisterCommonState(.GrabReaction, CommonStates.GrabReaction);
 }
 
 pub const HitEvent = struct {

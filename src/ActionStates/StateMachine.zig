@@ -49,19 +49,7 @@ pub const CombatStateRegistery = struct {
     const MAX_STATES = 256;
     CombatStates: [MAX_STATES]?CombatStateCallbacks = [_]?CombatStateCallbacks{null} ** MAX_STATES,
 
-    pub fn RegisterCommonState(self: *CombatStateRegistery, StateID: CombatStateID, StateCallbacks: *CombatStateCallbacks) void {
-        // TODO: assert(StateID <= LastCommonStateID). Whatever the zig way of doing this is...
-        // condition might be ''' StateID < std.meta.fields(CombatStateID).len '''
-        self.CombatStates[@intFromEnum(StateID)] = StateCallbacks.*;
-    }
-
-    pub fn RegisterCombatState(self: *CombatStateRegistery, StateID: CombatStateID, StateCallbacks: *CombatStateCallbacks) void {
-        // TODO: assert(StateID <= LastCommonStateID). Whatever the zig way of doing this is...
-        // condition might be ''' StateID < std.meta.fields(CombatStateID).len '''
-        self.CombatStates[@intFromEnum(StateID)] = StateCallbacks;
-    }
-
-    pub fn RegisterCombatStateNew(self: *CombatStateRegistery, state_id: CombatStateID, state: anytype) void {
+    pub fn RegisterCommonState(self: *CombatStateRegistery, state_id: CombatStateID, state: anytype) void {
         var Callbacks: CombatStateCallbacks = .{};
 
         if (@hasDecl(state, "OnStart")) {
