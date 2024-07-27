@@ -235,7 +235,7 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
                     // set assign when selected
                     if (assigning_asset and (z.getPtrId(property) == assigning_id)) {
                         // Assign asset
-                        if (try AssetSelectPopup(the_asset.type)) |selected_asset| {
+                        if (try AssetSelectPopup(property.asset_tag)) |selected_asset| {
                             property.*.path = selected_asset.path;
                             assigning_asset = false;
                             assigning_id = 0;
@@ -309,19 +309,32 @@ pub fn AssetSelectWindow(allocator: std.mem.Allocator, asset_tag: ?asset.AssetTy
         if (z.beginMenuBar()) {
             // Import Menu
             if (z.beginMenu("Import", true)) {
-                if (z.menuItem("Texture", .{})) {
+                if (z.menuItem("Character", .{})) {
+                    try AssetImporter(character_data.CharacterProperties, "Import Character Asset", "Character", "*.json");
+                } else if (z.menuItem("Action", .{})) {
+                    try AssetImporter(character_data.ActionProperties, "Import Action Asset", "Action", "*.json");
+                } else if (z.menuItem("Texture", .{})) {
                     try AssetImporter(character_data.Texture, "Import Texture", "Texture", "*.png");
                 }
 
-                if (z.menuItem("Character", .{})) {
-                    try AssetImporter(character_data.CharacterProperties, "Import Character Asset", "Character", "*.json");
-                }
                 z.endMenu();
             }
 
             if (z.beginMenu("Create", true)) {
                 if (z.menuItem("Character", .{})) {
-                    try AssetCreator(character_data.CharacterProperties, "Create Character Asset", "Character", "*.json");
+                    try AssetCreator(
+                        character_data.CharacterProperties,
+                        "Create Character Asset",
+                        "Character",
+                        "*.json",
+                    );
+                } else if (z.menuItem("Action", .{})) {
+                    try AssetCreator(
+                        character_data.ActionProperties,
+                        "Create Action Asset",
+                        "Action",
+                        "*.json",
+                    );
                 }
                 z.endMenu();
             }
@@ -457,6 +470,24 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                 try CompTimePropertyEdit(
                     entry.type.Character,
                     "Character",
+                    allocator,
+                    .{},
+                );
+            },
+            .Action => {
+                if (z.button("Save Asset", .{})) {
+                    asset.saveAsset(
+                        entry.type.Action.*,
+                        entry.full_path,
+                        allocator,
+                    ) catch {
+                        std.debug.print("Any Error", .{});
+                    };
+                }
+
+                try CompTimePropertyEdit(
+                    entry.type.Action,
+                    "Action",
                     allocator,
                     .{},
                 );

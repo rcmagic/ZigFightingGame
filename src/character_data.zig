@@ -180,12 +180,10 @@ pub const ActionProperties = struct {
     animation_timeline: std.ArrayList(ImageRange),
 
     const Self = @This();
-    // pub fn jsonStringify(value: Self, jws: anytype) !void {
-    //     try stringifyValue(value, jws);
-    //     // try jws.write(.{
-    //     //     .duration = value.duration,
-    //     // });
-    // }
+
+    pub fn jsonStringify(value: @This(), jws: anytype) !void {
+        try stringifyValue(value, jws);
+    }
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
         return ActionProperties{
@@ -293,20 +291,15 @@ pub const CharacterProperties = struct {
     default_pushbox: Hitbox = .{},
     grabbable_distance: i32 = 50000,
     actions: std.ArrayList(ActionProperties),
+    action_assets: std.ArrayList(asset.LoadableAssetReference(asset.AssetTypeTag.Action)),
 
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
-        return CharacterProperties{ .actions = std.ArrayList(ActionProperties).init(allocator), .image_sequences = std.ArrayList(ImageSequence).init(allocator) };
-    }
-
-    pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !asset.AssetType {
-        const asset_test_load = try loadCharacterAsset(path, allocator);
-        if (asset_test_load) |loaded_asset| {
-            const data = try allocator.create(CharacterProperties);
-            data.* = loaded_asset;
-            return .{ .Character = data };
-        }
-        return .{ .Empty = 0 };
+        return CharacterProperties{
+            .actions = std.ArrayList(ActionProperties).init(allocator),
+            .action_assets = std.ArrayList(asset.LoadableAssetReference(.Action)).init(allocator),
+            .image_sequences = std.ArrayList(ImageSequence).init(allocator),
+        };
     }
 
     // Serialization Support
@@ -335,7 +328,7 @@ pub const Texture = struct {
         return .{};
     }
 
-    pub fn loadAsset(path: []const u8, allocator: std.mem.Allocator) !asset.AssetType {
+    pub fn readAsset(path: []const u8, allocator: std.mem.Allocator) !asset.AssetType {
         const data: *Texture = try allocator.create(Texture);
         data.*.Texture = try loadTexture(path, allocator);
         return .{ .Texture = data };
