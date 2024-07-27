@@ -49,7 +49,8 @@ pub const CollisionSystem = struct {
 
             const grabber_state = state_machine_component.stateMachine.CurrentState;
             if (state_machine_component.stateMachine.Registery.CombatStates[@intFromEnum(grabber_state)]) |state| {
-                grabber_action_name = state.name;
+                _ = state;
+                grabber_action_name = @tagName(grabber_state);
             }
 
             return character_data.findAction(
@@ -131,7 +132,8 @@ pub const CollisionSystem = struct {
                                 var actionName: []const u8 = "";
 
                                 if (gameState.state_machine_components[attackerIndex].stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                                    actionName = state.name;
+                                    _ = state;
+                                    actionName = @tagName(CurrentState);
                                 }
 
                                 if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, gameData.ActionMaps.items[attackerIndex], actionName)) |actionData| {
@@ -236,7 +238,8 @@ pub const CollisionSystem = struct {
 
             var actionName: []const u8 = "";
             if (state_machine.stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                actionName = state.name;
+                _ = state;
+                actionName = @tagName(CurrentState);
             }
 
             if (gameState.gameData) |gameData| {

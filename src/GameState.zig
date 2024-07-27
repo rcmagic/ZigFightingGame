@@ -59,31 +59,18 @@ pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
     return gameData;
 }
 
-// For now our only test state is a global constant. Need to move this to somewhere where character
-// specific data is stored.
-var StandingCallbacks = StateMachine.CombatStateCallbacks{ .name = "Standing", .OnUpdate = CommonStates.Standing.OnUpdate, .OnStart = CommonStates.Standing.OnStart, .OnEnd = CommonStates.Standing.OnEnd };
-var WalkingForwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "WalkingForward", .OnUpdate = CommonStates.WalkingForward.OnUpdate, .OnStart = CommonStates.WalkingForward.OnStart, .OnEnd = CommonStates.WalkingForward.OnEnd };
-var WalkingBackwardCallbacks = StateMachine.CombatStateCallbacks{ .name = "WalkingBackward", .OnUpdate = CommonStates.WalkingBackward.OnUpdate, .OnStart = CommonStates.WalkingBackward.OnStart, .OnEnd = CommonStates.WalkingBackward.OnEnd };
-var JumpCallbacks = StateMachine.CombatStateCallbacks{ .name = "Jump", .OnUpdate = CommonStates.Jump.OnUpdate, .OnStart = CommonStates.Jump.OnStart, .OnEnd = CommonStates.Jump.OnEnd };
-var AttackCallbacks = StateMachine.CombatStateCallbacks{ .name = "Attack", .OnUpdate = CommonStates.Attack.OnUpdate, .OnStart = CommonStates.Attack.OnStart, .OnEnd = CommonStates.Attack.OnEnd };
-var SpecialCallbacks = StateMachine.CombatStateCallbacks{ .name = "Special", .OnUpdate = CommonStates.Special.OnUpdate, .OnStart = CommonStates.Special.OnStart, .OnEnd = CommonStates.Special.OnEnd };
-var ReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "Reaction", .OnUpdate = CommonStates.Reaction.OnUpdate, .OnStart = CommonStates.Reaction.OnStart, .OnEnd = CommonStates.Reaction.OnEnd };
-var LaunchReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "LaunchReaction", .OnUpdate = CommonStates.LaunchReaction.OnUpdate, .OnStart = CommonStates.LaunchReaction.OnStart, .OnEnd = CommonStates.LaunchReaction.OnEnd };
-var GuardReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GuardReaction", .OnUpdate = CommonStates.GuardReaction.OnUpdate, .OnStart = CommonStates.GuardReaction.OnStart, .OnEnd = CommonStates.GuardReaction.OnEnd };
-var GrabReactionCallbacks = StateMachine.CombatStateCallbacks{ .name = "GrabReaction", .OnUpdate = CommonStates.GrabReaction.OnUpdate, .OnStart = CommonStates.GrabReaction.OnStart, .OnEnd = CommonStates.GrabReaction.OnEnd };
-
 // Register states for our character
 fn RegisterActionStates(registery: *StateMachine.CombatStateRegistery) void {
-    registery.RegisterCommonState(.Standing, &StandingCallbacks);
-    registery.RegisterCommonState(.WalkingForward, &WalkingForwardCallbacks);
-    registery.RegisterCommonState(.WalkingBackward, &WalkingBackwardCallbacks);
-    registery.RegisterCommonState(.Jump, &JumpCallbacks);
-    registery.RegisterCommonState(.Attack, &AttackCallbacks);
-    registery.RegisterCommonState(.Special, &SpecialCallbacks);
-    registery.RegisterCommonState(.Reaction, &ReactionCallbacks);
-    registery.RegisterCommonState(.LaunchReaction, &LaunchReactionCallbacks);
-    registery.RegisterCommonState(.GuardReaction, &GuardReactionCallbacks);
-    registery.RegisterCommonState(.GrabReaction, &GrabReactionCallbacks);
+    registery.RegisterCombatStateNew(.Standing, CommonStates.Standing);
+    registery.RegisterCombatStateNew(.WalkingForward, CommonStates.WalkingForward);
+    registery.RegisterCombatStateNew(.WalkingBackward, CommonStates.WalkingBackward);
+    registery.RegisterCombatStateNew(.Jump, CommonStates.Jump);
+    registery.RegisterCombatStateNew(.Attack, CommonStates.Attack);
+    registery.RegisterCombatStateNew(.Special, CommonStates.Special);
+    registery.RegisterCombatStateNew(.Reaction, CommonStates.Reaction);
+    registery.RegisterCombatStateNew(.LaunchReaction, CommonStates.LaunchReaction);
+    registery.RegisterCombatStateNew(.GuardReaction, CommonStates.GuardReaction);
+    registery.RegisterCombatStateNew(.GrabReaction, CommonStates.GrabReaction);
 }
 
 pub const HitEvent = struct {

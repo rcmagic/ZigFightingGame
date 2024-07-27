@@ -488,7 +488,8 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
 
                 var actionName: []const u8 = "";
                 if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                    actionName = state.name;
+                    _ = state;
+                    actionName = @tagName(CurrentState);
                 }
 
                 // Get all the hitboxes for the current action.

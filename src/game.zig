@@ -50,7 +50,8 @@ fn prepareDrawState(gameState: GameState.GameState, entity: usize) DrawState {
 
         var actionName: []const u8 = "";
         if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-            actionName = state.name;
+            _ = state;
+            actionName = @tagName(CurrentState);
         }
 
         if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
@@ -145,7 +146,8 @@ fn drawCharacterHitboxes(gameState: GameState.GameState, entity: usize) void {
 
         var actionName: []const u8 = "";
         if (stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-            actionName = state.name;
+            _ = state;
+            actionName = @tagName(CurrentState);
         }
 
         if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {

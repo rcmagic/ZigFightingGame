@@ -39,21 +39,43 @@ pub const CombatStateContext = struct {
 
 // Provides an interface for combat states to respond to various events
 pub const CombatStateCallbacks = struct {
-    name: []const u8 = "",
-    OnStart: ?*const fn (context: *CombatStateContext) void, // Called when starting an action
-    OnUpdate: ?*const fn (context: *CombatStateContext) void, // Called every frame
-    OnEnd: ?*const fn (context: *CombatStateContext) void, // Called when finishing an action
+    OnStart: ?*const fn (context: *CombatStateContext) void = null, // Called when starting an action
+    OnUpdate: ?*const fn (context: *CombatStateContext) void = null, // Called every frame
+    OnEnd: ?*const fn (context: *CombatStateContext) void = null, // Called when finishing an action
 };
 
 // Stores the combat states used for a character.
 pub const CombatStateRegistery = struct {
     const MAX_STATES = 256;
-    CombatStates: [MAX_STATES]?*CombatStateCallbacks = [_]?*CombatStateCallbacks{null} ** MAX_STATES,
+    CombatStates: [MAX_STATES]?CombatStateCallbacks = [_]?CombatStateCallbacks{null} ** MAX_STATES,
 
     pub fn RegisterCommonState(self: *CombatStateRegistery, StateID: CombatStateID, StateCallbacks: *CombatStateCallbacks) void {
         // TODO: assert(StateID <= LastCommonStateID). Whatever the zig way of doing this is...
         // condition might be ''' StateID < std.meta.fields(CombatStateID).len '''
+        self.CombatStates[@intFromEnum(StateID)] = StateCallbacks.*;
+    }
+
+    pub fn RegisterCombatState(self: *CombatStateRegistery, StateID: CombatStateID, StateCallbacks: *CombatStateCallbacks) void {
+        // TODO: assert(StateID <= LastCommonStateID). Whatever the zig way of doing this is...
+        // condition might be ''' StateID < std.meta.fields(CombatStateID).len '''
         self.CombatStates[@intFromEnum(StateID)] = StateCallbacks;
+    }
+
+    pub fn RegisterCombatStateNew(self: *CombatStateRegistery, state_id: CombatStateID, state: anytype) void {
+        var Callbacks: CombatStateCallbacks = .{};
+
+        if (@hasDecl(state, "OnStart")) {
+            Callbacks.OnStart = @field(state, "OnStart");
+        }
+
+        if (@hasDecl(state, "OnUpdate")) {
+            Callbacks.OnUpdate = @field(state, "OnUpdate");
+        }
+
+        if (@hasDecl(state, "OnEnd")) {
+            Callbacks.OnEnd = @field(state, "OnEnd");
+        }
+        self.CombatStates[@intFromEnum(state_id)] = Callbacks;
     }
 };
 
@@ -80,7 +102,8 @@ pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *Co
             stateMachine.CurrentState = context.NextState;
 
             if (stateMachine.Registery.CombatStates[@intFromEnum(context.NextState)]) |NextState| {
-                context.ActionData = character_data.findAction(characterData, actionmap, NextState.name);
+                _ = NextState;
+                context.ActionData = character_data.findAction(characterData, actionmap, @tagName(context.NextState));
             }
 
             // Reset the timeline when a transition has occurred.
@@ -114,7 +137,8 @@ pub const CombatStateMachineProcessor = struct {
 
             // Handle returning to idle or looping at the end of an action.
             if (self.Registery.CombatStates[@intFromEnum(self.CurrentState)]) |CurrentState| {
-                if (character_data.findAction(characterData, actionmap, CurrentState.name)) |actionData| {
+                _ = CurrentState;
+                if (character_data.findAction(characterData, actionmap, @tagName(self.CurrentState))) |actionData| {
                     if (context.timeline_component.framesElapsed >= actionData.duration) {
                         // Reset the timeline for actions that loop
                         if (actionData.isLooping) {
