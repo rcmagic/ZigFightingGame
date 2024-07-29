@@ -38,10 +38,12 @@ pub fn LoadableAssetReference(comptime tag: AssetTypeTag) type {
         pub fn postLoad(self: *Self) !void {
             std.debug.print("postLoad() for {s}\n", .{self.path});
 
-            try GameState.AssetStorage.loadAsset(
+            GameState.AssetStorage.loadAsset(
                 std.meta.Child(std.meta.TagPayload(AssetType, tag)),
                 self.path,
-            );
+            ) catch {
+                std.debug.print("Failed to load asset reference at path: \"{s}\"\n", .{self.path});
+            };
         }
     };
 }
@@ -244,6 +246,9 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 },
                 else => unreachable,
             }
+        },
+        .Enum => {
+            return try std.json.parseFromValueLeaky(T, allocator, tree, .{});
         },
         .Struct => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {

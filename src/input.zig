@@ -1,6 +1,7 @@
 pub const InputNames = enum(u32) { Up, Down, Left, Right, Back, Forward, Attack };
 
 pub const MotionNames = enum(u32) {
+    None,
     QCF, // ↓↘→
     QCB, // ↓↙←
     DP, // →↓↘
@@ -16,7 +17,13 @@ pub const MotionNames = enum(u32) {
 //     {4, 2, 1}
 // };
 
-pub const MotionInputs = [@intFromEnum(MotionNames.Last)][3]u32{ [_]u32{ 2, 3, 6 }, [_]u32{ 2, 1, 4 }, [_]u32{ 6, 2, 3 }, [_]u32{ 4, 2, 1 } };
+pub const MotionInputs = [@intFromEnum(MotionNames.Last)][3]u32{
+    [_]u32{ 0, 0, 0 },
+    [_]u32{ 2, 3, 6 },
+    [_]u32{ 2, 1, 4 },
+    [_]u32{ 6, 2, 3 },
+    [_]u32{ 4, 2, 1 },
+};
 
 pub const InputCommand = struct {
     up: bool = false,

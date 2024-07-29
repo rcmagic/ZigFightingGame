@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const asset = @import("asset.zig");
 const gameState = @import("GameState.zig");
+const input = @import("input.zig");
 
 fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
     const T = @TypeOf(field);
@@ -16,6 +17,10 @@ fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
                 },
                 else => unreachable,
             }
+        },
+        .Enum, .EnumLiteral => {
+            try jws.objectField(name);
+            try jws.write(field);
         },
         .Struct => {
             try jws.objectField(name);
@@ -33,6 +38,9 @@ fn stringifyValue(value: anytype, jws: anytype) !void {
     const T = @TypeOf(value);
     switch (@typeInfo(T)) {
         .Fn => {},
+        // .Enum, .EnumLiteral => {
+        //     try jws.write(value);
+        // },
         .Struct => |structInfo| {
             if (@hasField(T, "items")) {
                 try jws.beginArray();
@@ -162,6 +170,12 @@ pub const ImageRange = struct {
     pub fn isActiveOnFrame(self: ImageRange, frame: i32) bool {
         return (frame >= self.start) and (frame < (self.start + self.duration));
     }
+};
+
+pub const ActionInput = struct {
+    action: asset.LoadableAssetReference(asset.AssetTypeTag.Action) = .{},
+    motion: input.MotionNames = .None,
+    button: input.InputNames = .Attack,
 };
 
 pub const ActionProperties = struct {
@@ -301,12 +315,14 @@ pub const CharacterProperties = struct {
     grabbable_distance: i32 = 50000,
     actions: std.ArrayList(ActionProperties),
     action_assets: std.ArrayList(asset.LoadableAssetReference(asset.AssetTypeTag.Action)),
+    action_inputs: std.ArrayList(ActionInput),
 
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
         return CharacterProperties{
             .actions = std.ArrayList(ActionProperties).init(allocator),
             .action_assets = std.ArrayList(asset.LoadableAssetReference(.Action)).init(allocator),
+            .action_inputs = std.ArrayList(ActionInput).init(allocator),
             .image_sequences = std.ArrayList(ImageSequence).init(allocator),
         };
     }
@@ -435,6 +451,9 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 else => unreachable,
             }
         },
+        // .Enum => {
+        //     return std.json.parseFromValueLeaky(T, allocator, tree, .{});
+        // },
         .Struct => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {
                 .Struct => @hasField(T, "items"),
