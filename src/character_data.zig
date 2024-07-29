@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const asset = @import("asset.zig");
 const gameState = @import("GameState.zig");
+const stateMachine = @import("ActionStates/StateMachine.zig");
 const input = @import("input.zig");
 
 fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
@@ -180,6 +181,7 @@ pub const ActionInput = struct {
 
 pub const ActionProperties = struct {
     name: []const u8 = "",
+    combat_state: stateMachine.CombatStateID = .Standing,
     duration: i32 = 0,
     isLooping: bool = false,
     isSpecial: bool = false,

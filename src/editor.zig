@@ -87,10 +87,10 @@ fn RemoveItem(list: anytype, index: usize) void {
 
 fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     switch (@typeInfo(@TypeOf(property.*))) {
-        .Enum => {
+        .Enum => |enum_info| {
             var selected_item = property.*;
             if (z.beginCombo(name, .{ .preview_value = @tagName(property.*) })) {
-                inline for (@typeInfo(@TypeOf(property.*)).Enum.fields) |e| {
+                inline for (enum_info.fields) |e| {
                     if (z.selectable(e.name, .{ .selected = (@intFromEnum(selected_item) == e.value) })) {
                         selected_item = @enumFromInt(e.value);
                     }
