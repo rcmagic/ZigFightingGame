@@ -11,9 +11,10 @@ const asset = @import("asset.zig");
 var StorageAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 pub var AssetStorage = asset.Storage.init(StorageAllocator.allocator());
 
+pub var ActionMaps: std.ArrayList(std.StringHashMap(usize)) = std.ArrayList(std.StringHashMap(usize)).init(StorageAllocator.allocator());
+
 pub const GameData = struct {
     CharacterAssets: std.ArrayList(*character_data.CharacterProperties),
-    ActionMaps: std.ArrayList(std.StringHashMap(usize)),
     image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
     ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
 
@@ -34,7 +35,7 @@ pub const GameData = struct {
                 try self.CharacterAssets.append(character);
                 try self.image_sequences.append(try character_data.loadSequenceImages(character.*, allocator));
 
-                try self.ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
+                try ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
                 // Create a hash map that lets us reference textures with a sequence name and index
                 try self.ImageSequenceMap.append(try character_data.generateImageSequenceMap(character.*, allocator));
             },
@@ -48,7 +49,6 @@ const StateMachineComponent = struct { context: StateMachine.CombatStateContext 
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
     var gameData = GameData{
         .CharacterAssets = std.ArrayList(*character_data.CharacterProperties).init(allocator),
-        .ActionMaps = std.ArrayList(std.StringHashMap(usize)).init(allocator),
         .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
         .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator),
     };

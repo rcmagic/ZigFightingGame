@@ -54,7 +54,7 @@ fn prepareDrawState(gameState: GameState.GameState, entity: usize) DrawState {
             actionName = @tagName(CurrentState);
         }
 
-        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
+        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
             const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
             // Get the sprite texture
@@ -150,7 +150,7 @@ fn drawCharacterHitboxes(gameState: GameState.GameState, entity: usize) void {
             actionName = @tagName(CurrentState);
         }
 
-        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
+        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
             const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
             if (vulCount > 0) {

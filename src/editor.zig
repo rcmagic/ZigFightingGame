@@ -524,7 +524,7 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                 }
 
                 // Get all the hitboxes for the current action.
-                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
+                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
                     var editActionName = [_]u8{0} ** 64;
                     std.mem.copyForwards(u8, &editActionName, actionName);
 

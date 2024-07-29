@@ -2,7 +2,7 @@ const std = @import("std");
 const math = @import("utils/math.zig");
 const character_data = @import("character_data.zig");
 const component = @import("component.zig");
-const GameState = @import("GameState.zig").GameState;
+const GameState = @import("GameState.zig");
 const common = @import("common.zig");
 
 // Check to see if two hitboxes overlap
@@ -42,7 +42,7 @@ pub const CollisionSystem = struct {
         return CollisionSystem{};
     }
 
-    fn getActionProperties(entity: usize, gameState: *GameState) ?*character_data.ActionProperties {
+    fn getActionProperties(entity: usize, gameState: *GameState.GameState) ?*character_data.ActionProperties {
         if (gameState.gameData) |gameData| {
             const state_machine_component = gameState.state_machine_components[entity];
             var grabber_action_name: []const u8 = "";
@@ -55,7 +55,7 @@ pub const CollisionSystem = struct {
 
             return character_data.findAction(
                 gameData.CharacterAssets.items[entity].*,
-                gameData.ActionMaps.items[entity],
+                GameState.ActionMaps.items[entity],
                 grabber_action_name,
             );
         }
@@ -63,7 +63,7 @@ pub const CollisionSystem = struct {
         return null;
     }
 
-    pub fn grab_collision_phase(gameState: *GameState) !void {
+    pub fn grab_collision_phase(gameState: *GameState.GameState) !void {
         if (gameState.gameData) |gameData| {
             for (0..gameState.entityCount) |grabber_entity| {
                 if (getActionProperties(grabber_entity, gameState)) |grabber_action_properties| {
@@ -96,7 +96,7 @@ pub const CollisionSystem = struct {
         }
     }
 
-    pub fn collision_phase(self: *CollisionSystem, gameState: *GameState) !void {
+    pub fn collision_phase(self: *CollisionSystem, gameState: *GameState.GameState) !void {
         const activeAttackSlices = self.AttackSlices[0..gameState.entityCount];
         const activeVulnerableSlices = self.VulnerableSlices[0..gameState.entityCount];
 
@@ -136,7 +136,7 @@ pub const CollisionSystem = struct {
                                     actionName = @tagName(CurrentState);
                                 }
 
-                                if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, gameData.ActionMaps.items[attackerIndex], actionName)) |actionData| {
+                                if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, GameState.ActionMaps.items[attackerIndex], actionName)) |actionData| {
                                     if (!actionData.attack_property.hit_property.isGrab) {
                                         try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
                                     }
@@ -214,7 +214,7 @@ pub const CollisionSystem = struct {
         }
     }
 
-    pub fn execute(self: *CollisionSystem, gameState: *GameState) !void {
+    pub fn execute(self: *CollisionSystem, gameState: *GameState.GameState) !void {
         var VulnerableScratchCount: usize = 0;
         var AttackScratchCount: usize = 0;
         var PushScratchCount: usize = 0;
@@ -248,7 +248,11 @@ pub const CollisionSystem = struct {
                 }
 
                 // Get all the hitboxes for the current action.
-                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, gameData.ActionMaps.items[entity], actionName)) |actionData| {
+                if (character_data.findAction(
+                    gameData.CharacterAssets.items[entity].*,
+                    GameState.ActionMaps.items[entity],
+                    actionName,
+                )) |actionData| {
 
                     // Gather attack boxes
                     {
@@ -351,7 +355,7 @@ test "Testing getting translated hitboxes" {
 //     //var Allocator = ArenaAllocator.allocator();
 
 //     // Our game state
-//     var gameState = try GameState.GameState.init(ArenaAllocator.allocator());
+//     var gameState = try gameState.GameState.init(ArenaAllocator.allocator());
 
 //     if(gameState.gameData) | *gameData |
 //     {

@@ -7,10 +7,10 @@ const input = @import("input.zig");
 const character_data = @import("character_data.zig");
 const collision_system = @import("collision_system.zig").CollisionSystem;
 const reaction_system = @import("reaction_system.zig").reaction_system;
-const GameState = @import("GameState.zig").GameState;
+const GameState = @import("GameState.zig");
 
 // Handles moving all entities which have a physics component
-fn physicsSystem(gameState: *GameState) !void {
+fn physicsSystem(gameState: *GameState.GameState) !void {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
         var physics = &gameState.physics_components[entityIndex];
@@ -55,25 +55,29 @@ fn physicsSystem(gameState: *GameState) !void {
     }
 }
 
-fn actionSystem(gameState: *GameState) void {
+fn actionSystem(gameState: *GameState.GameState) void {
     var entityIndex: usize = 0;
     while (entityIndex < gameState.entityCount) {
         const state_machine = &gameState.state_machine_components[entityIndex];
 
         if (gameState.gameData) |gameData| {
-            state_machine.stateMachine.UpdateStateMachine(&state_machine.context, gameData.CharacterAssets.items[entityIndex].*, gameData.ActionMaps.items[entityIndex]);
+            state_machine.stateMachine.UpdateStateMachine(
+                &state_machine.context,
+                gameData.CharacterAssets.items[entityIndex].*,
+                GameState.ActionMaps.items[entityIndex],
+            );
         }
 
         entityIndex += 1;
     }
 }
 
-fn inputCommandSystem(gameState: *GameState) void {
+fn inputCommandSystem(gameState: *GameState.GameState) void {
     gameState.state_machine_components[0].context.input_command = gameState.input_components[0].input_command;
     gameState.state_machine_components[1].context.input_command = gameState.input_components[1].input_command;
 }
 
-pub fn updateGame(gameState: *GameState) !void {
+pub fn updateGame(gameState: *GameState.GameState) !void {
     inputCommandSystem(gameState);
     try physicsSystem(gameState);
     actionSystem(gameState);

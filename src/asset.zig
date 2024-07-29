@@ -30,8 +30,19 @@ pub const AssetInfo = struct {
 pub fn LoadableAssetReference(comptime tag: AssetTypeTag) type {
     //_ = T;
     return struct {
+        const Self = @This();
+
         asset_tag: AssetTypeTag = tag,
         path: []const u8 = "",
+
+        pub fn postLoad(self: *Self) !void {
+            std.debug.print("postLoad() for {s}\n", .{self.path});
+
+            try GameState.AssetStorage.loadAsset(
+                std.meta.Child(std.meta.TagPayload(AssetType, tag)),
+                self.path,
+            );
+        }
     };
 }
 
@@ -274,6 +285,11 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                             @field(instanceOfStruct, field.name) = item;
                         }
                     }
+                }
+
+                // Perform anything that needs to be done after a struct is loaded.
+                if (@hasDecl(T, "postLoad")) {
+                    try instanceOfStruct.postLoad();
                 }
 
                 return instanceOfStruct;

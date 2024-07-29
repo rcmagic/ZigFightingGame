@@ -219,6 +219,13 @@ pub fn generateActionNameMap(character: CharacterProperties, allocator: std.mem.
         try ActionNameMap.putNoClobber(action.name, index);
     }
 
+    for (character.action_assets.items, 0..) |action, index| {
+        _ = index;
+
+        std.debug.print("generated mapping: {s}", .{@typeName(@TypeOf(action))});
+        //try ActionNameMap.putNoClobber(action.name, index);
+    }
+
     return ActionNameMap;
 }
 
@@ -285,6 +292,8 @@ pub const ImageSequence = struct {
 };
 
 pub const CharacterProperties = struct {
+    const Self = @This();
+
     image_sequences: std.ArrayList(ImageSequence),
 
     max_health: i32 = 10000,
@@ -300,6 +309,16 @@ pub const CharacterProperties = struct {
             .action_assets = std.ArrayList(asset.LoadableAssetReference(.Action)).init(allocator),
             .image_sequences = std.ArrayList(ImageSequence).init(allocator),
         };
+    }
+
+    pub fn postLoad(self: *Self) !void {
+        _ = self;
+        std.debug.print("Character Settings. postLoad()\n", .{});
+
+        // try GameState.AssetStorage.loadAsset(
+        //     std.meta.Child(std.meta.TagPayload(AssetType, tag)),
+        //     self.path,
+        // );
     }
 
     // Serialization Support
