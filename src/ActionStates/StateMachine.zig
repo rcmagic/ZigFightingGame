@@ -2,6 +2,7 @@ const std = @import("std");
 const component = @import("../component.zig");
 const input = @import("../input.zig");
 const character_data = @import("../character_data.zig");
+
 // Identifies common character states.
 pub const CombatStateID = enum(u32) {
     Standing,
@@ -22,18 +23,30 @@ pub const CombatStateID = enum(u32) {
 pub const CombatStateContext = struct {
     bTransition: bool = false, // indicates that a state transition has been triggered
     NextState: CombatStateID = .Standing, // indicates the next state to transition to.
+    next_named_action: []const u8 = "",
+    named_transition: bool = false,
     input_command: input.InputCommand = .{},
     input_component: *component.InputComponent = undefined,
     physics_component: *component.PhysicsComponent = undefined,
     timeline_component: *component.TimelineComponent = undefined,
     reaction_component: *component.ReactionComponent = undefined,
     action_flags_component: *component.ActionFlagsComponent = undefined,
-    ActionData: ?*character_data.ActionProperties = null,
+    ActionData: *const character_data.ActionProperties = undefined,
+    character_asset: *const character_data.CharacterProperties = undefined,
 
     // Trigger a transition to a new state.
     pub fn TransitionToState(self: *CombatStateContext, StateID: CombatStateID) void {
         self.bTransition = true;
         self.NextState = StateID;
+        self.next_named_action = "";
+        self.named_transition = false;
+    }
+
+    pub fn TransitionToNamedAction(self: *CombatStateContext, next_state: []const u8) void {
+        self.bTransition = true;
+        self.NextState = .Attack;
+        self.next_named_action = next_state;
+        self.named_transition = true;
     }
 };
 
@@ -67,42 +80,63 @@ pub const CombatStateRegistery = struct {
     }
 };
 
-pub fn HandleTransition(stateMachine: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: character_data.CharacterProperties, actionmap: std.StringHashMap(usize)) void {
+pub fn HandleTransition(
+    stateMachine: *CombatStateMachineProcessor,
+    context: *CombatStateContext,
+    characterData: *const character_data.CharacterProperties,
+    actionmap: std.StringHashMap(*const character_data.ActionProperties),
+) void {
+    if (!context.bTransition) return;
+
     if (stateMachine.Registery.CombatStates[@intFromEnum(stateMachine.CurrentState)]) |State| {
         // Perform a state transition when requested
-        if (context.bTransition) {
-            // Call the OnEnd function of the previous state to do any cleanup required.
-            if (State.OnEnd) |OnEnd| {
-                OnEnd(context);
+
+        // Call the OnEnd function of the previous state to do any cleanup required.
+        if (State.OnEnd) |OnEnd| {
+            OnEnd(context);
+        }
+
+        // Call the OnStart function on the next state to do any setup required
+        if (stateMachine.Registery.CombatStates[@intFromEnum(context.NextState)]) |NextState| {
+            if (NextState.OnStart) |OnStart| {
+                OnStart(context);
             }
+        }
 
-            // Call the OnStart function on the next state to do any setup required
-            if (stateMachine.Registery.CombatStates[@intFromEnum(context.NextState)]) |NextState| {
-                if (NextState.OnStart) |OnStart| {
-                    OnStart(context);
-                }
-            }
+        // Make sure the transition isn't performed more than once.
+        context.bTransition = false;
 
-            // Make sure the transition isn't performed more than once.
-            context.bTransition = false;
+        if (context.named_transition) {
+            context.named_transition = false;
 
-            // Make the next state current.
-            stateMachine.CurrentState = context.NextState;
+            context.ActionData = character_data.findAction(
+                context.character_asset.*,
+                actionmap,
+                context.next_named_action,
+            );
 
+            stateMachine.CurrentState = context.ActionData.combat_state;
+        } else {
             if (stateMachine.Registery.CombatStates[@intFromEnum(context.NextState)]) |NextState| {
                 _ = NextState;
-                context.ActionData = character_data.findAction(characterData, actionmap, @tagName(context.NextState));
+                context.ActionData = character_data.findAction(
+                    characterData.*,
+                    actionmap,
+                    @tagName(context.NextState),
+                );
             }
-
-            // Reset the timeline when a transition has occurred.
-            context.timeline_component.framesElapsed = 0;
-
-            // Make it possible for the new action to hit an opponent
-            context.reaction_component.attackHasHit = false;
-
-            // Disable special canceling on state transition
-            context.reaction_component.attackHasHitForSpecialCancel = false;
+            // Make the next state current.
+            stateMachine.CurrentState = context.NextState;
         }
+
+        // Reset the timeline when a transition has occurred.
+        context.timeline_component.framesElapsed = 0;
+
+        // Make it possible for the new action to hit an opponent
+        context.reaction_component.attackHasHit = false;
+
+        // Disable special canceling on state transition
+        context.reaction_component.attackHasHitForSpecialCancel = false;
     }
 }
 
@@ -111,7 +145,22 @@ pub const CombatStateMachineProcessor = struct {
     Registery: CombatStateRegistery = .{},
     CurrentState: CombatStateID = .Standing,
 
-    pub fn UpdateStateMachine(self: *CombatStateMachineProcessor, context: *CombatStateContext, characterData: character_data.CharacterProperties, actionmap: std.StringHashMap(usize)) void {
+    pub fn UpdateStateMachine(
+        self: *CombatStateMachineProcessor,
+        context: *CombatStateContext,
+        characterData: *const character_data.CharacterProperties,
+        actionmap: std.StringHashMap(*const character_data.ActionProperties),
+    ) void {
+        context.character_asset = characterData;
+
+        // Perform a state transition when requested
+        HandleTransition(
+            self,
+            context,
+            characterData,
+            actionmap,
+        );
+
         if (self.Registery.CombatStates[@intFromEnum(self.CurrentState)]) |State| {
             // Advance the timeline when there is no hitstop
             if (context.reaction_component.hitStop <= 0) {
@@ -126,27 +175,32 @@ pub const CombatStateMachineProcessor = struct {
             // Handle returning to idle or looping at the end of an action.
             if (self.Registery.CombatStates[@intFromEnum(self.CurrentState)]) |CurrentState| {
                 _ = CurrentState;
-                if (character_data.findAction(characterData, actionmap, @tagName(self.CurrentState))) |actionData| {
-                    if (context.timeline_component.framesElapsed >= actionData.duration) {
-                        // Reset the timeline for actions that loop
-                        if (actionData.isLooping) {
-                            context.timeline_component.framesElapsed = 0;
-                        }
-                        // Otherwise return to idle
-                        else if (!context.bTransition) {
-                            // Go back to idle
-                            if (context.physics_component.position.y > 0) {
-                                context.TransitionToState(.Jump);
-                            } else {
-                                context.TransitionToState(.Standing);
-                            }
+                const actionData = context.ActionData;
+
+                if (context.timeline_component.framesElapsed >= actionData.duration) {
+                    // Reset the timeline for actions that loop
+                    if (actionData.isLooping) {
+                        context.timeline_component.framesElapsed = 0;
+                    }
+                    // Otherwise return to idle
+                    else if (!context.bTransition) {
+                        // Go back to idle
+                        if (context.physics_component.position.y > 0) {
+                            context.TransitionToState(.Jump);
+                        } else {
+                            context.TransitionToState(.Standing);
                         }
                     }
                 }
             }
 
             // Perform a state transition when requested
-            HandleTransition(self, context, characterData, actionmap);
+            HandleTransition(
+                self,
+                context,
+                characterData,
+                actionmap,
+            );
         }
     }
 };

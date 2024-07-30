@@ -1,0 +1,75 @@
+{
+    "name": "Special",
+    "combat_state": "Special",
+    "duration": 20,
+    "isLooping": false,
+    "isSpecial": true,
+    "vulnerable_hitbox_groups": [
+        {
+            "start_frame": 0,
+            "duration": 100,
+            "hitboxes": [
+                {
+                    "top": 100000,
+                    "left": -100000,
+                    "bottom": 0,
+                    "right": 100000
+                }
+            ]
+        }
+    ],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [
+            {
+                "start_frame": 0,
+                "duration": 100,
+                "hitboxes": [
+                    {
+                        "top": 80250,
+                        "left": 7300,
+                        "bottom": 26350,
+                        "right": 105900
+                    }
+                ]
+            }
+        ],
+        "hit_property": {
+            "hitStun": 200,
+            "guardStun": 5,
+            "hitStop": 35,
+            "knockBack": 10000,
+            "isLaunch": true,
+            "airKnockback": 2000,
+            "launchVelocityY": 30000,
+            "isGrab": true
+        }
+    },
+    "grab_properties": [
+        {
+            "start_frame": 0,
+            "duration": 4,
+            "grab_distance": 25000
+        }
+    ],
+    "animation_timeline": [
+        {
+            "sequence": "special",
+            "index": 0,
+            "start": 0,
+            "duration": 4
+        },
+        {
+            "sequence": "special",
+            "index": 1,
+            "start": 4,
+            "duration": 10
+        },
+        {
+            "sequence": "special",
+            "index": 2,
+            "start": 14,
+            "duration": 20
+        }
+    ]
+}

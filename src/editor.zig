@@ -97,7 +97,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 }
                 z.endCombo();
 
-                property.* = selected_item;
+                @constCast(property).* = selected_item;
             }
         },
         .Struct => |structInfo| {
@@ -172,7 +172,9 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                     if (z.inputText(name, .{ .buf = &editText })) {
                         const ptr = @as([*c]u8, &editText);
                         const string = editText[0..std.mem.len(ptr)];
-                        property.* = try allocator.dupe(u8, string);
+                        @constCast(property).* = try allocator.dupe(u8, string);
+                        z.textUnformatted("Can't edit since const");
+                        //property.* = try allocator.dupe(u8, string);
                     }
                 },
                 else => {
@@ -197,10 +199,10 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 }
             }
             _ = z.dragInt(name, .{ .v = &value, .speed = 100, .min = min_value, .max = max_value });
-            property.* = @intCast(value);
+            @constCast(property).* = @intCast(value);
         },
         .Bool => {
-            _ = z.checkbox(name, .{ .v = property });
+            _ = z.checkbox(name, .{ .v = @constCast(property) });
         },
         else => {
             z.separatorText("Unknown Type");
@@ -536,23 +538,26 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                     actionName = @tagName(CurrentState);
                 }
 
+                const actionData = character_data.findAction(
+                    gameData.CharacterAssets.items[entity].*,
+                    GameState.ActionMaps.items[entity],
+                    actionName,
+                );
                 // Get all the hitboxes for the current action.
-                if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
-                    var editActionName = [_]u8{0} ** 64;
-                    std.mem.copyForwards(u8, &editActionName, actionName);
+                var editActionName = [_]u8{0} ** 64;
+                std.mem.copyForwards(u8, &editActionName, actionName);
 
-                    if (z.button("Save Character", .{})) {
-                        character_data.saveAsset(
-                            gameData.CharacterAssets.items[entity].*,
-                            "assets/test_chara_1.json",
-                            allocator,
-                        ) catch {
-                            std.debug.print("Any Error!", .{});
-                        };
-                    }
-
-                    try CompTimePropertyEdit(actionData, editActionName[0 .. actionName.len + 1 :0], allocator, .{});
+                if (z.button("Save Character", .{})) {
+                    character_data.saveAsset(
+                        gameData.CharacterAssets.items[entity].*,
+                        "assets/test_chara_1.json",
+                        allocator,
+                    ) catch {
+                        std.debug.print("Any Error!", .{});
+                    };
                 }
+
+                try CompTimePropertyEdit(@constCast(actionData), editActionName[0 .. actionName.len + 1 :0], allocator, .{});
             }
         }
     }

@@ -1,0 +1,69 @@
+{
+    "name": "Attack",
+    "combat_state": "Attack",
+    "duration": 20,
+    "isLooping": false,
+    "isSpecial": false,
+    "vulnerable_hitbox_groups": [
+        {
+            "start_frame": 0,
+            "duration": 100,
+            "hitboxes": [
+                {
+                    "top": 100000,
+                    "left": -100000,
+                    "bottom": 0,
+                    "right": 100000
+                }
+            ]
+        }
+    ],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [
+            {
+                "start_frame": 8,
+                "duration": 2,
+                "hitboxes": [
+                    {
+                        "top": 100000,
+                        "left": 0,
+                        "bottom": 0,
+                        "right": 120000
+                    }
+                ]
+            }
+        ],
+        "hit_property": {
+            "hitStun": 12,
+            "guardStun": 15,
+            "hitStop": 10,
+            "knockBack": 10000,
+            "isLaunch": false,
+            "airKnockback": 2000,
+            "launchVelocityY": 20000,
+            "isGrab": false
+        }
+    },
+    "grab_properties": [],
+    "animation_timeline": [
+        {
+            "sequence": "attack",
+            "index": 0,
+            "start": 0,
+            "duration": 4
+        },
+        {
+            "sequence": "attack",
+            "index": 1,
+            "start": 4,
+            "duration": 10
+        },
+        {
+            "sequence": "attack",
+            "index": 2,
+            "start": 14,
+            "duration": 20
+        }
+    ]
+}

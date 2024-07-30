@@ -54,20 +54,24 @@ fn prepareDrawState(gameState: GameState.GameState, entity: usize) DrawState {
             actionName = @tagName(CurrentState);
         }
 
-        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
-            const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
+        const actionData = character_data.findAction(
+            gameData.CharacterAssets.items[entity].*,
+            GameState.ActionMaps.items[entity],
+            actionName,
+        );
 
-            // Get the sprite texture
-            if (gameData.findSequenceTextures(entity, imageRange.sequence)) |sequence| {
-                drawState.texture = sequence.textures.items[@intCast(imageRange.index)];
-            }
+        const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
-            // Get the sprite offset
-            if (gameData.CharacterAssets.items[entity].findSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) |sequence| {
-                const image = sequence.images.items[@intCast(imageRange.index)];
-                drawState.x += if (facingLeft) -image.x else image.x;
-                drawState.y += image.y;
-            }
+        // Get the sprite texture
+        if (gameData.findSequenceTextures(entity, imageRange.sequence)) |sequence| {
+            drawState.texture = sequence.textures.items[@intCast(imageRange.index)];
+        }
+
+        // Get the sprite offset
+        if (gameData.CharacterAssets.items[entity].findSequence(gameData.ImageSequenceMap.items[entity], imageRange.sequence)) |sequence| {
+            const image = sequence.images.items[@intCast(imageRange.index)];
+            drawState.x += if (facingLeft) -image.x else image.x;
+            drawState.y += image.y;
         }
     }
 
@@ -150,47 +154,50 @@ fn drawCharacterHitboxes(gameState: GameState.GameState, entity: usize) void {
             actionName = @tagName(CurrentState);
         }
 
-        if (character_data.findAction(gameData.CharacterAssets.items[entity].*, GameState.ActionMaps.items[entity], actionName)) |actionData| {
-            const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
+        const actionData = character_data.findAction(
+            gameData.CharacterAssets.items[entity].*,
+            GameState.ActionMaps.items[entity],
+            actionName,
+        );
+        const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
-            if (vulCount > 0) {
-                const temp = debugDrawHitboxes[0..vulCount];
-                for (temp) |hitboxTmp| {
-                    const hitbox = if (facingLeft) common.translate_hitbox_flipped(hitboxTmp, .{}) else common.translate_hitbox(hitboxTmp, .{});
-                    const left = ScreenX + math.WorldToScreen(hitbox.left);
-                    const top = ScreenY - math.WorldToScreen(hitbox.top);
-                    const width = math.WorldToScreen(hitbox.right - hitbox.left);
-                    const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                    rl.drawRectangleLines(left, top, width, height, rl.Color.blue);
-                }
+        if (vulCount > 0) {
+            const temp = debugDrawHitboxes[0..vulCount];
+            for (temp) |hitboxTmp| {
+                const hitbox = if (facingLeft) common.translate_hitbox_flipped(hitboxTmp, .{}) else common.translate_hitbox(hitboxTmp, .{});
+                const left = ScreenX + math.WorldToScreen(hitbox.left);
+                const top = ScreenY - math.WorldToScreen(hitbox.top);
+                const width = math.WorldToScreen(hitbox.right - hitbox.left);
+                const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
+                rl.drawRectangleLines(left, top, width, height, rl.Color.blue);
             }
+        }
 
-            const atkCount = getActiveHitboxes(actionData.attack_property.hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
+        const atkCount = getActiveHitboxes(actionData.attack_property.hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
-            if (atkCount > 0) {
-                const temp = debugDrawHitboxes[0..atkCount];
-                for (temp) |hitboxTmp| {
-                    const hitbox = if (facingLeft) common.translate_hitbox_flipped(hitboxTmp, .{}) else common.translate_hitbox(hitboxTmp, .{});
-
-                    const left = ScreenX + math.WorldToScreen(hitbox.left);
-                    const top = ScreenY - math.WorldToScreen(hitbox.top);
-                    const width = math.WorldToScreen(hitbox.right - hitbox.left);
-                    const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                    rl.drawRectangleLines(left, top, width, height, rl.Color.red);
-                }
-            }
-            // Draw Default Hitbox
-            {
-                const data = gameData.CharacterAssets.items[entity];
-
-                const hitbox = if (facingLeft) common.translate_hitbox_flipped(data.default_pushbox, .{}) else common.translate_hitbox(data.default_pushbox, .{});
+        if (atkCount > 0) {
+            const temp = debugDrawHitboxes[0..atkCount];
+            for (temp) |hitboxTmp| {
+                const hitbox = if (facingLeft) common.translate_hitbox_flipped(hitboxTmp, .{}) else common.translate_hitbox(hitboxTmp, .{});
 
                 const left = ScreenX + math.WorldToScreen(hitbox.left);
                 const top = ScreenY - math.WorldToScreen(hitbox.top);
                 const width = math.WorldToScreen(hitbox.right - hitbox.left);
                 const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
-                rl.drawRectangleLines(left, top, width, height, rl.Color.green);
+                rl.drawRectangleLines(left, top, width, height, rl.Color.red);
             }
+        }
+        // Draw Default Hitbox
+        {
+            const data = gameData.CharacterAssets.items[entity];
+
+            const hitbox = if (facingLeft) common.translate_hitbox_flipped(data.default_pushbox, .{}) else common.translate_hitbox(data.default_pushbox, .{});
+
+            const left = ScreenX + math.WorldToScreen(hitbox.left);
+            const top = ScreenY - math.WorldToScreen(hitbox.top);
+            const width = math.WorldToScreen(hitbox.right - hitbox.left);
+            const height = math.WorldToScreen(hitbox.top - hitbox.bottom);
+            rl.drawRectangleLines(left, top, width, height, rl.Color.green);
         }
     }
 }
@@ -202,7 +209,19 @@ pub fn drawCharacterDebugInfo(allocator: std.mem.Allocator, gameState: GameState
     const framesElapsed = gameState.timeline_components[entity].framesElapsed;
     const XOffset: i32 = player * 200 + 10;
     const YOffset: i32 = 80;
-    rl.drawText(rl.textFormat("player: %d\nhitStop: %d\nhitStun: %d\nguardStun:%d\nframesElapsed:%d", .{ player, reaction.hitStop, reaction.hitStun, reaction.guardStun, framesElapsed }), XOffset, YOffset, 16, rl.Color.black);
+    rl.drawText(
+        rl.textFormat("player: %d\nhitStop: %d\nhitStun: %d\nguardStun:%d\nframesElapsed:%d\n", .{
+            player,
+            reaction.hitStop,
+            reaction.hitStun,
+            reaction.guardStun,
+            framesElapsed,
+        }),
+        XOffset,
+        YOffset,
+        16,
+        rl.Color.black,
+    );
 }
 
 pub fn debugDrawTimeline(gameState: GameState.GameState, entity: usize) void {
@@ -216,11 +235,9 @@ pub fn debugDrawTimeline(gameState: GameState.GameState, entity: usize) void {
     var totalFrames: i32 = 0;
     var activeFrame: i32 = 0;
 
-    // Pull duration from the current action for the timelin
-    if (gameState.state_machine_components[entity].context.ActionData) |actionData| {
-        totalFrames = actionData.duration;
-        activeFrame = gameState.timeline_components[entity].framesElapsed;
-    }
+    // Pull duration from the current action for the timeline
+    totalFrames = gameState.state_machine_components[entity].context.ActionData.duration;
+    activeFrame = gameState.timeline_components[entity].framesElapsed;
 
     // When there is hitstun use the hitstun from the last hit for drawing the timeline
     const hitStun = gameState.reaction_components[entity].hitStun;

@@ -211,6 +211,16 @@ pub const ActionProperties = struct {
         };
     }
 
+    pub fn initIgnoreError(allocator: std.mem.Allocator) ActionProperties {
+        return ActionProperties{
+            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .attack_property = try AttackProperty.init(allocator),
+            .grab_properties = std.ArrayList(GrabProperty).init(allocator),
+            .animation_timeline = std.ArrayList(ImageRange).init(allocator),
+        };
+    }
+
     pub fn getActiveImage(self: ActionProperties, frame: i32) ImageRange {
         for (self.animation_timeline.items) |image| {
             if (image.isActiveOnFrame(frame)) {
@@ -221,25 +231,32 @@ pub const ActionProperties = struct {
         return ImageRange{};
     }
 };
+var DefaultAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
-pub fn findAction(character: CharacterProperties, map: std.StringHashMap(usize), ActionName: []const u8) ?*ActionProperties {
-    if (map.get(ActionName)) |index| {
-        return &character.actions.items[index];
+const DefaultActionProperties: ActionProperties = ActionProperties.initIgnoreError(DefaultAllocator.allocator());
+
+pub fn findAction(character: CharacterProperties, map: std.StringHashMap(*const ActionProperties), ActionName: []const u8) *const ActionProperties {
+    _ = character;
+    if (map.get(ActionName)) |action| {
+        return action;
     }
-    return null;
+    return &DefaultActionProperties;
 }
 
-pub fn generateActionNameMap(character: CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(usize) {
-    var ActionNameMap = std.StringHashMap(usize).init(allocator);
-    for (character.actions.items, 0..) |action, index| {
-        try ActionNameMap.putNoClobber(action.name, index);
+pub fn generateActionNameMap(character: *const CharacterProperties, allocator: std.mem.Allocator) !std.StringHashMap(*const ActionProperties) {
+    var ActionNameMap = std.StringHashMap(*const ActionProperties).init(allocator);
+    for (character.actions.items) |*action| {
+        try ActionNameMap.putNoClobber(action.name, action);
     }
 
-    for (character.action_assets.items, 0..) |action, index| {
-        _ = index;
-
-        std.debug.print("generated mapping: {s}", .{@typeName(@TypeOf(action))});
-        //try ActionNameMap.putNoClobber(action.name, index);
+    for (character.action_assets.items) |action| {
+        switch (action.type) {
+            .Action => {
+                std.debug.print("generated mapping: {s}\n", .{@typeName(@TypeOf(action))});
+                try ActionNameMap.putNoClobber(action.type.Action.name, action.type.Action);
+            },
+            else => {},
+        }
     }
 
     return ActionNameMap;

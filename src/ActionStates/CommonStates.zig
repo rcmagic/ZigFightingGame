@@ -3,6 +3,8 @@ const StateMachine = @import("StateMachine.zig");
 const component = @import("../component.zig");
 const common = @import("../common.zig");
 const input = @import("../input.zig");
+const asset = @import("../asset.zig");
+const GameState = @import("../GameState.zig");
 
 // When the character collides with the ground, return to ground states.
 fn HandleGroundCollision(context: *StateMachine.CombatStateContext) bool {
@@ -39,6 +41,32 @@ fn CommonJumpTransitions(context: *StateMachine.CombatStateContext) bool {
 }
 
 fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool {
+
+    // Go through all the character asset specified actions first and check their inputs.
+    const character = context.character_asset;
+
+    for (character.action_inputs.items) |action_input| {
+        switch (action_input.action.type) {
+            .Action => {
+                if (action_input.action.type.Action.combat_state == .Attack) {
+                    if (context.input_component.WasInputPressed(
+                        input.InputNames.Attack,
+                        context.physics_component.facingLeft,
+                    ) and
+                        context.input_component.WasMotionExecuted(
+                        input.MotionNames.QCF,
+                        30,
+                        context.physics_component.facingLeft,
+                    )) {
+                        context.TransitionToState(.Special);
+                        return true;
+                    }
+                }
+            },
+            else => {},
+        }
+    }
+
     if (context.input_component.WasInputPressed(
         input.InputNames.Attack,
         context.physics_component.facingLeft,
@@ -132,12 +160,10 @@ pub fn CommonToIdleTransitions(context: *StateMachine.CombatStateContext) void {
 }
 
 fn TriggerEndOfAttackTransition(context: *StateMachine.CombatStateContext) bool {
-    if (context.ActionData) |actionData| {
-        // Only check for idle action transitions on the final frame.
-        if (context.timeline_component.framesElapsed >= actionData.duration) {
-            CommonToIdleTransitions(context);
-            return true;
-        }
+    // Only check for idle action transitions on the final frame.
+    if (context.timeline_component.framesElapsed >= context.ActionData.duration) {
+        CommonToIdleTransitions(context);
+        return true;
     }
 
     return false;

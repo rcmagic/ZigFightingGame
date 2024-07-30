@@ -63,7 +63,7 @@ fn actionSystem(gameState: *GameState.GameState) void {
         if (gameState.gameData) |gameData| {
             state_machine.stateMachine.UpdateStateMachine(
                 &state_machine.context,
-                gameData.CharacterAssets.items[entityIndex].*,
+                gameData.CharacterAssets.items[entityIndex],
                 GameState.ActionMaps.items[entityIndex],
             );
         }

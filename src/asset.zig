@@ -31,7 +31,7 @@ pub fn LoadableAssetReference(comptime tag: AssetTypeTag) type {
     //_ = T;
     return struct {
         const Self = @This();
-
+        type: AssetType = .{ .Empty = 0 },
         asset_tag: AssetTypeTag = tag,
         path: []const u8 = "",
 
@@ -44,6 +44,8 @@ pub fn LoadableAssetReference(comptime tag: AssetTypeTag) type {
             ) catch {
                 std.debug.print("Failed to load asset reference at path: \"{s}\"\n", .{self.path});
             };
+
+            self.type = GameState.AssetStorage.getAsset(self.path).type;
         }
     };
 }

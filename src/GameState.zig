@@ -11,7 +11,7 @@ const asset = @import("asset.zig");
 var StorageAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 pub var AssetStorage = asset.Storage.init(StorageAllocator.allocator());
 
-pub var ActionMaps: std.ArrayList(std.StringHashMap(usize)) = std.ArrayList(std.StringHashMap(usize)).init(StorageAllocator.allocator());
+pub var ActionMaps: std.ArrayList(std.StringHashMap(*const character_data.ActionProperties)) = std.ArrayList(std.StringHashMap(*const character_data.ActionProperties)).init(StorageAllocator.allocator());
 
 pub const GameData = struct {
     CharacterAssets: std.ArrayList(*character_data.CharacterProperties),
@@ -35,7 +35,7 @@ pub const GameData = struct {
                 try self.CharacterAssets.append(character);
                 try self.image_sequences.append(try character_data.loadSequenceImages(character.*, allocator));
 
-                try ActionMaps.append(try character_data.generateActionNameMap(character.*, allocator));
+                try ActionMaps.append(try character_data.generateActionNameMap(character, allocator));
                 // Create a hash map that lets us reference textures with a sequence name and index
                 try self.ImageSequenceMap.append(try character_data.generateImageSequenceMap(character.*, allocator));
             },
@@ -114,6 +114,7 @@ pub const GameState = struct {
         // Register states
         RegisterActionStates(&self.state_machine_components[self.entityCount].stateMachine.Registery);
 
+        self.state_machine_components[self.entityCount].context.TransitionToState(.Standing);
         self.entityCount += 1;
     }
 

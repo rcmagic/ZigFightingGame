@@ -1,0 +1,24 @@
+{
+    "name": "ThrustAttack",
+    "combat_state": "Attack",
+    "duration": 0,
+    "isLooping": false,
+    "isSpecial": true,
+    "vulnerable_hitbox_groups": [],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [],
+        "hit_property": {
+            "hitStun": 0,
+            "guardStun": 0,
+            "hitStop": 0,
+            "knockBack": 0,
+            "isLaunch": false,
+            "airKnockback": 0,
+            "launchVelocityY": 0,
+            "isGrab": false
+        }
+    },
+    "grab_properties": [],
+    "animation_timeline": []
+}

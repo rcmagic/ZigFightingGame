@@ -1,0 +1,31 @@
+{
+    "name": "GrabReaction",
+    "combat_state": "GrabReaction",
+    "duration": 300,
+    "isLooping": false,
+    "isSpecial": false,
+    "vulnerable_hitbox_groups": [],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [],
+        "hit_property": {
+            "hitStun": 0,
+            "guardStun": 0,
+            "hitStop": 0,
+            "knockBack": 0,
+            "isLaunch": false,
+            "airKnockback": 0,
+            "launchVelocityY": 0,
+            "isGrab": false
+        }
+    },
+    "grab_properties": [],
+    "animation_timeline": [
+        {
+            "sequence": "grab_reaction",
+            "index": 0,
+            "start": 0,
+            "duration": 1000
+        }
+    ]
+}

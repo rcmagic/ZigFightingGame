@@ -42,7 +42,7 @@ pub const CollisionSystem = struct {
         return CollisionSystem{};
     }
 
-    fn getActionProperties(entity: usize, gameState: *GameState.GameState) ?*character_data.ActionProperties {
+    fn getActionProperties(entity: usize, gameState: *GameState.GameState) ?*const character_data.ActionProperties {
         if (gameState.gameData) |gameData| {
             const state_machine_component = gameState.state_machine_components[entity];
             var grabber_action_name: []const u8 = "";
@@ -136,10 +136,13 @@ pub const CollisionSystem = struct {
                                     actionName = @tagName(CurrentState);
                                 }
 
-                                if (character_data.findAction(gameData.CharacterAssets.items[attackerIndex].*, GameState.ActionMaps.items[attackerIndex], actionName)) |actionData| {
-                                    if (!actionData.attack_property.hit_property.isGrab) {
-                                        try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
-                                    }
+                                const actionData = character_data.findAction(
+                                    gameData.CharacterAssets.items[attackerIndex].*,
+                                    GameState.ActionMaps.items[attackerIndex],
+                                    actionName,
+                                );
+                                if (!actionData.attack_property.hit_property.isGrab) {
+                                    try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
                                 }
                             }
                         }
@@ -248,64 +251,63 @@ pub const CollisionSystem = struct {
                 }
 
                 // Get all the hitboxes for the current action.
-                if (character_data.findAction(
+                const actionData = character_data.findAction(
                     gameData.CharacterAssets.items[entity].*,
                     GameState.ActionMaps.items[entity],
                     actionName,
-                )) |actionData| {
+                );
 
-                    // Gather attack boxes
-                    {
-                        // Here we insert the translated hitboxes for the action into AttackHitboxScratch
-                        const atkCount = get_translated_active_hitboxes(actionData.attack_property.hitbox_groups.items, entityOffset, facingLeft, self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
+                // Gather attack boxes
+                {
+                    // Here we insert the translated hitboxes for the action into AttackHitboxScratch
+                    const atkCount = get_translated_active_hitboxes(actionData.attack_property.hitbox_groups.items, entityOffset, facingLeft, self.AttackHitboxScratch[AttackScratchCount..], timeline.framesElapsed);
 
+                    // Store the slice for this entity that points to a range on the hitbox scratch array
+                    if (atkCount > 0) {
+                        self.AttackSlices[entity] = self.AttackHitboxScratch[AttackScratchCount..(AttackScratchCount + atkCount)];
+                    } else {
+                        self.AttackSlices[entity] = self.AttackHitboxScratch[0..0];
+                    }
+
+                    AttackScratchCount += atkCount;
+                }
+
+                // Gather vulnerable boxes
+                {
+                    // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
+                    const vulCount = get_translated_active_hitboxes(actionData.vulnerable_hitbox_groups.items, entityOffset, facingLeft, self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
+
+                    if (vulCount > 0) {
                         // Store the slice for this entity that points to a range on the hitbox scratch array
-                        if (atkCount > 0) {
-                            self.AttackSlices[entity] = self.AttackHitboxScratch[AttackScratchCount..(AttackScratchCount + atkCount)];
-                        } else {
-                            self.AttackSlices[entity] = self.AttackHitboxScratch[0..0];
-                        }
-
-                        AttackScratchCount += atkCount;
+                        self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[VulnerableScratchCount..(VulnerableScratchCount + vulCount)];
+                    } else {
+                        self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
                     }
 
-                    // Gather vulnerable boxes
-                    {
-                        // Here we insert the translated hitboxes for the action into VulnerableHitboxScratch
-                        const vulCount = get_translated_active_hitboxes(actionData.vulnerable_hitbox_groups.items, entityOffset, facingLeft, self.VulnerableHitboxScratch[VulnerableScratchCount..], timeline.framesElapsed);
+                    VulnerableScratchCount += vulCount;
+                }
 
-                        if (vulCount > 0) {
-                            // Store the slice for this entity that points to a range on the hitbox scratch array
-                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[VulnerableScratchCount..(VulnerableScratchCount + vulCount)];
-                        } else {
-                            self.VulnerableSlices[entity] = self.VulnerableHitboxScratch[0..0];
-                        }
+                // Gather push boxes
+                {
+                    // Here we insert the translated hitboxes for the action into PushHitboxScratch
+                    var pushCount = get_translated_active_hitboxes(actionData.push_hitbox_groups.items, entityOffset, facingLeft, self.PushHitboxScratch[PushScratchCount..], timeline.framesElapsed);
 
-                        VulnerableScratchCount += vulCount;
+                    // Don't allow characters in a grab reaction to be pushed.
+                    if (gameState.reaction_components[entity].grabLocked) {}
+                    // If there is no push hitbox overrides, use the default push hitbox for the character.
+                    else if (pushCount <= 0) {
+                        pushCount = 1;
+                        // Get the slice of push hitboxes still available after processing previous push boxes.
+                        var scratchHitboxes = self.PushHitboxScratch[PushScratchCount..];
+                        const hitbox = gameData.CharacterAssets.items[entity].default_pushbox;
+                        const translatedBox = if (facingLeft) common.translate_hitbox_flipped(hitbox, entityOffset) else common.translate_hitbox(hitbox, entityOffset);
+
+                        scratchHitboxes[0] = translatedBox;
                     }
 
-                    // Gather push boxes
-                    {
-                        // Here we insert the translated hitboxes for the action into PushHitboxScratch
-                        var pushCount = get_translated_active_hitboxes(actionData.push_hitbox_groups.items, entityOffset, facingLeft, self.PushHitboxScratch[PushScratchCount..], timeline.framesElapsed);
-
-                        // Don't allow characters in a grab reaction to be pushed.
-                        if (gameState.reaction_components[entity].grabLocked) {}
-                        // If there is no push hitbox overrides, use the default push hitbox for the character.
-                        else if (pushCount <= 0) {
-                            pushCount = 1;
-                            // Get the slice of push hitboxes still available after processing previous push boxes.
-                            var scratchHitboxes = self.PushHitboxScratch[PushScratchCount..];
-                            const hitbox = gameData.CharacterAssets.items[entity].default_pushbox;
-                            const translatedBox = if (facingLeft) common.translate_hitbox_flipped(hitbox, entityOffset) else common.translate_hitbox(hitbox, entityOffset);
-
-                            scratchHitboxes[0] = translatedBox;
-                        }
-
-                        // Store the slice for this entity that points to a range on the hitbox scratch array
-                        self.PushSlices[entity] = self.PushHitboxScratch[PushScratchCount..(PushScratchCount + pushCount)];
-                        PushScratchCount += pushCount;
-                    }
+                    // Store the slice for this entity that points to a range on the hitbox scratch array
+                    self.PushSlices[entity] = self.PushHitboxScratch[PushScratchCount..(PushScratchCount + pushCount)];
+                    PushScratchCount += pushCount;
                 }
             }
         }

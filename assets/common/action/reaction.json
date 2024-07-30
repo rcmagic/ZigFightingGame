@@ -1,0 +1,44 @@
+{
+    "name": "Reaction",
+    "combat_state": "Reaction",
+    "duration": 100,
+    "isLooping": false,
+    "isSpecial": false,
+    "vulnerable_hitbox_groups": [
+        {
+            "start_frame": 0,
+            "duration": 100,
+            "hitboxes": [
+                {
+                    "top": 100000,
+                    "left": -100000,
+                    "bottom": 0,
+                    "right": 100000
+                }
+            ]
+        }
+    ],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [],
+        "hit_property": {
+            "hitStun": 0,
+            "guardStun": 0,
+            "hitStop": 0,
+            "knockBack": 0,
+            "isLaunch": false,
+            "airKnockback": 0,
+            "launchVelocityY": 0,
+            "isGrab": false
+        }
+    },
+    "grab_properties": [],
+    "animation_timeline": [
+        {
+            "sequence": "stand",
+            "index": 0,
+            "start": 0,
+            "duration": 100
+        }
+    ]
+}
