@@ -5,6 +5,7 @@
             "images": [
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/idle_00.png"
                     },
                     "x": -32,
@@ -17,6 +18,7 @@
             "images": [
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/grab_reaction.png"
                     },
                     "x": -32,
@@ -29,6 +31,7 @@
             "images": [
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/attack_00.png"
                     },
                     "x": -108,
@@ -36,6 +39,7 @@
                 },
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/attack_01.png"
                     },
                     "x": -103,
@@ -43,6 +47,7 @@
                 },
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/attack_02.png"
                     },
                     "x": -32,
@@ -55,6 +60,7 @@
             "images": [
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/attack_00.png"
                     },
                     "x": -108,
@@ -62,6 +68,7 @@
                 },
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/special_attack_00.png"
                     },
                     "x": -190,
@@ -69,6 +76,7 @@
                 },
                 {
                     "asset": {
+                        "asset_tag": "Texture",
                         "path": "assets/animation/test_chara_1/color1/attack_02.png"
                     },
                     "x": -32,
@@ -88,6 +96,7 @@
     "actions": [
         {
             "name": "Standing",
+            "combat_state": "Standing",
             "duration": 10,
             "isLooping": true,
             "isSpecial": false,
@@ -131,6 +140,7 @@
         },
         {
             "name": "WalkingForward",
+            "combat_state": "Standing",
             "duration": 1,
             "isLooping": true,
             "isSpecial": false,
@@ -174,6 +184,7 @@
         },
         {
             "name": "WalkingBackward",
+            "combat_state": "Standing",
             "duration": 1,
             "isLooping": true,
             "isSpecial": false,
@@ -217,6 +228,7 @@
         },
         {
             "name": "Jump",
+            "combat_state": "Standing",
             "duration": 0,
             "isLooping": false,
             "isSpecial": false,
@@ -260,6 +272,7 @@
         },
         {
             "name": "Attack",
+            "combat_state": "Standing",
             "duration": 20,
             "isLooping": false,
             "isSpecial": false,
@@ -328,6 +341,7 @@
         },
         {
             "name": "Special",
+            "combat_state": "Standing",
             "duration": 20,
             "isLooping": false,
             "isSpecial": true,
@@ -402,6 +416,7 @@
         },
         {
             "name": "Reaction",
+            "combat_state": "Standing",
             "duration": 100,
             "isLooping": false,
             "isSpecial": false,
@@ -445,6 +460,7 @@
         },
         {
             "name": "LaunchReaction",
+            "combat_state": "Standing",
             "duration": 10000,
             "isLooping": true,
             "isSpecial": false,
@@ -488,6 +504,7 @@
         },
         {
             "name": "GuardReaction",
+            "combat_state": "Standing",
             "duration": 100,
             "isLooping": false,
             "isSpecial": false,
@@ -531,6 +548,7 @@
         },
         {
             "name": "GrabReaction",
+            "combat_state": "Standing",
             "duration": 300,
             "isLooping": false,
             "isSpecial": false,
@@ -558,6 +576,17 @@
                     "duration": 1000
                 }
             ]
+        }
+    ],
+    "action_assets": [],
+    "action_inputs": [
+        {
+            "action": {
+                "asset_tag": "Action",
+                "path": "assets/action/thrust_attack.json"
+            },
+            "motion": "QCB",
+            "button": "Attack"
         }
     ]
 }
