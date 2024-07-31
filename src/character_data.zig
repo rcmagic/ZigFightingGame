@@ -233,7 +233,7 @@ pub const ActionProperties = struct {
 };
 var DefaultAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
-const DefaultActionProperties: ActionProperties = ActionProperties.initIgnoreError(DefaultAllocator.allocator());
+pub const DefaultActionProperties: ActionProperties = ActionProperties.initIgnoreError(DefaultAllocator.allocator());
 
 pub fn findAction(character: CharacterProperties, map: std.StringHashMap(*const ActionProperties), ActionName: []const u8) *const ActionProperties {
     _ = character;

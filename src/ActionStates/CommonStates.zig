@@ -50,15 +50,15 @@ fn CommonAttackTransitions(context: *StateMachine.CombatStateContext) bool {
             .Action => {
                 if (action_input.action.type.Action.combat_state == .Attack) {
                     if (context.input_component.WasInputPressed(
-                        input.InputNames.Attack,
+                        action_input.button,
                         context.physics_component.facingLeft,
                     ) and
                         context.input_component.WasMotionExecuted(
-                        input.MotionNames.QCF,
+                        action_input.motion,
                         30,
                         context.physics_component.facingLeft,
                     )) {
-                        context.TransitionToState(.Special);
+                        context.TransitionToStateRef(action_input.action.type.Action);
                         return true;
                     }
                 }

@@ -24,6 +24,8 @@ pub const CombatStateContext = struct {
     bTransition: bool = false, // indicates that a state transition has been triggered
     NextState: CombatStateID = .Standing, // indicates the next state to transition to.
     next_named_action: []const u8 = "",
+    next_action: *const character_data.ActionProperties = undefined,
+    ref_transition: bool = false,
     named_transition: bool = false,
     input_command: input.InputCommand = .{},
     input_component: *component.InputComponent = undefined,
@@ -40,6 +42,15 @@ pub const CombatStateContext = struct {
         self.NextState = StateID;
         self.next_named_action = "";
         self.named_transition = false;
+        self.ref_transition = false;
+    }
+
+    pub fn TransitionToStateRef(self: *CombatStateContext, action_data: *const character_data.ActionProperties) void {
+        self.bTransition = true;
+        self.next_named_action = "";
+        self.named_transition = false;
+        self.next_action = action_data;
+        self.ref_transition = true;
     }
 
     pub fn TransitionToNamedAction(self: *CombatStateContext, next_state: []const u8) void {
@@ -47,6 +58,7 @@ pub const CombatStateContext = struct {
         self.NextState = .Attack;
         self.next_named_action = next_state;
         self.named_transition = true;
+        self.ref_transition = false;
     }
 };
 
@@ -116,6 +128,11 @@ pub fn HandleTransition(
             );
 
             stateMachine.CurrentState = context.ActionData.combat_state;
+            stateMachine.current_action = context.ActionData;
+        } else if (context.ref_transition) {
+            context.ActionData = context.next_action;
+            stateMachine.CurrentState = context.next_action.combat_state;
+            stateMachine.current_action = context.ActionData;
         } else {
             if (stateMachine.Registery.CombatStates[@intFromEnum(context.NextState)]) |NextState| {
                 _ = NextState;
@@ -127,6 +144,7 @@ pub fn HandleTransition(
             }
             // Make the next state current.
             stateMachine.CurrentState = context.NextState;
+            stateMachine.current_action = context.ActionData;
         }
 
         // Reset the timeline when a transition has occurred.
@@ -144,6 +162,7 @@ pub fn HandleTransition(
 pub const CombatStateMachineProcessor = struct {
     Registery: CombatStateRegistery = .{},
     CurrentState: CombatStateID = .Standing,
+    current_action: *const character_data.ActionProperties,
 
     pub fn UpdateStateMachine(
         self: *CombatStateMachineProcessor,

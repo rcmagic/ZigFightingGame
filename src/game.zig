@@ -54,13 +54,7 @@ fn prepareDrawState(gameState: GameState.GameState, entity: usize) DrawState {
             actionName = @tagName(CurrentState);
         }
 
-        const actionData = character_data.findAction(
-            gameData.CharacterAssets.items[entity].*,
-            GameState.ActionMaps.items[entity],
-            actionName,
-        );
-
-        const imageRange = actionData.getActiveImage(gameState.timeline_components[entity].framesElapsed);
+        const imageRange = stateMachine.current_action.getActiveImage(gameState.timeline_components[entity].framesElapsed);
 
         // Get the sprite texture
         if (gameData.findSequenceTextures(entity, imageRange.sequence)) |sequence| {

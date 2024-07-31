@@ -44,7 +44,12 @@ pub const GameData = struct {
     }
 };
 
-const StateMachineComponent = struct { context: StateMachine.CombatStateContext = .{}, stateMachine: StateMachine.CombatStateMachineProcessor = .{} };
+const StateMachineComponent = struct {
+    context: StateMachine.CombatStateContext = .{},
+    stateMachine: StateMachine.CombatStateMachineProcessor = .{
+        .current_action = &character_data.DefaultActionProperties,
+    },
+};
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
     var gameData = GameData{
