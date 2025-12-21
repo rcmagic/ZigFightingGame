@@ -179,6 +179,21 @@ pub const ActionInput = struct {
     button: input.InputNames = .Attack,
 };
 
+pub const SetVelocityActionCommand = struct {
+    const Self = @This();
+    x: ?i32 = null,
+    y: ?i32 = null,
+
+    fn Execute(self: Self, context: *stateMachine.CombatStateContext) void {
+        if (self.x) |x| {
+            context.physics_component.velocity.x = x;
+        }
+        if (self.y) |y| {
+            context.physics_component.velocity.y = y;
+        }
+    }
+};
+
 pub const ActionProperties = struct {
     name: []const u8 = "",
     combat_state: stateMachine.CombatStateID = .Standing,
