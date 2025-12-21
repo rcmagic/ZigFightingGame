@@ -51,10 +51,10 @@ fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, alloca
         hitbox.SetHeight(height);
 
         switch (@typeInfo(@TypeOf(hitbox.*))) {
-            .Struct => |structInfo| {
+            .@"struct" => |structInfo| {
                 inline for (structInfo.fields) |field| {
                     switch (@typeInfo(field.type)) {
-                        .Int => {
+                        .int => {
                             CoordinateEdit(field.name, &@field(hitbox, field.name));
                         },
                         else => {
@@ -74,10 +74,8 @@ fn TexturePreview(texture: *character_data.Texture, allocator: std.mem.Allocator
     // try GenericPropertyEdit(texture, "", allocator, meta_data);
     _ = allocator;
     _ = meta_data;
-    z.image(&texture.Texture.id, .{
-        .w = @floatFromInt(texture.Texture.width),
-        .h = @floatFromInt(texture.Texture.height),
-    });
+    const c_tex: [*c]const c.struct_Texture = @ptrCast(&texture.Texture);
+    c.rlImGuiImageSize(c_tex, texture.Texture.width, texture.Texture.height);
 }
 
 fn RemoveItem(list: anytype, index: usize) void {
@@ -87,7 +85,7 @@ fn RemoveItem(list: anytype, index: usize) void {
 
 fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem.Allocator, meta_data: anytype) !void {
     switch (@typeInfo(@TypeOf(property.*))) {
-        .Enum => |enum_info| {
+        .@"enum" => |enum_info| {
             var selected_item = property.*;
             if (z.beginCombo(name, .{ .preview_value = @tagName(property.*) })) {
                 inline for (enum_info.fields) |e| {
@@ -100,7 +98,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 @constCast(property).* = selected_item;
             }
         },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             if (@hasField(@TypeOf(property.*), "items")) {
                 z.pushPtrId(property);
                 defer z.popId();
@@ -129,9 +127,9 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                     RemoveItem(property, @intCast(deleteIndex));
                 } else if (addButtonClicked) {
                     switch (@typeInfo(@TypeOf(property.items))) {
-                        .Pointer => |ptrInfo| {
+                        .pointer => |ptrInfo| {
                             switch (@typeInfo(ptrInfo.child)) {
-                                .Struct => {
+                                .@"struct" => {
                                     var instance: ptrInfo.child = undefined;
                                     if (@hasDecl(ptrInfo.child, "init")) {
                                         instance = try ptrInfo.child.init(allocator);
@@ -164,9 +162,9 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 }
             }
         },
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     var editText = [_:0]u8{0} ** 64;
                     std.mem.copyForwards(u8, &editText, property.*);
                     if (z.inputText(name, .{ .buf = &editText })) {
@@ -182,7 +180,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
                 },
             }
         },
-        .Int => {
+        .int => {
             var value: i32 = @intCast(property.*);
 
             var min_value: i32 = -1000;
@@ -201,7 +199,7 @@ fn GenericPropertyEdit(property: anytype, name: [:0]const u8, allocator: std.mem
             _ = z.dragInt(name, .{ .v = &value, .speed = 100, .min = min_value, .max = max_value });
             @constCast(property).* = @intCast(value);
         },
-        .Bool => {
+        .bool => {
             _ = z.checkbox(name, .{ .v = @constCast(property) });
         },
         else => {
@@ -232,7 +230,7 @@ fn CompTimePropertyEdit(property: anytype, name: [:0]const u8, allocator: std.me
         //} else if (@TypeOf(property.*) == asset.LoadableAssetReference(asset.AssetTypeTag.Texture)) {
     } else {
         switch (@typeInfo(@TypeOf(property.*))) {
-            .Struct => {
+            .@"struct" => {
                 if (@hasField(@TypeOf(property.*), "asset_tag")) {
                     z.textUnformatted("Asset Reference");
 

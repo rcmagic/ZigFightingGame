@@ -1,16 +1,20 @@
 .{
-    .name = "zig-fighting-game",
+    .name = .zig_fighting_game,
     .version = "1.0.0",
     .paths = .{ "src", "vendor" },
+    .fingerprint = 0x676055e0ccd38bfe,
     .dependencies = .{
         .rlimgui = .{
-            .url = "https://github.com/raylib-extras/rlImGui/archive/d765c1ef3d37cf939f88aaa272a59a2713d654c9.tar.gz",
-            .hash = "1220e68e8862832a7c08aa2bbaa8ffb7b7f9c492f8e518d595162ff0c01155f542c3",
+            .url = "https://github.com/raylib-extras/rlImGui/archive/dc7f976.tar.gz",
+            .hash = "N-V-__8AAC-taQCKZ-3IjRuWJ-5Dc47QKHDPEmqlwXhvjBGq",
         },
-        .zgui = .{ .path = "vendor/zgui" },
-        .@"raylib-zig" = .{
-            .url = "https://github.com/Not-Nik/raylib-zig/archive/85e07d7db56c2e228d543ca17a9df0ef87f349d8.tar.gz",
-            .hash = "122064a960fff658211413c4b3b56e1699719126c3d099d3ed43f9eaff17a936ad91",
+        .zgui = .{
+            .url = "git+https://github.com/zig-gamedev/zgui#7d3fb3302b90bf71dbc93eb02bb208e6f37d555b",
+            .hash = "zgui-0.6.0-dev--L6sZBHybQAZLl719GjSlogZC3MhuGRf4wI48tjbnW3z",
+        },
+        .raylib_zig = .{
+            .url = "git+https://github.com/raylib-zig/raylib-zig?ref=devel#a4d18b2d1cf8fdddec68b5b084535fca0475f466",
+            .hash = "raylib_zig-5.6.0-dev-KE8REL5MBQAf3p497t52Xw9P7ojndIkVOWPXnLiLLw2P",
         },
         .sfd = .{
             .url = "https://github.com/rxi/sfd/archive/refs/heads/master.zip",

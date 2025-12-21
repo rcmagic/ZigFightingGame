@@ -332,7 +332,7 @@ test "Testing getting translated hitboxes" {
     var Allocator = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer Allocator.deinit();
 
-    var HitboxGroupList = std.ArrayList(character_data.HitboxGroup).init(Allocator.allocator());
+    var HitboxGroupList = std.array_list.Managed(character_data.HitboxGroup).init(Allocator.allocator());
 
     const HitboxGroupData = try character_data.HitboxGroup.init(Allocator.allocator());
     try HitboxGroupList.append(HitboxGroupData);

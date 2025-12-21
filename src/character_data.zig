@@ -8,26 +8,26 @@ const input = @import("input.zig");
 fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
     const T = @TypeOf(field);
     switch (@typeInfo(T)) {
-        .Fn => {},
+        .@"fn" => {},
         // Currenly only support slices
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     try jws.objectField(name);
                     try jws.write(field);
                 },
                 else => unreachable,
             }
         },
-        .Enum, .EnumLiteral => {
+        .@"enum", .enum_literal => {
             try jws.objectField(name);
             try jws.write(field);
         },
-        .Struct => {
+        .@"struct" => {
             try jws.objectField(name);
             try stringifyValue(field, jws);
         },
-        .Int, .Bool => {
+        .int, .bool => {
             try jws.objectField(name);
             try jws.write(field);
         },
@@ -38,11 +38,11 @@ fn stringifyField(field: anytype, name: [:0]const u8, jws: anytype) !void {
 fn stringifyValue(value: anytype, jws: anytype) !void {
     const T = @TypeOf(value);
     switch (@typeInfo(T)) {
-        .Fn => {},
-        // .Enum, .EnumLiteral => {
+        .@"fn" => {},
+        // .@"enum", .@"enum"Literal => {
         //     try jws.write(value);
         // },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             if (@hasField(T, "items")) {
                 try jws.beginArray();
                 for (@field(value, "items")) |arrayItem| {
@@ -57,7 +57,7 @@ fn stringifyValue(value: anytype, jws: anytype) !void {
                 try jws.endObject();
             }
         },
-        .Int => {
+        .int => {
             try jws.write(value);
         },
 
@@ -109,7 +109,7 @@ pub const HitboxGroup = struct {
     start_frame: i32 = 0,
     duration: i32 = 1,
 
-    hitboxes: std.ArrayList(Hitbox),
+    hitboxes: std.array_list.Managed(Hitbox),
 
     const Self = @This();
     // pub fn jsonStringify(value: Self, options: std.json.StringifyOptions, out_stream: anytype) !void {
@@ -118,7 +118,7 @@ pub const HitboxGroup = struct {
 
     pub fn init(allocator: std.mem.Allocator) !HitboxGroup {
         return HitboxGroup{
-            .hitboxes = std.ArrayList(Hitbox).init(allocator),
+            .hitboxes = std.array_list.Managed(Hitbox).init(allocator),
         };
     }
 
@@ -139,13 +139,13 @@ pub const HitProperty = struct {
 };
 
 pub const AttackProperty = struct {
-    hitbox_groups: std.ArrayList(HitboxGroup),
+    hitbox_groups: std.array_list.Managed(HitboxGroup),
     hit_property: HitProperty,
 
     pub fn init(allocator: std.mem.Allocator) !AttackProperty {
         return AttackProperty{
             .hit_property = .{},
-            .hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .hitbox_groups = std.array_list.Managed(HitboxGroup).init(allocator),
         };
     }
 };
@@ -201,14 +201,14 @@ pub const ActionProperties = struct {
     isLooping: bool = false,
     isSpecial: bool = false,
 
-    vulnerable_hitbox_groups: std.ArrayList(HitboxGroup),
-    push_hitbox_groups: std.ArrayList(HitboxGroup),
+    vulnerable_hitbox_groups: std.array_list.Managed(HitboxGroup),
+    push_hitbox_groups: std.array_list.Managed(HitboxGroup),
 
     attack_property: AttackProperty,
 
-    grab_properties: std.ArrayList(GrabProperty),
+    grab_properties: std.array_list.Managed(GrabProperty),
 
-    animation_timeline: std.ArrayList(ImageRange),
+    animation_timeline: std.array_list.Managed(ImageRange),
 
     const Self = @This();
 
@@ -218,21 +218,21 @@ pub const ActionProperties = struct {
 
     pub fn init(allocator: std.mem.Allocator) !ActionProperties {
         return ActionProperties{
-            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
-            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .vulnerable_hitbox_groups = std.array_list.Managed(HitboxGroup).init(allocator),
+            .push_hitbox_groups = std.array_list.Managed(HitboxGroup).init(allocator),
             .attack_property = try AttackProperty.init(allocator),
-            .grab_properties = std.ArrayList(GrabProperty).init(allocator),
-            .animation_timeline = std.ArrayList(ImageRange).init(allocator),
+            .grab_properties = std.array_list.Managed(GrabProperty).init(allocator),
+            .animation_timeline = std.array_list.Managed(ImageRange).init(allocator),
         };
     }
 
     pub fn initIgnoreError(allocator: std.mem.Allocator) ActionProperties {
         return ActionProperties{
-            .vulnerable_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
-            .push_hitbox_groups = std.ArrayList(HitboxGroup).init(allocator),
+            .vulnerable_hitbox_groups = std.array_list.Managed(HitboxGroup).init(allocator),
+            .push_hitbox_groups = std.array_list.Managed(HitboxGroup).init(allocator),
             .attack_property = try AttackProperty.init(allocator),
-            .grab_properties = std.ArrayList(GrabProperty).init(allocator),
-            .animation_timeline = std.ArrayList(ImageRange).init(allocator),
+            .grab_properties = std.array_list.Managed(GrabProperty).init(allocator),
+            .animation_timeline = std.array_list.Managed(ImageRange).init(allocator),
         };
     }
 
@@ -280,10 +280,10 @@ pub fn generateActionNameMap(character: *const CharacterProperties, allocator: s
 // Stores the textures used in an image sequence. Use the referenced image index
 // to get the associated texture.
 pub const SequenceTexRef = struct {
-    textures: std.ArrayList(rl.Texture2D),
+    textures: std.array_list.Managed(rl.Texture2D),
 
     pub fn init(allocator: std.mem.Allocator) !SequenceTexRef {
-        return SequenceTexRef{ .textures = std.ArrayList(rl.Texture2D).init(allocator) };
+        return SequenceTexRef{ .textures = std.array_list.Managed(rl.Texture2D).init(allocator) };
     }
 };
 
@@ -305,8 +305,8 @@ pub fn loadTexture(path: []const u8, allocator: std.mem.Allocator) !rl.Texture2D
 }
 
 // Sequences are loaded in the same order as the character data asset.
-pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.Allocator) !std.ArrayList(SequenceTexRef) {
-    var imageSequences = std.ArrayList(SequenceTexRef).init(allocator);
+pub fn loadSequenceImages(character: CharacterProperties, allocator: std.mem.Allocator) !std.array_list.Managed(SequenceTexRef) {
+    var imageSequences = std.array_list.Managed(SequenceTexRef).init(allocator);
 
     for (character.image_sequences.items) |sequence| {
         try imageSequences.append(try SequenceTexRef.init(allocator));
@@ -332,32 +332,32 @@ pub const Image = struct {
 // A list of images associated with an sequence name
 pub const ImageSequence = struct {
     name: []const u8 = "",
-    images: std.ArrayList(Image),
+    images: std.array_list.Managed(Image),
 
     pub fn init(allocator: std.mem.Allocator) !ImageSequence {
-        return ImageSequence{ .images = std.ArrayList(Image).init(allocator) };
+        return ImageSequence{ .images = std.array_list.Managed(Image).init(allocator) };
     }
 };
 
 pub const CharacterProperties = struct {
     const Self = @This();
 
-    image_sequences: std.ArrayList(ImageSequence),
+    image_sequences: std.array_list.Managed(ImageSequence),
 
     max_health: i32 = 10000,
     default_pushbox: Hitbox = .{},
     grabbable_distance: i32 = 50000,
-    actions: std.ArrayList(ActionProperties),
-    action_assets: std.ArrayList(asset.LoadableAssetReference(asset.AssetTypeTag.Action)),
-    action_inputs: std.ArrayList(ActionInput),
+    actions: std.array_list.Managed(ActionProperties),
+    action_assets: std.array_list.Managed(asset.LoadableAssetReference(asset.AssetTypeTag.Action)),
+    action_inputs: std.array_list.Managed(ActionInput),
 
     // Deinitialize with `deinit`
     pub fn init(allocator: std.mem.Allocator) !CharacterProperties {
         return CharacterProperties{
-            .actions = std.ArrayList(ActionProperties).init(allocator),
-            .action_assets = std.ArrayList(asset.LoadableAssetReference(.Action)).init(allocator),
-            .action_inputs = std.ArrayList(ActionInput).init(allocator),
-            .image_sequences = std.ArrayList(ImageSequence).init(allocator),
+            .actions = std.array_list.Managed(ActionProperties).init(allocator),
+            .action_assets = std.array_list.Managed(asset.LoadableAssetReference(.Action)).init(allocator),
+            .action_inputs = std.array_list.Managed(ActionInput).init(allocator),
+            .image_sequences = std.array_list.Managed(ImageSequence).init(allocator),
         };
     }
 
@@ -429,6 +429,7 @@ pub fn loadCharacterAsset(path: []const u8, allocator: std.mem.Allocator) !?Char
 }
 
 pub fn saveAsset(character_asset: CharacterProperties, path: []const u8, allocator: std.mem.Allocator) !void {
+    _ = allocator;
     const file = std.fs.cwd().createFile(
         path,
         .{},
@@ -441,16 +442,15 @@ pub fn saveAsset(character_asset: CharacterProperties, path: []const u8, allocat
     defer (file.close());
 
     var buffer: [MaxAssetBufferSize]u8 = undefined;
-    var fba = std.heap.FixedBufferAllocator.init(&buffer);
-    var string = std.ArrayList(u8).init(fba.allocator());
+    var writer: std.Io.Writer = std.Io.Writer.fixed(&buffer);
 
-    try std.json.stringifyArbitraryDepth(allocator, character_asset, .{ .whitespace = .indent_4 }, string.writer());
+    try std.json.Stringify.value(character_asset, .{ .whitespace = .indent_4 }, &writer);
 
-    try file.writeAll(buffer[0..string.items.len]);
+    try file.writeAll(buffer[0..writer.end]);
 }
 
 // fn itemType(comptime T: type) ?type {
-//     if (@TypeOf(T) == .Pointer) {
+//     if (@TypeOf(T) == .pointer) {
 //         return @field(T, "child");
 //     }
 
@@ -459,23 +459,23 @@ pub fn saveAsset(character_asset: CharacterProperties, path: []const u8, allocat
 
 fn itemType(comptime T: type) ?type {
     switch (@typeInfo(T)) {
-        .Pointer => |info| return info.child,
+        .pointer => |info| return info.child,
         else => null,
     }
 }
 
 fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
-        .Int => {
+        .int => {
             return @intCast(tree.integer);
         },
-        .Bool => {
+        .bool => {
             return tree.bool;
         },
         // Currenly only support slices
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     const output = try allocator.alloc(u8, tree.string.len);
                     errdefer allocator.free(output);
                     @memcpy(output, tree.string);
@@ -485,12 +485,12 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 else => unreachable,
             }
         },
-        // .Enum => {
+        // .@"enum" => {
         //     return std.json.parseFromValueLeaky(T, allocator, tree, .{});
         // },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {
-                .Struct => @hasField(T, "items"),
+                .@"struct" => @hasField(T, "items"),
                 else => false,
             };
 
@@ -541,16 +541,16 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
 
 fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
-        .Int => {
+        .int => {
             return @intCast(tree.integer);
         },
-        .Bool => {
+        .bool => {
             return tree.bool;
         },
         // Currenly only support slices
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     const output = try allocator.alloc(u8, tree.string.len);
                     errdefer allocator.free(output);
                     @memcpy(output, tree.string);
@@ -560,9 +560,9 @@ fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 else => unreachable,
             }
         },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {
-                .Struct => @hasField(T, "items"),
+                .@"struct" => @hasField(T, "items"),
                 else => false,
             };
 
@@ -614,7 +614,7 @@ fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
 test "Test HitboxGroup.isActiveOnFrame()" {
     var ArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
-    var hitboxGroup = HitboxGroup{ .start_frame = 2, .duration = 5, .hitboxes = std.ArrayList(Hitbox).init(ArenaAllocator.allocator()) };
+    var hitboxGroup = HitboxGroup{ .start_frame = 2, .duration = 5, .hitboxes = std.array_list.Managed(Hitbox).init(ArenaAllocator.allocator()) };
 
     try std.testing.expect(hitboxGroup.isActiveOnFrame(2));
     try std.testing.expect(!hitboxGroup.isActiveOnFrame(7));
@@ -625,7 +625,7 @@ test "Testing resizable array." {
     {
         var CharacterArenaAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
-        var group = HitboxGroup{ .hitboxes = std.ArrayList(Hitbox).init(CharacterArenaAllocator.allocator()) };
+        var group = HitboxGroup{ .hitboxes = std.array_list.Managed(Hitbox).init(CharacterArenaAllocator.allocator()) };
 
         try group.hitboxes.append(Hitbox{ .left = 0, .top = 0, .bottom = 200, .right = 400 });
 
@@ -708,10 +708,10 @@ test "Testing resizable array." {
 
 // test "Deserialize a struct with an ArrayList" {
 //     const oneFieldStructArrayList = struct {
-//         numbers: std.ArrayList(i32),
+//         numbers: std.array_list.Managed(i32),
 //         const Self = @This();
 //         fn init(allocator: std.mem.Allocator) !Self {
-//             return Self{ .numbers = std.ArrayList(i32).init(allocator) };
+//             return Self{ .numbers = std.array_list.Managed(i32).init(allocator) };
 //         }
 //     };
 
@@ -777,7 +777,7 @@ test "Testing resizable array." {
 
 //     var buffer: [2048]u8 = undefined;
 //     var fba = std.heap.FixedBufferAllocator.init(&buffer);
-//     var string = std.ArrayList(u8).init(fba.allocator());
+//     var string = std.array_list.Managed(u8).init(fba.allocator());
 
 //     try std.json.stringifyArbitraryDepth(Allocator, Character, .{ .whitespace = .indent_4 }, string.writer());
 
