@@ -72,14 +72,10 @@ fn HitboxPropertyEdit(hitbox: *character_data.Hitbox, name: [:0]const u8, alloca
 
 fn TexturePreview(texture: *character_data.Texture, allocator: std.mem.Allocator, meta_data: anytype) void {
     // try GenericPropertyEdit(texture, "", allocator, meta_data);
-    _ = texture;
     _ = allocator;
     _ = meta_data;
-    // @todo find out what this "TextureRef" this function requires is. chase 2025/12/22
-    // z.image(&texture.Texture.id, .{
-    //     .w = @floatFromInt(texture.Texture.width),
-    //     .h = @floatFromInt(texture.Texture.height),
-    // });
+    const c_tex: [*c]const c.struct_Texture = @ptrCast(&texture.Texture);
+    c.rlImGuiImageSize(c_tex, texture.Texture.width, texture.Texture.height);
 }
 
 fn RemoveItem(list: anytype, index: usize) void {
