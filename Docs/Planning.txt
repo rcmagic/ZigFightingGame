@@ -206,10 +206,16 @@
 - Support canceling on hit
 - Supported buffered positive edge inputs
 
+2024/7/27
+- Record absolute left/right direction in the input buffer
+- Interpret left or right input at the time of usage
+
+
 
 2024/*/*
+- Make input forward and back direction relative to the opponent and not the character's facing direction.
 - Support per-character cancels
-- Support a per-action cancels
+- Support per-action cancels
 - Support a launch reaction and launch hit property
 - Support juggle hit properties
 - Support an air hit reaction. 

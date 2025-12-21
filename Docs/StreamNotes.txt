@@ -51,7 +51,7 @@ Numpad
 - Hook up hit properties in reaction states
 
 
-2024/3/19
+2024/3/12
 - Throws (Concepts)
 - Throws Possible Implementations
 - Implement Throws - Data structure
@@ -66,3 +66,12 @@ How are throws different than attacks?
 - Throws lock the opponent into a state in which the thrower controls them.
 - Thrower releases the throwee when the throw is finished.
 - Throws are branching. On collision they perform the success action, on whiff they perform a whiff action.
+
+2024/3/13
+- Grab based on distance not collisions 
+- Ground throws whiff against opponents in the air.
+
+2024/3/21
+- Support grab distance
+- Support grabs that work only against grounded opponents.
+- Support grab attack boxes and grabbing push boxes.

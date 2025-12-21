@@ -221,6 +221,32 @@ var my_hash_map = std.StringHashMapUnmanaged(V){};
 - You can remove data with a swap or shifting all elements forward to maintain order. 
 
 
+** Errors **
+- Errors are like Enums, but are assigned unsigned int values > 0. 
+- Error names that are the same will be assigned the same number.
+
+- Error definitions looks like this
+const FileOpenError = error{
+    AccessDenied,
+    OutOfMemory,
+    FileNotFound,
+};
+
+-- Errors can be passed into and returned from functions
+-- Errors can be coereced into other errors when going from a subset to a superset, even if the error name is the same.
+-- Shortcut for creating a single error name looks like
+const err = error.FileNotFound;
+
+-- anyerror is a superset off all errors and thus contains all errors.
+-- Any error can be coerced into anyerror
+-- ! creates an error union, a combination of an error and another type.
+
+
 
 ** Bit Flags / Bit Fields ***
 - "Packed structs in Zig make bit/flag sets trivial." https://devlog.hexops.com/2022/packed-structs-in-zig/
+
+
+** Interfaces / Generics **
+-- Has some interface patterns
+https://github.com/SuperAuguste/zig-patterns
