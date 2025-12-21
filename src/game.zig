@@ -261,23 +261,23 @@ pub fn pollGamepadInput(gameState: *GameState.GameState, controller: i32, entity
 
     const inputCommand = &gameState.input_components[entity].input_command;
 
-    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_up)) {
+    if (rl.isGamepadButtonDown(controller, .left_face_up)) {
         inputCommand.*.up = true;
     }
 
-    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_down)) {
+    if (rl.isGamepadButtonDown(controller, .left_face_down)) {
         inputCommand.*.down = true;
     }
 
-    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_left)) {
+    if (rl.isGamepadButtonDown(controller, .left_face_left)) {
         inputCommand.*.left = true;
     }
 
-    if (rl.isGamepadButtonDown(controller, .gamepad_button_left_face_right)) {
+    if (rl.isGamepadButtonDown(controller, .left_face_right)) {
         inputCommand.*.right = true;
     }
 
-    if (rl.isGamepadButtonDown(controller, .gamepad_button_right_face_left)) {
+    if (rl.isGamepadButtonDown(controller, .right_face_left)) {
         inputCommand.*.attack = true;
     }
 }
@@ -363,30 +363,30 @@ pub fn gameLoop() !void {
         gameState.input_components[1].input_command.reset();
 
         if (rl.isWindowFocused()) {
-            if (rl.isKeyPressed(.key_f3)) {
+            if (rl.isKeyPressed(.f3)) {
                 bPauseGame = !bPauseGame;
-            } else if (rl.isKeyPressed(.key_f2)) {
+            } else if (rl.isKeyPressed(.f2)) {
                 bAdvanceOnce = true;
             }
             // Toggle hitbox display
-            else if (rl.isKeyPressed(.key_f4)) {
+            else if (rl.isKeyPressed(.f4)) {
                 bDebugShowHitboxes = !bDebugShowHitboxes;
             }
 
             // Force reload assets with ctrl+F5
-            if (rl.isKeyDown(.key_left_control) and rl.isKeyPressed(.key_f5)) {
+            if (rl.isKeyDown(.left_control) and rl.isKeyPressed(.f5)) {
                 std.debug.print("Reloading assets...\n", .{});
                 AssetAllocator.deinit();
                 AssetAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
                 try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
             }
 
-            if (rl.isKeyPressed(.key_f8)) {
+            if (rl.isKeyPressed(.f8)) {
                 bShowEditor = !bShowEditor;
             }
 
             // Debug color toggle
-            if (rl.isKeyPressed(.key_f9)) {
+            if (rl.isKeyPressed(.f9)) {
                 bDebugColorEnabled = !bDebugColorEnabled;
             }
         }
@@ -397,23 +397,23 @@ pub fn gameLoop() !void {
         }
 
         if (!bShowEditor and rl.isWindowFocused()) {
-            if (rl.isKeyDown(.key_w)) {
+            if (rl.isKeyDown(.w)) {
                 gameState.input_components[0].input_command.up = true;
             }
 
-            if (rl.isKeyDown(.key_s)) {
+            if (rl.isKeyDown(.s)) {
                 gameState.input_components[0].input_command.down = true;
             }
 
-            if (rl.isKeyDown(.key_a)) {
+            if (rl.isKeyDown(.a)) {
                 gameState.input_components[0].input_command.left = true;
             }
 
-            if (rl.isKeyDown(.key_d)) {
+            if (rl.isKeyDown(.d)) {
                 gameState.input_components[0].input_command.right = true;
             }
 
-            if (rl.isKeyDown(.key_j)) {
+            if (rl.isKeyDown(.j)) {
                 gameState.input_components[0].input_command.attack = true;
             }
         }

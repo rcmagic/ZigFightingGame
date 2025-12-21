@@ -11,12 +11,12 @@ const asset = @import("asset.zig");
 var StorageAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 pub var AssetStorage = asset.Storage.init(StorageAllocator.allocator());
 
-pub var ActionMaps: std.ArrayList(std.StringHashMap(*const character_data.ActionProperties)) = std.ArrayList(std.StringHashMap(*const character_data.ActionProperties)).init(StorageAllocator.allocator());
+pub var ActionMaps: std.array_list.Managed(std.StringHashMap(*const character_data.ActionProperties)) = std.array_list.Managed(std.StringHashMap(*const character_data.ActionProperties)).init(StorageAllocator.allocator());
 
 pub const GameData = struct {
-    CharacterAssets: std.ArrayList(*character_data.CharacterProperties),
-    image_sequences: std.ArrayList(std.ArrayList(character_data.SequenceTexRef)),
-    ImageSequenceMap: std.ArrayList(std.StringHashMap(usize)),
+    CharacterAssets: std.array_list.Managed(*character_data.CharacterProperties),
+    image_sequences: std.array_list.Managed(std.array_list.Managed(character_data.SequenceTexRef)),
+    ImageSequenceMap: std.array_list.Managed(std.StringHashMap(usize)),
 
     pub fn findSequenceTextures(self: *const GameData, characterIndex: usize, SequenceName: []const u8) ?*character_data.SequenceTexRef {
         if (self.ImageSequenceMap.items[characterIndex].get(SequenceName)) |index| {
@@ -53,9 +53,9 @@ const StateMachineComponent = struct {
 
 pub fn InitializeGameData(allocator: std.mem.Allocator) !GameData {
     var gameData = GameData{
-        .CharacterAssets = std.ArrayList(*character_data.CharacterProperties).init(allocator),
-        .image_sequences = std.ArrayList(std.ArrayList(character_data.SequenceTexRef)).init(allocator),
-        .ImageSequenceMap = std.ArrayList(std.StringHashMap(usize)).init(allocator),
+        .CharacterAssets = std.array_list.Managed(*character_data.CharacterProperties).init(allocator),
+        .image_sequences = std.array_list.Managed(std.array_list.Managed(character_data.SequenceTexRef)).init(allocator),
+        .ImageSequenceMap = std.array_list.Managed(std.StringHashMap(usize)).init(allocator),
     };
 
     try gameData.LoadOneCharacter("assets/test_chara_1.json", allocator);
@@ -98,7 +98,7 @@ pub const GameState = struct {
     stats_components: [MAX_ENTITIES]component.StatsComponent = [_]component.StatsComponent{.{}} ** MAX_ENTITIES,
 
     // Transient Events
-    hitEvents: std.ArrayList(HitEvent),
+    hitEvents: std.array_list.Managed(HitEvent),
 
     // Systems
     collisionSystem: collision_system,
@@ -139,7 +139,7 @@ pub const GameState = struct {
 
             // Initialize the hit event
             // TODO: Make the number of max hit events a configurable property?
-            .hitEvents = try std.ArrayList(HitEvent).initCapacity(allocator, 10),
+            .hitEvents = try std.array_list.Managed(HitEvent).initCapacity(allocator, 10),
         };
 
         // For now we are only creating two characters to work with.

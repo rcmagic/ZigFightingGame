@@ -81,6 +81,7 @@ pub fn GetAssetNameSentinal(asset: AssetInfo) [:0]const u8 {
 
 const MaxAssetBufferSize = 1024 * 512;
 pub fn saveAsset(T: anytype, path: []const u8, allocator: std.mem.Allocator) !void {
+    _ = allocator;
     const file = std.fs.cwd().createFile(
         path,
         .{},
@@ -93,12 +94,11 @@ pub fn saveAsset(T: anytype, path: []const u8, allocator: std.mem.Allocator) !vo
     defer (file.close());
 
     var buffer: [MaxAssetBufferSize]u8 = undefined;
-    var fba = std.heap.FixedBufferAllocator.init(&buffer);
-    var string = std.ArrayList(u8).init(fba.allocator());
+    var writer: std.Io.Writer = std.Io.Writer.fixed(&buffer);
 
-    try std.json.stringifyArbitraryDepth(allocator, T, .{ .whitespace = .indent_4 }, string.writer());
+    try std.json.Stringify.value(T, .{ .whitespace = .indent_4 }, &writer);
 
-    try file.writeAll(buffer[0..string.items.len]);
+    try file.writeAll(buffer[0..writer.end]);
 }
 
 pub fn readAsset(path: []const u8, comptime T: type, allocator: std.mem.Allocator) !AssetType {
@@ -223,23 +223,23 @@ pub const Storage = struct {
 
 fn itemType(comptime T: type) ?type {
     switch (@typeInfo(T)) {
-        .Pointer => |info| return info.child,
+        .pointer => |info| return info.child,
         else => null,
     }
 }
 
 fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
-        .Int => {
+        .int => {
             return @intCast(tree.integer);
         },
-        .Bool => {
+        .bool => {
             return tree.bool;
         },
         // Currenly only support slices
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     const output = try allocator.alloc(u8, tree.string.len);
                     errdefer allocator.free(output);
                     @memcpy(output, tree.string);
@@ -249,12 +249,12 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 else => unreachable,
             }
         },
-        .Enum => {
+        .@"enum" => {
             return try std.json.parseFromValueLeaky(T, allocator, tree, .{});
         },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {
-                .Struct => @hasField(T, "items"),
+                .@"struct" => @hasField(T, "items"),
                 else => false,
             };
 
@@ -310,16 +310,16 @@ fn parseJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
 
 fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.Allocator) !?T {
     switch (@typeInfo(T)) {
-        .Int => {
+        .int => {
             return @intCast(tree.integer);
         },
-        .Bool => {
+        .bool => {
             return tree.bool;
         },
         // Currenly only support slices
-        .Pointer => |ptrInfo| {
+        .pointer => |ptrInfo| {
             switch (ptrInfo.size) {
-                .Slice => {
+                .slice => {
                     const output = try allocator.alloc(u8, tree.string.len);
                     errdefer allocator.free(output);
                     @memcpy(output, tree.string);
@@ -329,9 +329,9 @@ fn writeJsonValue(comptime T: type, tree: std.json.Value, allocator: std.mem.All
                 else => unreachable,
             }
         },
-        .Struct => |structInfo| {
+        .@"struct" => |structInfo| {
             const is_array_list: bool = switch (@typeInfo(T)) {
-                .Struct => @hasField(T, "items"),
+                .@"struct" => @hasField(T, "items"),
                 else => false,
             };
 
