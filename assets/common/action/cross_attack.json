@@ -1,0 +1,43 @@
+{
+    "name": "CrossAttack",
+    "combat_state": "Attack",
+    "duration": 90,
+    "isLooping": false,
+    "isSpecial": true,
+    "vulnerable_hitbox_groups": [],
+    "push_hitbox_groups": [],
+    "attack_property": {
+        "hitbox_groups": [],
+        "hit_property": {
+            "hitStun": 0,
+            "guardStun": 0,
+            "hitStop": 0,
+            "knockBack": 0,
+            "isLaunch": false,
+            "airKnockback": 0,
+            "launchVelocityY": 0,
+            "isGrab": false
+        }
+    },
+    "grab_properties": [],
+    "animation_timeline": [
+        {
+            "sequence": "cross",
+            "index": 0,
+            "start": 0,
+            "duration": 20
+        },
+        {
+            "sequence": "cross",
+            "index": 1,
+            "start": 20,
+            "duration": 10
+        },
+        {
+            "sequence": "cross",
+            "index": 2,
+            "start": 30,
+            "duration": 60
+        }
+    ]
+}
