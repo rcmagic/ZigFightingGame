@@ -155,6 +155,10 @@
         {
             "asset_tag": "Action",
             "path": "assets/common/action/launch_reaction.json"
+        },
+        {
+            "asset_tag": "Action",
+            "path": "assets/common/action/attack.json"
         }
     ],
     "action_inputs": [
