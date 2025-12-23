@@ -155,11 +155,11 @@ pub const GrabProperty: type = struct {
     duration: i32 = 1,
     grab_distance: i32 = 0,
 
+    pub const metaData = .{ .start_frame = .{ .min_value = 0 } };
+
     pub fn isActiveOnFrame(self: GrabProperty, frame: i32) bool {
         return (frame >= self.start_frame) and (frame < (self.start_frame + self.duration));
     }
-
-    pub const metaData = .{ .start_frame = .{ .min_value = 0 } };
 };
 
 pub const ImageRange = struct {
