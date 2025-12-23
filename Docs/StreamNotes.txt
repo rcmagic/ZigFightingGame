@@ -75,3 +75,8 @@ How are throws different than attacks?
 - Support grab distance
 - Support grabs that work only against grounded opponents.
 - Support grab attack boxes and grabbing push boxes.
+
+
+2025/12/23
+- Fixed bug where the current action property view shows the normal Attack even while performing QCB special [fixed]
+- Fix grab collision getting the incorrect action data

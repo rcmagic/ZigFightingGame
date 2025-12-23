@@ -536,11 +536,8 @@ pub fn Tick(gameState: GameState.GameState, allocator: std.mem.Allocator) !void 
                     actionName = @tagName(CurrentState);
                 }
 
-                const actionData = character_data.findAction(
-                    gameData.CharacterAssets.items[entity].*,
-                    GameState.ActionMaps.items[entity],
-                    actionName,
-                );
+                const actionData = gameState.state_machine_components[entity].context.ActionData;
+
                 // Get all the hitboxes for the current action.
                 var editActionName = [_]u8{0} ** 64;
                 std.mem.copyForwards(u8, &editActionName, actionName);

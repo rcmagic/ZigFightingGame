@@ -148,11 +148,8 @@ fn drawCharacterHitboxes(gameState: GameState.GameState, entity: usize) void {
             actionName = @tagName(CurrentState);
         }
 
-        const actionData = character_data.findAction(
-            gameData.CharacterAssets.items[entity].*,
-            GameState.ActionMaps.items[entity],
-            actionName,
-        );
+        const actionData = gameState.state_machine_components[entity].context.ActionData;
+
         const vulCount = getActiveHitboxes(actionData.vulnerable_hitbox_groups.items, debugDrawHitboxes[0..], framesElapsed);
 
         if (vulCount > 0) {

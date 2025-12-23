@@ -127,23 +127,17 @@ pub const CollisionSystem = struct {
                             // Generate Hit event.
                             std.debug.print("Hitboxes overlap!!\n", .{});
 
-                            if (gameState.gameData) |gameData| {
-                                const CurrentState = gameState.state_machine_components[attackerIndex].stateMachine.CurrentState;
-                                var actionName: []const u8 = "";
+                            const CurrentState = gameState.state_machine_components[attackerIndex].stateMachine.CurrentState;
+                            var actionName: []const u8 = "";
 
-                                if (gameState.state_machine_components[attackerIndex].stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
-                                    _ = state;
-                                    actionName = @tagName(CurrentState);
-                                }
+                            if (gameState.state_machine_components[attackerIndex].stateMachine.Registery.CombatStates[@intFromEnum(CurrentState)]) |state| {
+                                _ = state;
+                                actionName = @tagName(CurrentState);
+                            }
 
-                                const actionData = character_data.findAction(
-                                    gameData.CharacterAssets.items[attackerIndex].*,
-                                    GameState.ActionMaps.items[attackerIndex],
-                                    actionName,
-                                );
-                                if (!actionData.attack_property.hit_property.isGrab) {
-                                    try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
-                                }
+                            const actionData = gameState.state_machine_components[attackerIndex].context.ActionData;
+                            if (!actionData.attack_property.hit_property.isGrab) {
+                                try gameState.hitEvents.append(.{ .hitProperty = actionData.attack_property.hit_property, .attackerID = attackerIndex, .defenderID = defenderIndex });
                             }
                         }
                     }
@@ -251,11 +245,7 @@ pub const CollisionSystem = struct {
                 }
 
                 // Get all the hitboxes for the current action.
-                const actionData = character_data.findAction(
-                    gameData.CharacterAssets.items[entity].*,
-                    GameState.ActionMaps.items[entity],
-                    actionName,
-                );
+                const actionData = state_machine.context.ActionData;
 
                 // Gather attack boxes
                 {
