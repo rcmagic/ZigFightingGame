@@ -7,11 +7,24 @@
     "vulnerable_hitbox_groups": [],
     "push_hitbox_groups": [],
     "attack_property": {
-        "hitbox_groups": [],
+        "hitbox_groups": [
+            {
+                "start_frame": 20,
+                "duration": 5,
+                "hitboxes": [
+                    {
+                        "top": 106500,
+                        "left": -12350,
+                        "bottom": 6500,
+                        "right": 126150
+                    }
+                ]
+            }
+        ],
         "hit_property": {
-            "hitStun": 0,
+            "hitStun": 20,
             "guardStun": 0,
-            "hitStop": 0,
+            "hitStop": 15,
             "knockBack": 0,
             "isLaunch": false,
             "airKnockback": 0,
