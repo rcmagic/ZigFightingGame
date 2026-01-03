@@ -128,6 +128,7 @@ pub const HitboxGroup = struct {
 };
 
 pub const HitProperty = struct {
+    damage: i32 = 0,
     hitStun: i32 = 0,
     guardStun: i32 = 0,
     hitStop: i32 = 0,

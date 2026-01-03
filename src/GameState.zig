@@ -116,6 +116,10 @@ pub const GameState = struct {
         self.state_machine_components[self.entityCount].context.reaction_component = &self.reaction_components[self.entityCount];
         self.state_machine_components[self.entityCount].context.action_flags_component = &self.action_flags_components[self.entityCount];
 
+        if (self.gameData) |gameData| {
+            self.stats_components[self.entityCount].health = gameData.CharacterAssets.items[self.entityCount].max_health;
+        }
+
         // Register states
         RegisterActionStates(&self.state_machine_components[self.entityCount].stateMachine.Registery);
 
@@ -141,7 +145,9 @@ pub const GameState = struct {
             // TODO: Make the number of max hit events a configurable property?
             .hitEvents = try std.array_list.Managed(HitEvent).initCapacity(allocator, 10),
         };
+    }
 
+    pub fn initCharacters(self: *GameState) !void {
         // For now we are only creating two characters to work with.
         self.CreateAndInitOneCharacter();
         self.CreateAndInitOneCharacter();

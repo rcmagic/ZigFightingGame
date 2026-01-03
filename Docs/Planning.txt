@@ -211,15 +211,12 @@
 - Interpret left or right input at the time of usage
 
 
+2026/1/3
 
-2024/*/*
-- Make input forward and back direction relative to the opponent and not the character's facing direction.
-- Support per-character cancels
-- Support per-action cancels
-- Support a launch reaction and launch hit property
-- Support juggle hit properties
-- Support an air hit reaction. 
-- Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
+- Life Bars (UI and Game State Polling)
+- Match Handling and State
+
+
 
 
 ================== BACKLOG ==================
@@ -254,6 +251,8 @@
 - Lock-step synchronization 
 - Rollbacks
 
+
+
 2024/*/*
 - Making the asset loading code use streaming reads instead of loading into a fixed sized buffer.
 - Save/Load attack data from/to individual files
@@ -261,6 +260,16 @@
 - Cinematics
 - Training Mode / Debug tools
 - Separate components and system state to avoid circular dependencies. 
+- Make input forward and back direction relative to the opponent and not the character's facing direction.
+- Support per-character cancels
+- Support per-action cancels
+- Support a launch reaction and launch hit property (in progress)
+- Support juggle hit properties
+- Support an air hit reaction. 
+- Make it so that the flip to face opponent function uses the current positions of the character and their opponent to determine the direction they should face.
+
+
+
 
 ** TODO **
 - See if deinit() the asset allocators works properly when reloading assets.
@@ -300,5 +309,3 @@
 - Look into memory allocation tradeoffs for dealing with loading data.
 - What do we do about allocated memory inside of deep struct hierarchies such as strings and ArrayLists?
 - Support flipped physics (What did I intend with this again?)
-
-

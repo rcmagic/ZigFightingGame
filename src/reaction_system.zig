@@ -71,6 +71,13 @@ pub const reaction_system = struct {
                 gameState.reaction_components[hitEvent.defenderID].hitStun = hitEvent.hitProperty.hitStun;
             }
 
+            // Apply Damage
+            gameState.stats_components[hitEvent.defenderID].health -= hitEvent.hitProperty.damage;
+
+            if (gameState.stats_components[hitEvent.defenderID].health < 0) {
+                gameState.stats_components[hitEvent.defenderID].health = 0;
+            }
+
             gameState.reaction_components[hitEvent.defenderID].hitStop = hitEvent.hitProperty.hitStop;
 
             gameState.reaction_components[hitEvent.attackerID].hitStop = hitEvent.hitProperty.hitStop;

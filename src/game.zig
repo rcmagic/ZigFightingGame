@@ -107,6 +107,26 @@ fn renderDrawState(state: DrawState) void {
     rl.drawTextureRec(state.texture, rect, pos, state.color);
 }
 
+fn drawOneHud(gameState: GameState.GameState, entity: usize) void {
+    const screen_width: i32 = 800;
+    const lifebar_width: f32 = 304;
+    const offset_x: i32 = 36;
+    const offset_y: i32 = 19;
+    const x: i32 = if (entity == 0) offset_x else screen_width - offset_x - lifebar_width;
+    const width: f32 = if (entity == 0) lifebar_width else lifebar_width;
+
+    rl.drawRectangle(x, offset_y, @intFromFloat(lifebar_width), 26, rl.Color.dark_gray);
+
+    if (gameState.gameData) |gameData| {
+        const hp_percentage: f32 = @as(f32, @floatFromInt(gameState.stats_components[entity].health)) / @as(f32, @floatFromInt(gameData.CharacterAssets.items[entity].max_health));
+        rl.drawRectangle(x, offset_y, @intFromFloat(hp_percentage * width), 26, rl.Color.green);
+    }
+}
+fn drawHud(gameState: GameState.GameState) void {
+    drawOneHud(gameState, 0);
+    drawOneHud(gameState, 1);
+}
+
 fn getActiveHitboxes(hitboxGroups: []const character_data.HitboxGroup, hitboxes: []character_data.Hitbox, framesElapsed: i32) usize {
     var count: usize = 0;
     for (hitboxGroups) |hitboxGroup| {
@@ -300,6 +320,7 @@ pub fn gameLoop() !void {
     var gameState: GameState.GameState = undefined;
     try gameState.init(ArenaAllocator.allocator());
     try gameState.LoadPersistentGameAssets(AssetAllocator.allocator());
+    try gameState.initCharacters();
 
     // Initialize our game objects
     gameState.physics_components[0].position = .{ .x = -200000, .y = 0 };
@@ -315,6 +336,9 @@ pub fn gameLoop() !void {
 
     var bPauseGame = false;
     var GameFrameCount: i32 = 0;
+
+    // Whether or not the detail character debug information is shown
+    var draw_detailed_debug_info: bool = false;
 
     //const texture = rl.loadTexture("assets/animation/test_chara_1/color1/idle_00.png");
 
@@ -360,6 +384,10 @@ pub fn gameLoop() !void {
         gameState.input_components[1].input_command.reset();
 
         if (rl.isWindowFocused()) {
+            if (rl.isKeyPressed(.f1)) {
+                draw_detailed_debug_info = !draw_detailed_debug_info;
+            }
+
             if (rl.isKeyPressed(.f3)) {
                 bPauseGame = !bPauseGame;
             } else if (rl.isKeyPressed(.f2)) {
@@ -418,6 +446,7 @@ pub fn gameLoop() !void {
         // Game Simulation
         if (!bPauseGame or bAdvanceOnce) {
             try gameState.input_components[0].UpdateInput(gameState.input_components[0].input_command);
+            try gameState.input_components[1].UpdateInput(gameState.input_components[1].input_command);
 
             try game_simulation.updateGame(&gameState);
 
@@ -430,6 +459,8 @@ pub fn gameLoop() !void {
         rl.beginMode2D(Camera);
 
         rl.clearBackground(rl.Color.ray_white);
+
+        drawHud(gameState);
 
         renderDrawState(prepareDrawState(gameState, 0));
         renderDrawState(prepareDrawState(gameState, 1));
@@ -449,13 +480,16 @@ pub fn gameLoop() !void {
         // }
 
         // Debug information
-        rl.drawText(rl.textFormat("Game Frame: %d", .{GameFrameCount}), 10, 10, 16, rl.Color.dark_gray);
 
-        try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 0);
-        try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 1);
+        if (draw_detailed_debug_info) {
+            rl.drawText(rl.textFormat("Game Frame: %d", .{GameFrameCount}), 10, 10, 16, rl.Color.dark_gray);
 
-        debugDrawTimeline(gameState, 0);
-        debugDrawTimeline(gameState, 1);
+            try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 0);
+            try drawCharacterDebugInfo(std.heap.c_allocator, gameState, 1);
+
+            debugDrawTimeline(gameState, 0);
+            debugDrawTimeline(gameState, 1);
+        }
 
         if (bPauseGame) {
             rl.drawText("(Paused)", 10 + 150, 10, 16, rl.Color.dark_gray);

@@ -35,6 +35,7 @@
             }
         ],
         "hit_property": {
+            "damage": 800,
             "hitStun": 12,
             "guardStun": 15,
             "hitStop": 10,
