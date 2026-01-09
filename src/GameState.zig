@@ -7,6 +7,7 @@ const character_data = @import("character_data.zig");
 const collision_system = @import("collision_system.zig").CollisionSystem;
 const reaction_system = @import("reaction_system.zig").reaction_system;
 const asset = @import("asset.zig");
+const match = @import("MatchState.zig");
 
 var StorageAllocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 pub var AssetStorage = asset.Storage.init(StorageAllocator.allocator());
@@ -107,6 +108,9 @@ pub const GameState = struct {
 
     gameData: ?GameData = null,
 
+    // Manages the fight match
+    matchHandler: match.MatchHandler,
+
     // Boilerplate for setting up the components and state machine for one character.
     fn CreateAndInitOneCharacter(self: *GameState) void {
         // Setup referenced components used by the action state machine for a character.
@@ -144,6 +148,8 @@ pub const GameState = struct {
             // Initialize the hit event
             // TODO: Make the number of max hit events a configurable property?
             .hitEvents = try std.array_list.Managed(HitEvent).initCapacity(allocator, 10),
+
+            .matchHandler = match.MatchHandler.init(),
         };
     }
 

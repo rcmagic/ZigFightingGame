@@ -84,3 +84,15 @@ Stages:
 1   2  
 [Up][Down]
 [Down][Up]
+
+
+2026/1/9
+- Match State Machine
+    - States are made of state functions
+    - State functions get flag for enter/exit/ticking 
+    - Each state can indicate the next state to transition into
+- Match State Handler
+    - Tracks the current match state
+    - Handles transitioning between states
+    - Call match state functions
+    - Keeps a time since match state started.

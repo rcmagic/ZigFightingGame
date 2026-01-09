@@ -78,6 +78,11 @@ fn inputCommandSystem(gameState: *GameState.GameState) void {
 }
 
 pub fn updateGame(gameState: *GameState.GameState) !void {
+    if (gameState.frameCount == 0) {
+        try gameState.matchHandler.Start(gameState);
+    }
+
+    try gameState.matchHandler.Tick(gameState);
     inputCommandSystem(gameState);
     try physicsSystem(gameState);
     actionSystem(gameState);

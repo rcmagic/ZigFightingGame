@@ -145,7 +145,7 @@ pub const ReactionComponent = struct {
 };
 
 pub const StatsComponent = struct {
-    health: i32 = 0,
+    health: i32 = 10000,
     totalHitStun: i32 = 0,
     totalGuardStun: i32 = 0,
 };

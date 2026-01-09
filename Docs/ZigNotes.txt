@@ -59,6 +59,9 @@ fn do_op(fn_call: call2_op, op1: i8, op2: i8) i8 { // A function that takes anot
     return fn_call(op1, op2);
 }
 
+
+** FUNCTION TYPE ***
+
 ** STRUCTS ** 
 // Declare a struct.
 // Zig gives no guarantees about the order of fields and the size of
